@@ -1,0 +1,3674 @@
+{
+  "runs": [
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-01",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T15:54:55.295375+00:00",
+        "finished_at_utc": "2026-07-03T15:59:41.307318+00:00",
+        "elapsed_seconds": 286.0119293000025
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 58228,
+        "tokens_out": 16719,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-02",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T15:59:41.365979+00:00",
+        "finished_at_utc": "2026-07-03T16:03:59.239717+00:00",
+        "elapsed_seconds": 257.87372820000746
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 10,
+        "tokens_in": 56741,
+        "tokens_out": 14707,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-04",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T16:03:59.289367+00:00",
+        "finished_at_utc": "2026-07-03T16:09:00.184261+00:00",
+        "elapsed_seconds": 300.89488740000525
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 11,
+        "tokens_in": 62262,
+        "tokens_out": 16434,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-05",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T16:09:00.215731+00:00",
+        "finished_at_utc": "2026-07-03T16:14:14.127364+00:00",
+        "elapsed_seconds": 313.911626599991
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 20,
+        "tokens_in": 93118,
+        "tokens_out": 18648,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-06",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T16:18:31.658206+00:00",
+        "finished_at_utc": "2026-07-03T16:23:19.156043+00:00",
+        "elapsed_seconds": 287.4978271999862
+      },
+      "llm_usage": {
+        "llm_calls": 17,
+        "tool_calls": 8,
+        "tokens_in": 90592,
+        "tokens_out": 17161,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-07",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T16:23:19.184893+00:00",
+        "finished_at_utc": "2026-07-03T16:28:18.708926+00:00",
+        "elapsed_seconds": 299.52402389998315
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 13,
+        "tokens_in": 96027,
+        "tokens_out": 17026,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-08",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T16:28:18.770407+00:00",
+        "finished_at_utc": "2026-07-03T16:32:51.503078+00:00",
+        "elapsed_seconds": 272.73266239999793
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 74135,
+        "tokens_out": 16364,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-09",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T16:32:51.534174+00:00",
+        "finished_at_utc": "2026-07-03T16:37:02.830377+00:00",
+        "elapsed_seconds": 251.29619769999408
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 10,
+        "tokens_in": 56499,
+        "tokens_out": 14267,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-11",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T16:37:02.868385+00:00",
+        "finished_at_utc": "2026-07-03T16:41:40.961286+00:00",
+        "elapsed_seconds": 278.0928951000096
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 14,
+        "tokens_in": 59869,
+        "tokens_out": 17442,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-12",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T16:41:40.996093+00:00",
+        "finished_at_utc": "2026-07-03T16:46:45.318104+00:00",
+        "elapsed_seconds": 304.3220042999892
+      },
+      "llm_usage": {
+        "llm_calls": 17,
+        "tool_calls": 21,
+        "tokens_in": 104055,
+        "tokens_out": 19269,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-13",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T16:46:45.373502+00:00",
+        "finished_at_utc": "2026-07-03T16:51:31.582172+00:00",
+        "elapsed_seconds": 286.208661200013
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 17,
+        "tokens_in": 75753,
+        "tokens_out": 16841,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-14",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T16:51:31.630145+00:00",
+        "finished_at_utc": "2026-07-03T16:57:28.948967+00:00",
+        "elapsed_seconds": 357.31881440000143
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 13,
+        "tokens_in": 76824,
+        "tokens_out": 20365,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-15",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T16:57:28.992486+00:00",
+        "finished_at_utc": "2026-07-03T17:03:42.556660+00:00",
+        "elapsed_seconds": 373.5641677000094
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 20,
+        "tokens_in": 98267,
+        "tokens_out": 19874,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-16",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T17:03:42.589191+00:00",
+        "finished_at_utc": "2026-07-03T17:08:32.084162+00:00",
+        "elapsed_seconds": 289.4949640999839
+      },
+      "llm_usage": {
+        "llm_calls": 26,
+        "tool_calls": 21,
+        "tokens_in": 167829,
+        "tokens_out": 16595,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-18",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T17:10:56.634719+00:00",
+        "finished_at_utc": "2026-07-03T17:15:57.483897+00:00",
+        "elapsed_seconds": 300.849164299987
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 20,
+        "tokens_in": 98476,
+        "tokens_out": 18991,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-19",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T17:15:57.539509+00:00",
+        "finished_at_utc": "2026-07-03T17:20:08.173788+00:00",
+        "elapsed_seconds": 250.63426590000745
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 10,
+        "tokens_in": 64198,
+        "tokens_out": 15450,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-20",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T17:20:08.207544+00:00",
+        "finished_at_utc": "2026-07-03T17:25:37.272881+00:00",
+        "elapsed_seconds": 329.06533109999145
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 20,
+        "tokens_in": 86979,
+        "tokens_out": 19431,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-21",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T17:25:37.304350+00:00",
+        "finished_at_utc": "2026-07-03T17:30:19.994379+00:00",
+        "elapsed_seconds": 282.6900225999998
+      },
+      "llm_usage": {
+        "llm_calls": 21,
+        "tool_calls": 11,
+        "tokens_in": 139130,
+        "tokens_out": 16921,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-22",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T17:30:20.023858+00:00",
+        "finished_at_utc": "2026-07-03T17:35:33.656663+00:00",
+        "elapsed_seconds": 313.6327989999845
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 20,
+        "tokens_in": 148529,
+        "tokens_out": 17231,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-23",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T17:35:33.690917+00:00",
+        "finished_at_utc": "2026-07-03T17:39:45.867642+00:00",
+        "elapsed_seconds": 252.17671929998323
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 10,
+        "tokens_in": 60345,
+        "tokens_out": 15762,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-25",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T17:39:45.914128+00:00",
+        "finished_at_utc": "2026-07-03T17:46:46.905678+00:00",
+        "elapsed_seconds": 420.99154439999256
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 12,
+        "tokens_in": 65809,
+        "tokens_out": 15962,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-26",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T17:46:46.938518+00:00",
+        "finished_at_utc": "2026-07-03T17:51:06.157744+00:00",
+        "elapsed_seconds": 259.21921999999904
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 17,
+        "tokens_in": 79371,
+        "tokens_out": 15721,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-27",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T17:51:06.188185+00:00",
+        "finished_at_utc": "2026-07-03T17:55:06.877966+00:00",
+        "elapsed_seconds": 240.689776299987
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 11,
+        "tokens_in": 55100,
+        "tokens_out": 15470,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-28",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-03T17:55:06.907886+00:00",
+        "finished_at_utc": "2026-07-03T17:59:29.292786+00:00",
+        "elapsed_seconds": 262.38489459999255
+      },
+      "llm_usage": {
+        "llm_calls": 22,
+        "tool_calls": 17,
+        "tokens_in": 164066,
+        "tokens_out": 15903,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-29",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T02:35:11.927256+00:00",
+        "finished_at_utc": "2026-07-04T02:41:12.061483+00:00",
+        "elapsed_seconds": 360.13421340000014
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 14,
+        "tokens_in": 69211,
+        "tokens_out": 17123,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-01-30",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T02:41:12.113784+00:00",
+        "finished_at_utc": "2026-07-04T02:46:54.079052+00:00",
+        "elapsed_seconds": 341.96525740000016
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 10,
+        "tokens_in": 62905,
+        "tokens_out": 16823,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-01",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T02:46:54.161690+00:00",
+        "finished_at_utc": "2026-07-04T02:52:07.345301+00:00",
+        "elapsed_seconds": 313.18360329999996
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 10,
+        "tokens_in": 71417,
+        "tokens_out": 16721,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-02",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T06:52:07.347079+00:00",
+        "finished_at_utc": "2026-07-04T06:57:29.526523+00:00",
+        "elapsed_seconds": 322.1794330999983
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 13,
+        "tokens_in": 98232,
+        "tokens_out": 18662,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-03",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T06:57:29.598920+00:00",
+        "finished_at_utc": "2026-07-04T07:01:56.812282+00:00",
+        "elapsed_seconds": 267.2133504000012
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 21,
+        "tokens_in": 86408,
+        "tokens_out": 17171,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-04",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T07:01:56.895310+00:00",
+        "finished_at_utc": "2026-07-04T07:07:29.824982+00:00",
+        "elapsed_seconds": 332.9296609000012
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 9,
+        "tokens_in": 109101,
+        "tokens_out": 19399,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-05",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T07:07:29.913908+00:00",
+        "finished_at_utc": "2026-07-04T07:12:11.782482+00:00",
+        "elapsed_seconds": 281.86856160000025
+      },
+      "llm_usage": {
+        "llm_calls": 21,
+        "tool_calls": 12,
+        "tokens_in": 146917,
+        "tokens_out": 17283,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-06",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T07:12:11.860822+00:00",
+        "finished_at_utc": "2026-07-04T07:16:43.217705+00:00",
+        "elapsed_seconds": 271.35687289999987
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 10,
+        "tokens_in": 124908,
+        "tokens_out": 16752,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-08",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T07:16:43.285554+00:00",
+        "finished_at_utc": "2026-07-04T07:21:53.328594+00:00",
+        "elapsed_seconds": 310.0430305000009
+      },
+      "llm_usage": {
+        "llm_calls": 20,
+        "tool_calls": 17,
+        "tokens_in": 147145,
+        "tokens_out": 18666,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-09",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T07:21:53.404729+00:00",
+        "finished_at_utc": "2026-07-04T07:27:08.788638+00:00",
+        "elapsed_seconds": 315.3838966000003
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 17,
+        "tokens_in": 112577,
+        "tokens_out": 18681,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-10",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T07:27:08.868068+00:00",
+        "finished_at_utc": "2026-07-04T07:32:07.841003+00:00",
+        "elapsed_seconds": 298.97292670000024
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 16,
+        "tokens_in": 158417,
+        "tokens_out": 19178,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-11",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T07:32:07.917821+00:00",
+        "finished_at_utc": "2026-07-04T07:36:56.228807+00:00",
+        "elapsed_seconds": 288.3109770999981
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 9,
+        "tokens_in": 133115,
+        "tokens_out": 16571,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-12",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T07:36:56.305897+00:00",
+        "finished_at_utc": "2026-07-04T07:41:31.686178+00:00",
+        "elapsed_seconds": 275.38027280000097
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 12,
+        "tokens_in": 71938,
+        "tokens_out": 16629,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-13",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T07:49:42.341223+00:00",
+        "finished_at_utc": "2026-07-04T07:54:45.874705+00:00",
+        "elapsed_seconds": 303.5334746999979
+      },
+      "llm_usage": {
+        "llm_calls": 18,
+        "tool_calls": 9,
+        "tokens_in": 127707,
+        "tokens_out": 17757,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-15",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T07:54:45.938483+00:00",
+        "finished_at_utc": "2026-07-04T08:00:22.712983+00:00",
+        "elapsed_seconds": 336.77448920000097
+      },
+      "llm_usage": {
+        "llm_calls": 18,
+        "tool_calls": 9,
+        "tokens_in": 135670,
+        "tokens_out": 18495,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-16",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T08:00:22.778370+00:00",
+        "finished_at_utc": "2026-07-04T08:06:45.798583+00:00",
+        "elapsed_seconds": 383.0202042000019
+      },
+      "llm_usage": {
+        "llm_calls": 16,
+        "tool_calls": 21,
+        "tokens_in": 141250,
+        "tokens_out": 20731,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-17",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T08:06:45.845916+00:00",
+        "finished_at_utc": "2026-07-04T08:11:43.594074+00:00",
+        "elapsed_seconds": 297.7481513999992
+      },
+      "llm_usage": {
+        "llm_calls": 20,
+        "tool_calls": 18,
+        "tokens_in": 153038,
+        "tokens_out": 18956,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-18",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T08:11:43.622170+00:00",
+        "finished_at_utc": "2026-07-04T08:17:11.011097+00:00",
+        "elapsed_seconds": 327.3889205000014
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 10,
+        "tokens_in": 73351,
+        "tokens_out": 19862,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-19",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T08:17:11.089342+00:00",
+        "finished_at_utc": "2026-07-04T08:22:35.437855+00:00",
+        "elapsed_seconds": 324.3485048000002
+      },
+      "llm_usage": {
+        "llm_calls": 16,
+        "tool_calls": 20,
+        "tokens_in": 123433,
+        "tokens_out": 19903,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-20",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T08:22:35.507811+00:00",
+        "finished_at_utc": "2026-07-04T08:27:05.891929+00:00",
+        "elapsed_seconds": 270.38410870000007
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 10,
+        "tokens_in": 118072,
+        "tokens_out": 17562,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-22",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T08:27:05.973238+00:00",
+        "finished_at_utc": "2026-07-04T08:32:31.043723+00:00",
+        "elapsed_seconds": 325.070478499998
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 10,
+        "tokens_in": 77298,
+        "tokens_out": 17616,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-23",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T08:32:31.073719+00:00",
+        "finished_at_utc": "2026-07-04T08:37:28.112916+00:00",
+        "elapsed_seconds": 297.0391918999994
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 14,
+        "tokens_in": 93633,
+        "tokens_out": 18248,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-24",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T08:37:28.143578+00:00",
+        "finished_at_utc": "2026-07-04T08:41:51.015820+00:00",
+        "elapsed_seconds": 262.8722366999973
+      },
+      "llm_usage": {
+        "llm_calls": 18,
+        "tool_calls": 8,
+        "tokens_in": 108693,
+        "tokens_out": 15860,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-25",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T08:41:53.385412+00:00",
+        "finished_at_utc": "2026-07-04T08:47:15.498280+00:00",
+        "elapsed_seconds": 322.11286090000067
+      },
+      "llm_usage": {
+        "llm_calls": 22,
+        "tool_calls": 20,
+        "tokens_in": 149094,
+        "tokens_out": 19043,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-26",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T08:47:15.533215+00:00",
+        "finished_at_utc": "2026-07-04T08:52:37.758894+00:00",
+        "elapsed_seconds": 322.2256730000008
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 10,
+        "tokens_in": 98579,
+        "tokens_out": 20489,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-02-27",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T08:52:37.787171+00:00",
+        "finished_at_utc": "2026-07-04T08:56:50.780058+00:00",
+        "elapsed_seconds": 252.9928817
+      },
+      "llm_usage": {
+        "llm_calls": 20,
+        "tool_calls": 11,
+        "tokens_in": 159882,
+        "tokens_out": 16318,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-01",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T08:56:50.814501+00:00",
+        "finished_at_utc": "2026-07-04T09:01:56.889506+00:00",
+        "elapsed_seconds": 306.07499830000233
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 11,
+        "tokens_in": 69285,
+        "tokens_out": 17410,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-02",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T09:01:56.938258+00:00",
+        "finished_at_utc": "2026-07-04T09:07:31.697392+00:00",
+        "elapsed_seconds": 334.75912719999906
+      },
+      "llm_usage": {
+        "llm_calls": 16,
+        "tool_calls": 11,
+        "tokens_in": 76897,
+        "tokens_out": 17844,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-03",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T09:07:31.727121+00:00",
+        "finished_at_utc": "2026-07-04T09:12:54.390751+00:00",
+        "elapsed_seconds": 322.66362220000156
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 12,
+        "tokens_in": 87688,
+        "tokens_out": 18860,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-04",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T09:12:54.465301+00:00",
+        "finished_at_utc": "2026-07-04T09:17:28.351438+00:00",
+        "elapsed_seconds": 273.88612830000056
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 18,
+        "tokens_in": 88484,
+        "tokens_out": 17792,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-05",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T09:17:28.410824+00:00",
+        "finished_at_utc": "2026-07-04T09:22:27.396204+00:00",
+        "elapsed_seconds": 298.9853710999996
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 12,
+        "tokens_in": 82769,
+        "tokens_out": 18087,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-06",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T09:22:27.451266+00:00",
+        "finished_at_utc": "2026-07-04T09:28:38.343089+00:00",
+        "elapsed_seconds": 370.89181590000226
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 17,
+        "tokens_in": 134174,
+        "tokens_out": 20309,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-08",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T09:28:38.374476+00:00",
+        "finished_at_utc": "2026-07-04T09:33:54.578737+00:00",
+        "elapsed_seconds": 316.204254100001
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 13,
+        "tokens_in": 67853,
+        "tokens_out": 17835,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-09",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T09:33:57.577026+00:00",
+        "finished_at_utc": "2026-07-04T09:39:26.489720+00:00",
+        "elapsed_seconds": 328.91268370000034
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 17,
+        "tokens_in": 84805,
+        "tokens_out": 18294,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-10",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T09:39:26.542367+00:00",
+        "finished_at_utc": "2026-07-04T09:44:28.437394+00:00",
+        "elapsed_seconds": 301.8950159999986
+      },
+      "llm_usage": {
+        "llm_calls": 16,
+        "tool_calls": 19,
+        "tokens_in": 117204,
+        "tokens_out": 18550,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-11",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T09:44:28.502807+00:00",
+        "finished_at_utc": "2026-07-04T09:49:52.442441+00:00",
+        "elapsed_seconds": 323.9396264999996
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 10,
+        "tokens_in": 63607,
+        "tokens_out": 17703,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-12",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T09:49:52.469997+00:00",
+        "finished_at_utc": "2026-07-04T09:54:45.388978+00:00",
+        "elapsed_seconds": 292.9189762999995
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 21,
+        "tokens_in": 76833,
+        "tokens_out": 18547,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-13",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T09:54:45.417674+00:00",
+        "finished_at_utc": "2026-07-04T09:59:45.068822+00:00",
+        "elapsed_seconds": 299.6511430999999
+      },
+      "llm_usage": {
+        "llm_calls": 18,
+        "tool_calls": 8,
+        "tokens_in": 97892,
+        "tokens_out": 18057,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-15",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T09:59:45.154351+00:00",
+        "finished_at_utc": "2026-07-04T10:04:25.465758+00:00",
+        "elapsed_seconds": 280.31139500000063
+      },
+      "llm_usage": {
+        "llm_calls": 16,
+        "tool_calls": 7,
+        "tokens_in": 103009,
+        "tokens_out": 15940,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-16",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T14:04:32.535019+00:00",
+        "finished_at_utc": "2026-07-04T14:09:28.839891+00:00",
+        "elapsed_seconds": 296.30486250000104
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 79411,
+        "tokens_out": 15994,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-17",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T14:09:28.907024+00:00",
+        "finished_at_utc": "2026-07-04T14:13:56.375863+00:00",
+        "elapsed_seconds": 267.46882750000077
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 10,
+        "tokens_in": 179921,
+        "tokens_out": 15832,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-18",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T14:13:56.436181+00:00",
+        "finished_at_utc": "2026-07-04T14:18:59.076507+00:00",
+        "elapsed_seconds": 302.64031650000106
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 11,
+        "tokens_in": 166267,
+        "tokens_out": 17480,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-19",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T14:18:59.149508+00:00",
+        "finished_at_utc": "2026-07-04T14:23:27.248032+00:00",
+        "elapsed_seconds": 268.09851470000285
+      },
+      "llm_usage": {
+        "llm_calls": 17,
+        "tool_calls": 8,
+        "tokens_in": 110649,
+        "tokens_out": 17580,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-20",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T14:23:27.333759+00:00",
+        "finished_at_utc": "2026-07-04T14:27:49.598709+00:00",
+        "elapsed_seconds": 262.264938100001
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 10,
+        "tokens_in": 136394,
+        "tokens_out": 16624,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-22",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T14:27:49.700797+00:00",
+        "finished_at_utc": "2026-07-04T14:32:05.478240+00:00",
+        "elapsed_seconds": 255.77742820000276
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 10,
+        "tokens_in": 139838,
+        "tokens_out": 15433,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-23",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T14:32:05.548207+00:00",
+        "finished_at_utc": "2026-07-04T14:37:11.970984+00:00",
+        "elapsed_seconds": 306.42276590000256
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 10,
+        "tokens_in": 77049,
+        "tokens_out": 18320,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-24",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-04T14:37:12.055801+00:00",
+        "finished_at_utc": "2026-07-04T14:42:26.859856+00:00",
+        "elapsed_seconds": 314.8040433999995
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 17,
+        "tokens_in": 144753,
+        "tokens_out": 18334,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-25",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T02:48:08.500374+00:00",
+        "finished_at_utc": "2026-07-06T02:54:12.092200+00:00",
+        "elapsed_seconds": 363.5918171
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 10,
+        "tokens_in": 75455,
+        "tokens_out": 19167,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-26",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T02:54:12.120496+00:00",
+        "finished_at_utc": "2026-07-06T02:59:44.288012+00:00",
+        "elapsed_seconds": 332.16750809999996
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 11,
+        "tokens_in": 71153,
+        "tokens_out": 19084,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-27",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T02:59:44.353419+00:00",
+        "finished_at_utc": "2026-07-06T03:05:52.609653+00:00",
+        "elapsed_seconds": 368.2562230000001
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 72545,
+        "tokens_out": 17567,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-29",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T03:05:52.732818+00:00",
+        "finished_at_utc": "2026-07-06T03:11:30.496781+00:00",
+        "elapsed_seconds": 337.763952
+      },
+      "llm_usage": {
+        "llm_calls": 17,
+        "tool_calls": 8,
+        "tokens_in": 108458,
+        "tokens_out": 17726,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-30",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T03:11:30.571996+00:00",
+        "finished_at_utc": "2026-07-06T03:17:31.954132+00:00",
+        "elapsed_seconds": 361.3821261999999
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 11,
+        "tokens_in": 94098,
+        "tokens_out": 17744,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-03-31",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T03:17:31.998130+00:00",
+        "finished_at_utc": "2026-07-06T03:24:14.212057+00:00",
+        "elapsed_seconds": 402.21392209999976
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 11,
+        "tokens_in": 67239,
+        "tokens_out": 18947,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-01",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T03:24:14.255708+00:00",
+        "finished_at_utc": "2026-07-06T03:31:01.187580+00:00",
+        "elapsed_seconds": 406.9318647
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 22,
+        "tokens_in": 96304,
+        "tokens_out": 20693,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-02",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T03:31:01.243907+00:00",
+        "finished_at_utc": "2026-07-06T03:38:29.918942+00:00",
+        "elapsed_seconds": 448.67502809999996
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 10,
+        "tokens_in": 144678,
+        "tokens_out": 20178,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-05",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T03:38:29.955685+00:00",
+        "finished_at_utc": "2026-07-06T03:44:31.084179+00:00",
+        "elapsed_seconds": 361.1284837000003
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 11,
+        "tokens_in": 68416,
+        "tokens_out": 18704,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-06",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T03:44:31.136762+00:00",
+        "finished_at_utc": "2026-07-06T03:48:33.870816+00:00",
+        "elapsed_seconds": 242.73404770000025
+      },
+      "llm_usage": {
+        "llm_calls": 16,
+        "tool_calls": 11,
+        "tokens_in": 77383,
+        "tokens_out": 13988,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-07",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T03:48:42.915246+00:00",
+        "finished_at_utc": "2026-07-06T03:54:06.486595+00:00",
+        "elapsed_seconds": 323.5713404000003
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 78926,
+        "tokens_out": 19192,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-08",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T03:54:06.554781+00:00",
+        "finished_at_utc": "2026-07-06T03:58:52.622329+00:00",
+        "elapsed_seconds": 286.06753630000003
+      },
+      "llm_usage": {
+        "llm_calls": 16,
+        "tool_calls": 16,
+        "tokens_in": 108592,
+        "tokens_out": 17945,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-09",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T03:58:52.672905+00:00",
+        "finished_at_utc": "2026-07-06T04:04:30.882161+00:00",
+        "elapsed_seconds": 338.2092482999997
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 14,
+        "tokens_in": 68244,
+        "tokens_out": 18619,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-10",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T04:04:30.921446+00:00",
+        "finished_at_utc": "2026-07-06T04:09:42.194317+00:00",
+        "elapsed_seconds": 311.2728655000001
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 10,
+        "tokens_in": 130455,
+        "tokens_out": 17269,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-12",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T04:09:42.236611+00:00",
+        "finished_at_utc": "2026-07-06T04:14:31.869363+00:00",
+        "elapsed_seconds": 289.63274660000025
+      },
+      "llm_usage": {
+        "llm_calls": 18,
+        "tool_calls": 11,
+        "tokens_in": 112588,
+        "tokens_out": 18127,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-13",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T04:14:31.913063+00:00",
+        "finished_at_utc": "2026-07-06T04:19:26.761938+00:00",
+        "elapsed_seconds": 294.84886879999976
+      },
+      "llm_usage": {
+        "llm_calls": 16,
+        "tool_calls": 21,
+        "tokens_in": 123035,
+        "tokens_out": 19598,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-14",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T04:19:26.791087+00:00",
+        "finished_at_utc": "2026-07-06T04:24:20.474337+00:00",
+        "elapsed_seconds": 293.68324159999975
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 11,
+        "tokens_in": 77623,
+        "tokens_out": 18069,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-15",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T04:24:20.548953+00:00",
+        "finished_at_utc": "2026-07-06T04:30:16.334552+00:00",
+        "elapsed_seconds": 355.7855896000001
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 9,
+        "tokens_in": 81352,
+        "tokens_out": 20799,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-16",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T04:30:16.390704+00:00",
+        "finished_at_utc": "2026-07-06T04:36:00.567323+00:00",
+        "elapsed_seconds": 344.17661300000054
+      },
+      "llm_usage": {
+        "llm_calls": 20,
+        "tool_calls": 11,
+        "tokens_in": 182931,
+        "tokens_out": 19824,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-17",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T04:36:00.597086+00:00",
+        "finished_at_utc": "2026-07-06T04:41:01.774593+00:00",
+        "elapsed_seconds": 301.1775005999998
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 11,
+        "tokens_in": 125194,
+        "tokens_out": 18717,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-19",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T04:41:04.911254+00:00",
+        "finished_at_utc": "2026-07-06T04:46:15.396457+00:00",
+        "elapsed_seconds": 310.4851955000004
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 76256,
+        "tokens_out": 17620,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-20",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T04:46:15.448189+00:00",
+        "finished_at_utc": "2026-07-06T04:51:38.482631+00:00",
+        "elapsed_seconds": 323.0344348999997
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 9,
+        "tokens_in": 129869,
+        "tokens_out": 19597,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-21",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T04:51:38.511375+00:00",
+        "finished_at_utc": "2026-07-06T04:58:13.139841+00:00",
+        "elapsed_seconds": 394.62846080000054
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 13,
+        "tokens_in": 96221,
+        "tokens_out": 21679,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-22",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T04:58:13.170222+00:00",
+        "finished_at_utc": "2026-07-06T05:04:42.231948+00:00",
+        "elapsed_seconds": 389.061718500001
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 10,
+        "tokens_in": 90569,
+        "tokens_out": 20842,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-23",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T05:04:42.267775+00:00",
+        "finished_at_utc": "2026-07-06T05:11:05.193728+00:00",
+        "elapsed_seconds": 382.9259456999989
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 85065,
+        "tokens_out": 20170,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-24",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T05:11:05.244830+00:00",
+        "finished_at_utc": "2026-07-06T05:17:32.555021+00:00",
+        "elapsed_seconds": 387.3101822999997
+      },
+      "llm_usage": {
+        "llm_calls": 20,
+        "tool_calls": 11,
+        "tokens_in": 172885,
+        "tokens_out": 19846,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-26",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T05:17:32.607223+00:00",
+        "finished_at_utc": "2026-07-06T05:23:19.308668+00:00",
+        "elapsed_seconds": 346.70143929999904
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 10,
+        "tokens_in": 70157,
+        "tokens_out": 17381,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-27",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T05:23:19.338923+00:00",
+        "finished_at_utc": "2026-07-06T05:28:31.853076+00:00",
+        "elapsed_seconds": 312.5141444000001
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 10,
+        "tokens_in": 66710,
+        "tokens_out": 16227,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-28",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T05:28:31.928837+00:00",
+        "finished_at_utc": "2026-07-06T05:34:51.568918+00:00",
+        "elapsed_seconds": 379.6400728000008
+      },
+      "llm_usage": {
+        "llm_calls": 29,
+        "tool_calls": 19,
+        "tokens_in": 296283,
+        "tokens_out": 19968,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-29",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T05:34:51.599736+00:00",
+        "finished_at_utc": "2026-07-06T05:41:18.915281+00:00",
+        "elapsed_seconds": 387.31554030000007
+      },
+      "llm_usage": {
+        "llm_calls": 18,
+        "tool_calls": 9,
+        "tokens_in": 135544,
+        "tokens_out": 19002,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-04-30",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T05:41:22.019763+00:00",
+        "finished_at_utc": "2026-07-06T05:47:14.273750+00:00",
+        "elapsed_seconds": 352.25397969999904
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 10,
+        "tokens_in": 139706,
+        "tokens_out": 18246,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-01",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T05:47:14.304111+00:00",
+        "finished_at_utc": "2026-07-06T05:52:26.531650+00:00",
+        "elapsed_seconds": 312.22753190000003
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 78944,
+        "tokens_out": 18495,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-03",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T05:52:26.577035+00:00",
+        "finished_at_utc": "2026-07-06T05:58:31.477042+00:00",
+        "elapsed_seconds": 364.89999979999993
+      },
+      "llm_usage": {
+        "llm_calls": 18,
+        "tool_calls": 9,
+        "tokens_in": 138552,
+        "tokens_out": 17947,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-04",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T05:58:31.552111+00:00",
+        "finished_at_utc": "2026-07-06T06:04:47.047746+00:00",
+        "elapsed_seconds": 375.49562460000016
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 96393,
+        "tokens_out": 19761,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-05",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T06:04:47.129892+00:00",
+        "finished_at_utc": "2026-07-06T06:10:53.001578+00:00",
+        "elapsed_seconds": 365.8716747999988
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 14,
+        "tokens_in": 84190,
+        "tokens_out": 17281,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-06",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T06:10:53.083180+00:00",
+        "finished_at_utc": "2026-07-06T06:16:05.854154+00:00",
+        "elapsed_seconds": 312.7709649999997
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 9,
+        "tokens_in": 81651,
+        "tokens_out": 16469,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-07",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T06:16:05.911777+00:00",
+        "finished_at_utc": "2026-07-06T06:22:47.811061+00:00",
+        "elapsed_seconds": 401.8992772999991
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 77797,
+        "tokens_out": 19960,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-08",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T06:22:47.877313+00:00",
+        "finished_at_utc": "2026-07-06T06:29:53.903408+00:00",
+        "elapsed_seconds": 426.02608770000006
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 11,
+        "tokens_in": 71718,
+        "tokens_out": 20242,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-10",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T06:29:53.934485+00:00",
+        "finished_at_utc": "2026-07-06T06:37:33.746032+00:00",
+        "elapsed_seconds": 459.8115405999997
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 12,
+        "tokens_in": 96985,
+        "tokens_out": 22815,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-11",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T06:37:33.808765+00:00",
+        "finished_at_utc": "2026-07-06T06:43:59.644808+00:00",
+        "elapsed_seconds": 385.8360335999987
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 12,
+        "tokens_in": 87041,
+        "tokens_out": 20290,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-12",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T06:44:02.616638+00:00",
+        "finished_at_utc": "2026-07-06T06:49:58.616043+00:00",
+        "elapsed_seconds": 355.9993966000002
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 10,
+        "tokens_in": 150652,
+        "tokens_out": 18686,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-13",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T06:49:58.680429+00:00",
+        "finished_at_utc": "2026-07-06T06:54:57.518521+00:00",
+        "elapsed_seconds": 298.8380805000015
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 10,
+        "tokens_in": 74446,
+        "tokens_out": 16641,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-14",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T06:54:57.555547+00:00",
+        "finished_at_utc": "2026-07-06T07:00:49.234869+00:00",
+        "elapsed_seconds": 351.67931540000063
+      },
+      "llm_usage": {
+        "llm_calls": 16,
+        "tool_calls": 23,
+        "tokens_in": 98035,
+        "tokens_out": 20393,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-15",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T07:00:49.267627+00:00",
+        "finished_at_utc": "2026-07-06T07:07:09.704877+00:00",
+        "elapsed_seconds": 380.4372430000003
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 12,
+        "tokens_in": 63049,
+        "tokens_out": 17845,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-17",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T07:07:09.761541+00:00",
+        "finished_at_utc": "2026-07-06T07:12:41.680077+00:00",
+        "elapsed_seconds": 331.9185257000008
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 77297,
+        "tokens_out": 17586,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-18",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T07:12:41.770171+00:00",
+        "finished_at_utc": "2026-07-06T07:17:55.014777+00:00",
+        "elapsed_seconds": 313.24459789999855
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 18,
+        "tokens_in": 79778,
+        "tokens_out": 17616,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-19",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T07:17:55.084351+00:00",
+        "finished_at_utc": "2026-07-06T07:24:23.087255+00:00",
+        "elapsed_seconds": 388.00288640000144
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 9,
+        "tokens_in": 162549,
+        "tokens_out": 19536,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-20",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T07:24:23.140741+00:00",
+        "finished_at_utc": "2026-07-06T07:30:30.125915+00:00",
+        "elapsed_seconds": 366.98516390000077
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 10,
+        "tokens_in": 92888,
+        "tokens_out": 20243,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-21",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T07:30:30.203659+00:00",
+        "finished_at_utc": "2026-07-06T07:37:35.886910+00:00",
+        "elapsed_seconds": 425.68324329999814
+      },
+      "llm_usage": {
+        "llm_calls": 18,
+        "tool_calls": 8,
+        "tokens_in": 114644,
+        "tokens_out": 20905,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-22",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T07:37:35.943218+00:00",
+        "finished_at_utc": "2026-07-06T07:44:23.029101+00:00",
+        "elapsed_seconds": 407.0858718999989
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 92412,
+        "tokens_out": 20493,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-24",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T07:44:26.710640+00:00",
+        "finished_at_utc": "2026-07-06T07:50:16.915353+00:00",
+        "elapsed_seconds": 350.20469709999816
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 74015,
+        "tokens_out": 18203,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-25",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T07:50:16.949406+00:00",
+        "finished_at_utc": "2026-07-06T07:55:39.436962+00:00",
+        "elapsed_seconds": 322.48754589999953
+      },
+      "llm_usage": {
+        "llm_calls": 17,
+        "tool_calls": 12,
+        "tokens_in": 81889,
+        "tokens_out": 15270,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-26",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T07:55:39.524850+00:00",
+        "finished_at_utc": "2026-07-06T08:02:37.962937+00:00",
+        "elapsed_seconds": 418.4380764999987
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 16,
+        "tokens_in": 82260,
+        "tokens_out": 18990,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-27",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T08:02:38.021907+00:00",
+        "finished_at_utc": "2026-07-06T08:10:06.872598+00:00",
+        "elapsed_seconds": 448.85068460000184
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 13,
+        "tokens_in": 81195,
+        "tokens_out": 18307,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-28",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T08:10:06.916996+00:00",
+        "finished_at_utc": "2026-07-06T08:16:13.310862+00:00",
+        "elapsed_seconds": 366.39385720000064
+      },
+      "llm_usage": {
+        "llm_calls": 18,
+        "tool_calls": 9,
+        "tokens_in": 124996,
+        "tokens_out": 16627,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-29",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T08:16:13.364055+00:00",
+        "finished_at_utc": "2026-07-06T08:23:18.461641+00:00",
+        "elapsed_seconds": 425.0975778000029
+      },
+      "llm_usage": {
+        "llm_calls": 17,
+        "tool_calls": 8,
+        "tokens_in": 106815,
+        "tokens_out": 19636,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-05-31",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T08:23:18.511393+00:00",
+        "finished_at_utc": "2026-07-06T08:30:18.821239+00:00",
+        "elapsed_seconds": 420.30983899999774
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 19,
+        "tokens_in": 96173,
+        "tokens_out": 19753,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-01",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T08:30:18.869475+00:00",
+        "finished_at_utc": "2026-07-06T08:36:55.691322+00:00",
+        "elapsed_seconds": 396.8218405000007
+      },
+      "llm_usage": {
+        "llm_calls": 20,
+        "tool_calls": 13,
+        "tokens_in": 147078,
+        "tokens_out": 18113,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-02",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T08:36:55.725418+00:00",
+        "finished_at_utc": "2026-07-06T08:42:36.285206+00:00",
+        "elapsed_seconds": 340.55978010000035
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 12,
+        "tokens_in": 87545,
+        "tokens_out": 16451,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-03",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T08:42:36.354756+00:00",
+        "finished_at_utc": "2026-07-06T08:48:34.296427+00:00",
+        "elapsed_seconds": 357.94166029999906
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 10,
+        "tokens_in": 148296,
+        "tokens_out": 18139,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-04",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T08:48:39.653380+00:00",
+        "finished_at_utc": "2026-07-06T08:55:12.365853+00:00",
+        "elapsed_seconds": 392.7124624999997
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 12,
+        "tokens_in": 92819,
+        "tokens_out": 19663,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-05",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T08:55:12.396813+00:00",
+        "finished_at_utc": "2026-07-06T09:01:48.174317+00:00",
+        "elapsed_seconds": 395.7774927999999
+      },
+      "llm_usage": {
+        "llm_calls": 21,
+        "tool_calls": 11,
+        "tokens_in": 148649,
+        "tokens_out": 21171,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-07",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T09:01:48.293376+00:00",
+        "finished_at_utc": "2026-07-06T09:08:07.648839+00:00",
+        "elapsed_seconds": 379.3554527999986
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 74352,
+        "tokens_out": 19134,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-08",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T09:08:07.681797+00:00",
+        "finished_at_utc": "2026-07-06T09:15:32.172759+00:00",
+        "elapsed_seconds": 444.49095300000045
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 13,
+        "tokens_in": 105028,
+        "tokens_out": 20243,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-09",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T09:15:32.259915+00:00",
+        "finished_at_utc": "2026-07-06T09:22:26.239119+00:00",
+        "elapsed_seconds": 413.9791895999988
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 17,
+        "tokens_in": 96823,
+        "tokens_out": 19554,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-10",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T09:22:26.344662+00:00",
+        "finished_at_utc": "2026-07-06T09:27:34.266346+00:00",
+        "elapsed_seconds": 307.92167280000285
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 18,
+        "tokens_in": 68347,
+        "tokens_out": 15508,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-11",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T09:27:34.322443+00:00",
+        "finished_at_utc": "2026-07-06T09:34:59.981215+00:00",
+        "elapsed_seconds": 445.65876500000013
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 19,
+        "tokens_in": 100491,
+        "tokens_out": 21451,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-12",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T09:35:00.024179+00:00",
+        "finished_at_utc": "2026-07-06T09:41:49.286298+00:00",
+        "elapsed_seconds": 409.26210939999874
+      },
+      "llm_usage": {
+        "llm_calls": 17,
+        "tool_calls": 22,
+        "tokens_in": 104288,
+        "tokens_out": 21217,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-14",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T09:41:49.375644+00:00",
+        "finished_at_utc": "2026-07-06T09:47:40.427365+00:00",
+        "elapsed_seconds": 351.0517114000031
+      },
+      "llm_usage": {
+        "llm_calls": 17,
+        "tool_calls": 12,
+        "tokens_in": 96846,
+        "tokens_out": 18774,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-15",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://api.minimaxi.com/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T09:47:40.470918+00:00",
+        "finished_at_utc": "2026-07-06T09:53:16.669850+00:00",
+        "elapsed_seconds": 336.19892179999806
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 11,
+        "tokens_in": 81317,
+        "tokens_out": 19092,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-16",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T15:01:59.992707+00:00",
+        "finished_at_utc": "2026-07-06T15:08:34.219734+00:00",
+        "elapsed_seconds": 394.2270137999949
+      },
+      "llm_usage": {
+        "llm_calls": 16,
+        "tool_calls": 13,
+        "tokens_in": 135655,
+        "tokens_out": 19050,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-17",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T15:08:34.312952+00:00",
+        "finished_at_utc": "2026-07-06T15:13:28.113510+00:00",
+        "elapsed_seconds": 293.800545099999
+      },
+      "llm_usage": {
+        "llm_calls": 15,
+        "tool_calls": 13,
+        "tokens_in": 112706,
+        "tokens_out": 17399,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-18",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T15:13:28.203410+00:00",
+        "finished_at_utc": "2026-07-06T15:18:43.948061+00:00",
+        "elapsed_seconds": 315.74464109999826
+      },
+      "llm_usage": {
+        "llm_calls": 13,
+        "tool_calls": 12,
+        "tokens_in": 64309,
+        "tokens_out": 18897,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-19",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T15:18:43.980659+00:00",
+        "finished_at_utc": "2026-07-06T15:23:36.879200+00:00",
+        "elapsed_seconds": 292.8985324000023
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 14,
+        "tokens_in": 81784,
+        "tokens_out": 17732,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-21",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T15:23:36.959251+00:00",
+        "finished_at_utc": "2026-07-06T15:28:15.646510+00:00",
+        "elapsed_seconds": 278.68724759999895
+      },
+      "llm_usage": {
+        "llm_calls": 17,
+        "tool_calls": 21,
+        "tokens_in": 102846,
+        "tokens_out": 16009,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-22",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T15:28:15.749901+00:00",
+        "finished_at_utc": "2026-07-06T15:34:08.161635+00:00",
+        "elapsed_seconds": 352.4117219000036
+      },
+      "llm_usage": {
+        "llm_calls": 20,
+        "tool_calls": 11,
+        "tokens_in": 184142,
+        "tokens_out": 19777,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-23",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T15:34:08.239552+00:00",
+        "finished_at_utc": "2026-07-06T15:39:16.632744+00:00",
+        "elapsed_seconds": 308.3931798000049
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 16,
+        "tokens_in": 146226,
+        "tokens_out": 18024,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-24",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T15:39:16.697741+00:00",
+        "finished_at_utc": "2026-07-06T15:46:27.948108+00:00",
+        "elapsed_seconds": 431.25035840000055
+      },
+      "llm_usage": {
+        "llm_calls": 18,
+        "tool_calls": 21,
+        "tokens_in": 130064,
+        "tokens_out": 23571,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-25",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T15:46:28.016068+00:00",
+        "finished_at_utc": "2026-07-06T15:51:07.223104+00:00",
+        "elapsed_seconds": 279.2070273999998
+      },
+      "llm_usage": {
+        "llm_calls": 19,
+        "tool_calls": 9,
+        "tokens_in": 126284,
+        "tokens_out": 17804,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-26",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-06T15:51:07.307806+00:00",
+        "finished_at_utc": "2026-07-06T15:55:58.641179+00:00",
+        "elapsed_seconds": 291.33336090000375
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 17,
+        "tokens_in": 86806,
+        "tokens_out": 19098,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-28",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-07T03:00:13.894896+00:00",
+        "finished_at_utc": "2026-07-07T03:07:35.768760+00:00",
+        "elapsed_seconds": 441.87384899999597
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 13,
+        "tokens_in": 80756,
+        "tokens_out": 17838,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-29",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-07T03:07:35.839836+00:00",
+        "finished_at_utc": "2026-07-07T03:14:21.920329+00:00",
+        "elapsed_seconds": 406.08047590000206
+      },
+      "llm_usage": {
+        "llm_calls": 14,
+        "tool_calls": 19,
+        "tokens_in": 87636,
+        "tokens_out": 19012,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    },
+    {
+      "baseline": "tradingagents",
+      "symbol": "GCUSD",
+      "trade_date": "2026-06-30",
+      "model": {
+        "provider": "minimax-cn",
+        "deep": "MiniMax-M2.1",
+        "quick": "MiniMax-M2.1",
+        "backend_url": "https://model1.imfan.top/v1"
+      },
+      "timing": {
+        "started_at_utc": "2026-07-07T03:14:22.005217+00:00",
+        "finished_at_utc": "2026-07-07T03:19:34.070545+00:00",
+        "elapsed_seconds": 312.0653176999913
+      },
+      "llm_usage": {
+        "llm_calls": 16,
+        "tool_calls": 10,
+        "tokens_in": 82514,
+        "tokens_out": 14733,
+        "estimated_cost_usd": null,
+        "cost_note": "not estimated; pass both price flags to compute USD cost"
+      }
+    }
+  ],
+  "sanitization": "Inputs, raw output, reasoning, news content, portfolio details and workstation paths removed. Historical evaluators may require excluded original artifacts."
+}

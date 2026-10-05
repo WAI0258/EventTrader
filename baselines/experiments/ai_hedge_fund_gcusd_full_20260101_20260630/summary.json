@@ -1,0 +1,5327 @@
+{
+  "baseline": "ai-hedge-fund",
+  "symbol": "GCUSD",
+  "reported_window": {
+    "start": "2026-01-01",
+    "end": "2026-06-30"
+  },
+  "selected_analysts": [
+    "technical_analyst",
+    "news_sentiment_analyst"
+  ],
+  "model": {
+    "provider": "Anthropic",
+    "model_name": "MiniMax-M2.1"
+  },
+  "resume": {
+    "enabled": true,
+    "resumed_completed_days": 101
+  },
+  "aggregate_llm_usage": {
+    "llm_calls": 772,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "tokens_total": 0,
+    "usage_observed": false,
+    "calls_missing_usage": 772,
+    "estimated_cost_usd": null
+  },
+  "performance_metrics": {
+    "sharpe_ratio": -0.7798488522137154,
+    "sortino_ratio": -1.040999097092415,
+    "max_drawdown": -3.2351265804201224,
+    "max_drawdown_date": "2026-05-10"
+  },
+  "runs": [
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-01",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-01",
+      "decision_at": "2026-01-01T23:59:59+00:00",
+      "visible_through": "2026-01-01T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:01:00.081545+00:00",
+        "finished_at_utc": "2026-07-03T16:01:35.998743+00:00",
+        "elapsed_seconds": 35.917187299986836
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 4,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 4,
+        "per_agent_calls": {
+          "news_sentiment_agent": 3,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100000.0,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-02",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-02",
+      "decision_at": "2026-01-02T23:59:59+00:00",
+      "visible_through": "2026-01-02T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:01:36.008036+00:00",
+        "finished_at_utc": "2026-07-03T16:02:41.157053+00:00",
+        "elapsed_seconds": 65.14900220002164
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99929.2,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-05",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-05",
+      "decision_at": "2026-01-05T23:59:59+00:00",
+      "visible_through": "2026-01-05T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:02:41.172026+00:00",
+        "finished_at_utc": "2026-07-03T16:03:31.028675+00:00",
+        "elapsed_seconds": 49.856635899981484
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99929.20000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-06",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-06",
+      "decision_at": "2026-01-06T23:59:59+00:00",
+      "visible_through": "2026-01-06T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:03:31.054776+00:00",
+        "finished_at_utc": "2026-07-03T16:04:36.972804+00:00",
+        "elapsed_seconds": 65.91801900000428
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99916.40000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-07",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-07",
+      "decision_at": "2026-01-07T23:59:59+00:00",
+      "visible_through": "2026-01-07T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:04:36.980709+00:00",
+        "finished_at_utc": "2026-07-03T16:05:16.790149+00:00",
+        "elapsed_seconds": 39.8094283999817
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99916.40000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 4,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-08",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-08",
+      "decision_at": "2026-01-08T23:59:59+00:00",
+      "visible_through": "2026-01-08T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:05:16.801168+00:00",
+        "finished_at_utc": "2026-07-03T16:06:02.505395+00:00",
+        "elapsed_seconds": 45.70421850000275
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99782.0,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-09",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-09",
+      "decision_at": "2026-01-09T23:59:59+00:00",
+      "visible_through": "2026-01-09T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:06:02.515730+00:00",
+        "finished_at_utc": "2026-07-03T16:06:40.361330+00:00",
+        "elapsed_seconds": 37.845591699995566
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99782.0,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-12",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-12",
+      "decision_at": "2026-01-12T23:59:59+00:00",
+      "visible_through": "2026-01-12T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:06:40.374368+00:00",
+        "finished_at_utc": "2026-07-03T16:07:31.066162+00:00",
+        "elapsed_seconds": 50.69178550000652
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100088.0,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-13",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-13",
+      "decision_at": "2026-01-13T23:59:59+00:00",
+      "visible_through": "2026-01-13T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:07:31.081914+00:00",
+        "finished_at_utc": "2026-07-03T16:08:13.514124+00:00",
+        "elapsed_seconds": 42.43213630001992
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100088.0,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-14",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-14",
+      "decision_at": "2026-01-14T23:59:59+00:00",
+      "visible_through": "2026-01-14T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:08:13.532147+00:00",
+        "finished_at_utc": "2026-07-03T16:09:04.105891+00:00",
+        "elapsed_seconds": 50.57373329999973
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99923.6,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-15",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-15",
+      "decision_at": "2026-01-15T23:59:59+00:00",
+      "visible_through": "2026-01-15T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:09:04.117949+00:00",
+        "finished_at_utc": "2026-07-03T16:09:49.932158+00:00",
+        "elapsed_seconds": 45.814202100009425
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99923.6,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-16",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-16",
+      "decision_at": "2026-01-16T23:59:59+00:00",
+      "visible_through": "2026-01-16T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:09:49.945774+00:00",
+        "finished_at_utc": "2026-07-03T16:10:38.039514+00:00",
+        "elapsed_seconds": 48.093731800006935
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100040.40000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-19",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-19",
+      "decision_at": "2026-01-19T23:59:59+00:00",
+      "visible_through": "2026-01-19T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:10:38.051591+00:00",
+        "finished_at_utc": "2026-07-03T16:11:20.491516+00:00",
+        "elapsed_seconds": 42.439918999996735
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100040.40000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-20",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-20",
+      "decision_at": "2026-01-20T23:59:59+00:00",
+      "visible_through": "2026-01-20T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:11:20.502269+00:00",
+        "finished_at_utc": "2026-07-03T16:12:05.231083+00:00",
+        "elapsed_seconds": 44.72880630000145
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100710.40000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "hold",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-21",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-21",
+      "decision_at": "2026-01-21T23:59:59+00:00",
+      "visible_through": "2026-01-21T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:12:05.248356+00:00",
+        "finished_at_utc": "2026-07-03T16:12:49.168652+00:00",
+        "elapsed_seconds": 43.92028619998018
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100429.20000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-22",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-22",
+      "decision_at": "2026-01-22T23:59:59+00:00",
+      "visible_through": "2026-01-22T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:12:49.192185+00:00",
+        "finished_at_utc": "2026-07-03T16:13:25.537231+00:00",
+        "elapsed_seconds": 36.345034199999645
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100429.20000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 0,
+        "net_units": 3,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-23",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-23",
+      "decision_at": "2026-01-23T23:59:59+00:00",
+      "visible_through": "2026-01-23T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:13:25.551776+00:00",
+        "finished_at_utc": "2026-07-03T16:14:12.949361+00:00",
+        "elapsed_seconds": 47.39757850000751
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100596.00000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-26",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-26",
+      "decision_at": "2026-01-26T23:59:59+00:00",
+      "visible_through": "2026-01-26T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:14:12.960458+00:00",
+        "finished_at_utc": "2026-07-03T16:14:58.068710+00:00",
+        "elapsed_seconds": 45.10824699999648
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100596.00000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 0,
+        "net_units": 3,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-27",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-27",
+      "decision_at": "2026-01-27T23:59:59+00:00",
+      "visible_through": "2026-01-27T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:14:58.080022+00:00",
+        "finished_at_utc": "2026-07-03T16:15:44.429907+00:00",
+        "elapsed_seconds": 46.34988019999582
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 101130.90000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "hold",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 0,
+        "net_units": 3,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-28",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-28",
+      "decision_at": "2026-01-28T23:59:59+00:00",
+      "visible_through": "2026-01-28T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:15:44.445487+00:00",
+        "finished_at_utc": "2026-07-03T16:16:24.804099+00:00",
+        "elapsed_seconds": 40.35860480001429
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 102172.20000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-29",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-29",
+      "decision_at": "2026-01-29T23:59:59+00:00",
+      "visible_through": "2026-01-29T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:16:24.823249+00:00",
+        "finished_at_utc": "2026-07-03T16:17:05.065474+00:00",
+        "elapsed_seconds": 40.24221189998207
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 102172.20000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 0,
+        "net_units": 3,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-01-30",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-01-30",
+      "decision_at": "2026-01-30T23:59:59+00:00",
+      "visible_through": "2026-01-30T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:17:05.079116+00:00",
+        "finished_at_utc": "2026-07-03T16:17:51.567399+00:00",
+        "elapsed_seconds": 46.48827140001231
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100893.90000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-02",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-02",
+      "decision_at": "2026-02-02T23:59:59+00:00",
+      "visible_through": "2026-02-02T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:17:51.592511+00:00",
+        "finished_at_utc": "2026-07-03T16:18:34.232678+00:00",
+        "elapsed_seconds": 42.64015590000781
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 100893.90000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 2,
+        "net_units": -2,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-03",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-03",
+      "decision_at": "2026-02-03T23:59:59+00:00",
+      "visible_through": "2026-02-03T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:18:34.266954+00:00",
+        "finished_at_utc": "2026-07-03T16:19:15.791962+00:00",
+        "elapsed_seconds": 41.524999700021
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100359.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-04",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-04",
+      "decision_at": "2026-02-04T23:59:59+00:00",
+      "visible_through": "2026-02-04T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:19:15.804140+00:00",
+        "finished_at_utc": "2026-07-03T16:19:51.228186+00:00",
+        "elapsed_seconds": 35.42403990001185
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100359.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-05",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-05",
+      "decision_at": "2026-02-05T23:59:59+00:00",
+      "visible_through": "2026-02-05T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:19:51.251070+00:00",
+        "finished_at_utc": "2026-07-03T16:20:37.363106+00:00",
+        "elapsed_seconds": 46.112028200004715
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100256.70000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-06",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-06",
+      "decision_at": "2026-02-06T23:59:59+00:00",
+      "visible_through": "2026-02-06T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:20:37.375810+00:00",
+        "finished_at_utc": "2026-07-03T16:21:20.144904+00:00",
+        "elapsed_seconds": 42.7690877999994
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100256.70000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-09",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-09",
+      "decision_at": "2026-02-09T23:59:59+00:00",
+      "visible_through": "2026-02-09T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:21:20.168081+00:00",
+        "finished_at_utc": "2026-07-03T16:22:14.701615+00:00",
+        "elapsed_seconds": 54.5335272999946
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100355.30000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "hold",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-10",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-10",
+      "decision_at": "2026-02-10T23:59:59+00:00",
+      "visible_through": "2026-02-10T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:22:14.712944+00:00",
+        "finished_at_utc": "2026-07-03T16:22:52.839757+00:00",
+        "elapsed_seconds": 38.12680729999556
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100391.90000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-11",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-11",
+      "decision_at": "2026-02-11T23:59:59+00:00",
+      "visible_through": "2026-02-11T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:22:52.855044+00:00",
+        "finished_at_utc": "2026-07-03T16:23:27.800904+00:00",
+        "elapsed_seconds": 34.9458534999867
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100391.90000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-12",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-12",
+      "decision_at": "2026-02-12T23:59:59+00:00",
+      "visible_through": "2026-02-12T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:23:27.813558+00:00",
+        "finished_at_utc": "2026-07-03T16:24:04.280473+00:00",
+        "elapsed_seconds": 36.46691000001738
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100204.10000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-13",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-13",
+      "decision_at": "2026-02-13T23:59:59+00:00",
+      "visible_through": "2026-02-13T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:24:04.294149+00:00",
+        "finished_at_utc": "2026-07-03T16:24:48.423006+00:00",
+        "elapsed_seconds": 44.12884660001146
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100204.10000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-16",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-16",
+      "decision_at": "2026-02-16T23:59:59+00:00",
+      "visible_through": "2026-02-16T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:24:48.447671+00:00",
+        "finished_at_utc": "2026-07-03T16:25:25.756279+00:00",
+        "elapsed_seconds": 37.30860030002077
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100045.70000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-17",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-17",
+      "decision_at": "2026-02-17T23:59:59+00:00",
+      "visible_through": "2026-02-17T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:25:25.775754+00:00",
+        "finished_at_utc": "2026-07-03T16:26:08.764776+00:00",
+        "elapsed_seconds": 42.98900890001096
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100045.70000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 0,
+        "net_units": 1,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-18",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-18",
+      "decision_at": "2026-02-18T23:59:59+00:00",
+      "visible_through": "2026-02-18T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:26:08.792757+00:00",
+        "finished_at_utc": "2026-07-03T16:26:53.083544+00:00",
+        "elapsed_seconds": 44.290777200018056
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100094.70000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-19",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-19",
+      "decision_at": "2026-02-19T23:59:59+00:00",
+      "visible_through": "2026-02-19T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:26:53.102849+00:00",
+        "finished_at_utc": "2026-07-03T16:27:35.908350+00:00",
+        "elapsed_seconds": 42.80549339999561
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100125.90000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "hold",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-20",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-20",
+      "decision_at": "2026-02-20T23:59:59+00:00",
+      "visible_through": "2026-02-20T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:27:35.922427+00:00",
+        "finished_at_utc": "2026-07-03T16:28:28.704106+00:00",
+        "elapsed_seconds": 52.7816725000157
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100347.30000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-23",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-23",
+      "decision_at": "2026-02-23T23:59:59+00:00",
+      "visible_through": "2026-02-23T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:28:28.721358+00:00",
+        "finished_at_utc": "2026-07-03T16:29:13.119705+00:00",
+        "elapsed_seconds": 44.398333499993896
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100347.30000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-24",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-24",
+      "decision_at": "2026-02-24T23:59:59+00:00",
+      "visible_through": "2026-02-24T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:29:13.134597+00:00",
+        "finished_at_utc": "2026-07-03T16:29:50.130068+00:00",
+        "elapsed_seconds": 36.995465599989984
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100375.30000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-25",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-25",
+      "decision_at": "2026-02-25T23:59:59+00:00",
+      "visible_through": "2026-02-25T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:29:50.141668+00:00",
+        "finished_at_utc": "2026-07-03T16:30:26.356415+00:00",
+        "elapsed_seconds": 36.21474060000037
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100375.30000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-26",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-26",
+      "decision_at": "2026-02-26T23:59:59+00:00",
+      "visible_through": "2026-02-26T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:30:26.367984+00:00",
+        "finished_at_utc": "2026-07-03T16:31:09.400001+00:00",
+        "elapsed_seconds": 43.03201120000449
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100353.90000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-02-27",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-02-27",
+      "decision_at": "2026-02-27T23:59:59+00:00",
+      "visible_through": "2026-02-27T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:31:09.411360+00:00",
+        "finished_at_utc": "2026-07-03T16:31:45.593105+00:00",
+        "elapsed_seconds": 36.18173799998476
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100353.90000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-02",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-02",
+      "decision_at": "2026-03-02T23:59:59+00:00",
+      "visible_through": "2026-03-02T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:31:45.605227+00:00",
+        "finished_at_utc": "2026-07-03T16:32:25.254599+00:00",
+        "elapsed_seconds": 39.649367200006964
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100383.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 0,
+        "net_units": 3,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-03",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-03",
+      "decision_at": "2026-03-03T23:59:59+00:00",
+      "visible_through": "2026-03-03T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:32:25.265397+00:00",
+        "finished_at_utc": "2026-07-03T16:33:09.046200+00:00",
+        "elapsed_seconds": 43.78079769999022
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99756.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-04",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-04",
+      "decision_at": "2026-03-04T23:59:59+00:00",
+      "visible_through": "2026-03-04T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:33:09.064544+00:00",
+        "finished_at_utc": "2026-07-03T16:33:55.912417+00:00",
+        "elapsed_seconds": 46.847861800022656
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99756.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 0,
+        "net_units": 1,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-05",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-05",
+      "decision_at": "2026-03-05T23:59:59+00:00",
+      "visible_through": "2026-03-05T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:33:55.926543+00:00",
+        "finished_at_utc": "2026-07-03T16:34:37.536547+00:00",
+        "elapsed_seconds": 41.60999839997385
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99711.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 0,
+        "net_units": 3,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-06",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-06",
+      "decision_at": "2026-03-06T23:59:59+00:00",
+      "visible_through": "2026-03-06T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:34:37.552482+00:00",
+        "finished_at_utc": "2026-07-03T16:35:20.095106+00:00",
+        "elapsed_seconds": 42.542613300000085
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99863.40000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-09",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-09",
+      "decision_at": "2026-03-09T23:59:59+00:00",
+      "visible_through": "2026-03-09T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:35:20.117421+00:00",
+        "finished_at_utc": "2026-07-03T16:36:01.495843+00:00",
+        "elapsed_seconds": 41.37841320000007
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99863.40000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 3,
+        "net_units": -3,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-10",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-10",
+      "decision_at": "2026-03-10T23:59:59+00:00",
+      "visible_through": "2026-03-10T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:36:01.516374+00:00",
+        "finished_at_utc": "2026-07-03T16:36:40.892989+00:00",
+        "elapsed_seconds": 39.37660729998606
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99724.80000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-11",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-11",
+      "decision_at": "2026-03-11T23:59:59+00:00",
+      "visible_through": "2026-03-11T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:36:40.904902+00:00",
+        "finished_at_utc": "2026-07-03T16:37:17.151338+00:00",
+        "elapsed_seconds": 36.246428900019964
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99724.80000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 0,
+        "net_units": 3,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-12",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-12",
+      "decision_at": "2026-03-12T23:59:59+00:00",
+      "visible_through": "2026-03-12T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:37:17.164909+00:00",
+        "finished_at_utc": "2026-07-03T16:37:58.486937+00:00",
+        "elapsed_seconds": 41.322021400002996
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99606.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-13",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-13",
+      "decision_at": "2026-03-13T23:59:59+00:00",
+      "visible_through": "2026-03-13T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:49:20.728977+00:00",
+        "finished_at_utc": "2026-07-03T16:50:00.637893+00:00",
+        "elapsed_seconds": 39.90890869998839
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99606.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 3,
+        "net_units": -3,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-16",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-16",
+      "decision_at": "2026-03-16T23:59:59+00:00",
+      "visible_through": "2026-03-16T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:50:00.653377+00:00",
+        "finished_at_utc": "2026-07-03T16:50:39.207278+00:00",
+        "elapsed_seconds": 38.55389300000388
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99543.00000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-17",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-17",
+      "decision_at": "2026-03-17T23:59:59+00:00",
+      "visible_through": "2026-03-17T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:50:39.220407+00:00",
+        "finished_at_utc": "2026-07-03T16:51:33.149460+00:00",
+        "elapsed_seconds": 53.929046700010076
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99543.00000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 0,
+        "net_units": 1,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-18",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-18",
+      "decision_at": "2026-03-18T23:59:59+00:00",
+      "visible_through": "2026-03-18T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:51:33.167894+00:00",
+        "finished_at_utc": "2026-07-03T16:52:16.001977+00:00",
+        "elapsed_seconds": 42.83407640000223
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99400.90000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 2,
+        "net_units": -1,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-19",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-19",
+      "decision_at": "2026-03-19T23:59:59+00:00",
+      "visible_through": "2026-03-19T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:52:16.014519+00:00",
+        "finished_at_utc": "2026-07-03T16:53:00.402200+00:00",
+        "elapsed_seconds": 44.38767470000312
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99527.00000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 4,
+        "net_units": -3,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-20",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-20",
+      "decision_at": "2026-03-20T23:59:59+00:00",
+      "visible_through": "2026-03-20T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:53:00.421014+00:00",
+        "finished_at_utc": "2026-07-03T16:53:36.831234+00:00",
+        "elapsed_seconds": 36.41021189998719
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 100355.90000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 5,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-23",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-23",
+      "decision_at": "2026-03-23T23:59:59+00:00",
+      "visible_through": "2026-03-23T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:53:36.843010+00:00",
+        "finished_at_utc": "2026-07-03T16:54:12.791352+00:00",
+        "elapsed_seconds": 35.94833730001119
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 100766.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 5,
+        "net_units": -5,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-24",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-24",
+      "decision_at": "2026-03-24T23:59:59+00:00",
+      "visible_through": "2026-03-24T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:54:12.803432+00:00",
+        "finished_at_utc": "2026-07-03T16:54:57.546411+00:00",
+        "elapsed_seconds": 44.74297230000957
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99660.80000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-25",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-25",
+      "decision_at": "2026-03-25T23:59:59+00:00",
+      "visible_through": "2026-03-25T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:54:57.568587+00:00",
+        "finished_at_utc": "2026-07-03T16:55:38.109987+00:00",
+        "elapsed_seconds": 40.541393299994525
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99660.80000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 3,
+        "net_units": -3,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-26",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-26",
+      "decision_at": "2026-03-26T23:59:59+00:00",
+      "visible_through": "2026-03-26T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:55:38.130609+00:00",
+        "finished_at_utc": "2026-07-03T16:56:21.586085+00:00",
+        "elapsed_seconds": 43.45546649998869
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99905.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-27",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-27",
+      "decision_at": "2026-03-27T23:59:59+00:00",
+      "visible_through": "2026-03-27T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:56:21.604953+00:00",
+        "finished_at_utc": "2026-07-03T16:57:01.154407+00:00",
+        "elapsed_seconds": 39.54944550001528
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99905.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 0,
+        "net_units": 3,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-30",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-30",
+      "decision_at": "2026-03-30T23:59:59+00:00",
+      "visible_through": "2026-03-30T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:57:01.172080+00:00",
+        "finished_at_utc": "2026-07-03T16:57:52.598054+00:00",
+        "elapsed_seconds": 51.42582509998465
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100103.00000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "hold",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 0,
+        "net_units": 3,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-03-31",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-03-31",
+      "decision_at": "2026-03-31T23:59:59+00:00",
+      "visible_through": "2026-03-31T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:57:52.620691+00:00",
+        "finished_at_utc": "2026-07-03T16:58:41.187801+00:00",
+        "elapsed_seconds": 48.567101900000125
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100468.10000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-01",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-01",
+      "decision_at": "2026-04-01T23:59:59+00:00",
+      "visible_through": "2026-04-01T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:58:41.209252+00:00",
+        "finished_at_utc": "2026-07-03T16:59:26.705255+00:00",
+        "elapsed_seconds": 45.495996499987086
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100468.10000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-02",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-02",
+      "decision_at": "2026-04-02T23:59:59+00:00",
+      "visible_through": "2026-04-02T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T16:59:26.718614+00:00",
+        "finished_at_utc": "2026-07-03T17:00:12.869313+00:00",
+        "elapsed_seconds": 46.15069390001008
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100410.90000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 1,
+        "net_units": 1,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-03",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-03",
+      "decision_at": "2026-04-03T23:59:59+00:00",
+      "visible_through": "2026-04-03T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:00:12.881824+00:00",
+        "finished_at_utc": "2026-07-03T17:00:54.321514+00:00",
+        "elapsed_seconds": 41.43968410001253
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 100410.90000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 3,
+        "net_units": -1,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-06",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-06",
+      "decision_at": "2026-04-06T23:59:59+00:00",
+      "visible_through": "2026-04-06T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:00:54.333761+00:00",
+        "finished_at_utc": "2026-07-03T17:01:41.158397+00:00",
+        "elapsed_seconds": 46.82462990001659
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100410.70000000004,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 3,
+        "net_units": 1,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-07",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-07",
+      "decision_at": "2026-04-07T23:59:59+00:00",
+      "visible_through": "2026-04-07T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:01:41.181623+00:00",
+        "finished_at_utc": "2026-07-03T17:02:24.226139+00:00",
+        "elapsed_seconds": 43.044504899997264
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100562.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 6,
+        "short_units": 3,
+        "net_units": 3,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-08",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-08",
+      "decision_at": "2026-04-08T23:59:59+00:00",
+      "visible_through": "2026-04-08T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:02:24.274243+00:00",
+        "finished_at_utc": "2026-07-03T17:03:20.937006+00:00",
+        "elapsed_seconds": 56.66275419999147
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100285.70000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 6,
+        "short_units": 0,
+        "net_units": 6,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-09",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-09",
+      "decision_at": "2026-04-09T23:59:59+00:00",
+      "visible_through": "2026-04-09T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:03:20.951904+00:00",
+        "finished_at_utc": "2026-07-03T17:03:55.228257+00:00",
+        "elapsed_seconds": 34.27634750001016
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100620.50000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "hold",
+      "position_after_execution": {
+        "long_units": 6,
+        "short_units": 0,
+        "net_units": 6,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-10",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-10",
+      "decision_at": "2026-04-10T23:59:59+00:00",
+      "visible_through": "2026-04-10T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:03:55.239212+00:00",
+        "finished_at_utc": "2026-07-03T17:04:46.035406+00:00",
+        "elapsed_seconds": 50.79618699999992
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100138.10000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-13",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-13",
+      "decision_at": "2026-04-13T23:59:59+00:00",
+      "visible_through": "2026-04-13T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:04:46.057007+00:00",
+        "finished_at_utc": "2026-07-03T17:05:36.473436+00:00",
+        "elapsed_seconds": 50.416420800000196
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 100138.10000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 3,
+        "net_units": -3,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-14",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-14",
+      "decision_at": "2026-04-14T23:59:59+00:00",
+      "visible_through": "2026-04-14T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:05:36.486926+00:00",
+        "finished_at_utc": "2026-07-03T17:06:28.907139+00:00",
+        "elapsed_seconds": 52.420207500021206
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99964.10000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-15",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-15",
+      "decision_at": "2026-04-15T23:59:59+00:00",
+      "visible_through": "2026-04-15T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:06:28.924064+00:00",
+        "finished_at_utc": "2026-07-03T17:07:08.772300+00:00",
+        "elapsed_seconds": 39.84823150001466
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99964.10000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-16",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-16",
+      "decision_at": "2026-04-16T23:59:59+00:00",
+      "visible_through": "2026-04-16T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:07:08.784263+00:00",
+        "finished_at_utc": "2026-07-03T17:07:54.689412+00:00",
+        "elapsed_seconds": 45.905143199983286
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99899.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-17",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-17",
+      "decision_at": "2026-04-17T23:59:59+00:00",
+      "visible_through": "2026-04-17T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:07:54.709205+00:00",
+        "finished_at_utc": "2026-07-03T17:08:39.598353+00:00",
+        "elapsed_seconds": 44.88914029998705
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99899.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-20",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-20",
+      "decision_at": "2026-04-20T23:59:59+00:00",
+      "visible_through": "2026-04-20T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:08:39.611535+00:00",
+        "finished_at_utc": "2026-07-03T17:09:20.427572+00:00",
+        "elapsed_seconds": 40.81603200000245
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99907.90000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 0,
+        "net_units": 3,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-21",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-21",
+      "decision_at": "2026-04-21T23:59:59+00:00",
+      "visible_through": "2026-04-21T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:09:20.451772+00:00",
+        "finished_at_utc": "2026-07-03T17:10:18.968668+00:00",
+        "elapsed_seconds": 58.51688540002215
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99787.90000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-22",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-22",
+      "decision_at": "2026-04-22T23:59:59+00:00",
+      "visible_through": "2026-04-22T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:10:18.990780+00:00",
+        "finished_at_utc": "2026-07-03T17:11:12.045284+00:00",
+        "elapsed_seconds": 53.054495000018505
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99787.90000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 0,
+        "net_units": 1,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-23",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-23",
+      "decision_at": "2026-04-23T23:59:59+00:00",
+      "visible_through": "2026-04-23T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:11:12.058843+00:00",
+        "finished_at_utc": "2026-07-03T17:11:52.691917+00:00",
+        "elapsed_seconds": 40.633067199989455
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99755.8,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 2,
+        "net_units": -1,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-24",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-24",
+      "decision_at": "2026-04-24T23:59:59+00:00",
+      "visible_through": "2026-04-24T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:11:52.726794+00:00",
+        "finished_at_utc": "2026-07-03T17:12:40.228278+00:00",
+        "elapsed_seconds": 47.50147590000415
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99729.60000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 2,
+        "net_units": 1,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-27",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-27",
+      "decision_at": "2026-04-27T23:59:59+00:00",
+      "visible_through": "2026-04-27T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:12:40.240657+00:00",
+        "finished_at_utc": "2026-07-03T17:13:20.169449+00:00",
+        "elapsed_seconds": 39.928784200019436
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99701.10000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 5,
+        "net_units": -2,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-28",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-28",
+      "decision_at": "2026-04-28T23:59:59+00:00",
+      "visible_through": "2026-04-28T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:13:20.189893+00:00",
+        "finished_at_utc": "2026-07-03T17:14:01.361285+00:00",
+        "elapsed_seconds": 41.171384400018724
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99852.1,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 3,
+        "short_units": 7,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-29",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-29",
+      "decision_at": "2026-04-29T23:59:59+00:00",
+      "visible_through": "2026-04-29T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:14:01.385268+00:00",
+        "finished_at_utc": "2026-07-03T17:14:40.885613+00:00",
+        "elapsed_seconds": 39.500336099998094
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 100018.90000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 7,
+        "net_units": -7,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-04-30",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-04-30",
+      "decision_at": "2026-04-30T23:59:59+00:00",
+      "visible_through": "2026-04-30T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:14:40.929505+00:00",
+        "finished_at_utc": "2026-07-03T17:15:31.365293+00:00",
+        "elapsed_seconds": 50.43577730000834
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99526.1,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-01",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-01",
+      "decision_at": "2026-05-01T23:59:59+00:00",
+      "visible_through": "2026-05-01T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:15:31.389677+00:00",
+        "finished_at_utc": "2026-07-03T17:16:23.297998+00:00",
+        "elapsed_seconds": 51.90831159998197
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99526.1,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 0,
+        "net_units": 1,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-04",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-04",
+      "decision_at": "2026-05-04T23:59:59+00:00",
+      "visible_through": "2026-05-04T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:16:23.310643+00:00",
+        "finished_at_utc": "2026-07-03T17:17:04.460849+00:00",
+        "elapsed_seconds": 41.15020000000368
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99425.6,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 3,
+        "net_units": -2,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-05",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-05",
+      "decision_at": "2026-05-05T23:59:59+00:00",
+      "visible_through": "2026-05-05T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:17:04.483752+00:00",
+        "finished_at_utc": "2026-07-03T17:17:47.890881+00:00",
+        "elapsed_seconds": 43.4071200999897
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99205.40000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 5,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-06",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-06",
+      "decision_at": "2026-05-06T23:59:59+00:00",
+      "visible_through": "2026-05-06T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:17:47.903626+00:00",
+        "finished_at_utc": "2026-07-03T17:18:37.967902+00:00",
+        "elapsed_seconds": 50.064270300004864
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 98989.0,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "hold",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 5,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-07",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-07",
+      "decision_at": "2026-05-07T23:59:59+00:00",
+      "visible_through": "2026-05-07T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:18:37.979764+00:00",
+        "finished_at_utc": "2026-07-03T17:19:21.583362+00:00",
+        "elapsed_seconds": 43.603590999991866
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 98905.40000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 0,
+        "net_units": 1,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-08",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-08",
+      "decision_at": "2026-05-08T23:59:59+00:00",
+      "visible_through": "2026-05-08T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:19:21.594674+00:00",
+        "finished_at_utc": "2026-07-03T17:20:06.763439+00:00",
+        "elapsed_seconds": 45.16875949999667
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 98866.8,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-11",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-11",
+      "decision_at": "2026-05-11T23:59:59+00:00",
+      "visible_through": "2026-05-11T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:20:06.778473+00:00",
+        "finished_at_utc": "2026-07-03T17:20:45.739984+00:00",
+        "elapsed_seconds": 38.96150260002469
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99023.20000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-12",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-12",
+      "decision_at": "2026-05-12T23:59:59+00:00",
+      "visible_through": "2026-05-12T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:20:45.752783+00:00",
+        "finished_at_utc": "2026-07-03T17:21:38.692540+00:00",
+        "elapsed_seconds": 52.93974700002582
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99023.20000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 0,
+        "net_units": 1,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-13",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-13",
+      "decision_at": "2026-05-13T23:59:59+00:00",
+      "visible_through": "2026-05-13T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:21:38.715829+00:00",
+        "finished_at_utc": "2026-07-03T17:22:30.525306+00:00",
+        "elapsed_seconds": 51.80946630000835
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 98999.5,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 3,
+        "net_units": -2,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-14",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-14",
+      "decision_at": "2026-05-14T23:59:59+00:00",
+      "visible_through": "2026-05-14T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:22:30.545929+00:00",
+        "finished_at_utc": "2026-07-03T17:23:22.765445+00:00",
+        "elapsed_seconds": 52.21950749997632
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99122.5,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "hold",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 3,
+        "net_units": -2,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-15",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-15",
+      "decision_at": "2026-05-15T23:59:59+00:00",
+      "visible_through": "2026-05-15T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:23:22.777476+00:00",
+        "finished_at_utc": "2026-07-03T17:23:59.941994+00:00",
+        "elapsed_seconds": 37.16451280002366
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99265.90000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 5,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-18",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-18",
+      "decision_at": "2026-05-18T23:59:59+00:00",
+      "visible_through": "2026-05-18T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:23:59.961239+00:00",
+        "finished_at_utc": "2026-07-03T17:24:41.019906+00:00",
+        "elapsed_seconds": 41.05865900000208
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99265.1,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 5,
+        "net_units": -5,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-19",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-19",
+      "decision_at": "2026-05-19T23:59:59+00:00",
+      "visible_through": "2026-05-19T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:24:41.031505+00:00",
+        "finished_at_utc": "2026-07-03T17:25:25.759693+00:00",
+        "elapsed_seconds": 44.728182300023036
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99675.1,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-20",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-20",
+      "decision_at": "2026-05-20T23:59:59+00:00",
+      "visible_through": "2026-05-20T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:25:25.774946+00:00",
+        "finished_at_utc": "2026-07-03T17:26:08.876155+00:00",
+        "elapsed_seconds": 43.1012039000052
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99675.1,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 4,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-21",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-21",
+      "decision_at": "2026-05-21T23:59:59+00:00",
+      "visible_through": "2026-05-21T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-03T17:26:08.889361+00:00",
+        "finished_at_utc": "2026-07-03T17:26:53.247218+00:00",
+        "elapsed_seconds": 44.357849299994996
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99670.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-22",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-22",
+      "decision_at": "2026-05-22T23:59:59+00:00",
+      "visible_through": "2026-05-22T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:14:43.027650+00:00",
+        "finished_at_utc": "2026-07-04T02:15:43.176581+00:00",
+        "elapsed_seconds": 60.14892009999994
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99670.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-25",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-25",
+      "decision_at": "2026-05-25T23:59:59+00:00",
+      "visible_through": "2026-05-25T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:15:43.203885+00:00",
+        "finished_at_utc": "2026-07-04T02:16:36.429762+00:00",
+        "elapsed_seconds": 53.2257482
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99670.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 4,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-26",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-26",
+      "decision_at": "2026-05-26T23:59:59+00:00",
+      "visible_through": "2026-05-26T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:16:36.452099+00:00",
+        "finished_at_utc": "2026-07-04T02:17:24.808285+00:00",
+        "elapsed_seconds": 48.356175499999836
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99857.10000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-27",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-27",
+      "decision_at": "2026-05-27T23:59:59+00:00",
+      "visible_through": "2026-05-27T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:17:24.838848+00:00",
+        "finished_at_utc": "2026-07-04T02:18:15.344562+00:00",
+        "elapsed_seconds": 50.50570499999981
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99857.10000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 1,
+        "short_units": 0,
+        "net_units": 1,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-28",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-28",
+      "decision_at": "2026-05-28T23:59:59+00:00",
+      "visible_through": "2026-05-28T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:18:15.366432+00:00",
+        "finished_at_utc": "2026-07-04T02:19:09.443926+00:00",
+        "elapsed_seconds": 54.07748399999991
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99984.30000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 2,
+        "short_units": 0,
+        "net_units": 2,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-05-29",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-05-29",
+      "decision_at": "2026-05-29T23:59:59+00:00",
+      "visible_through": "2026-05-29T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:19:09.470208+00:00",
+        "finished_at_utc": "2026-07-04T02:19:57.814350+00:00",
+        "elapsed_seconds": 48.34413369999993
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 100071.90000000004,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-01",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-01",
+      "decision_at": "2026-06-01T23:59:59+00:00",
+      "visible_through": "2026-06-01T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:19:57.839487+00:00",
+        "finished_at_utc": "2026-07-04T02:20:53.875749+00:00",
+        "elapsed_seconds": 56.03625340000008
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99888.30000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-02",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-02",
+      "decision_at": "2026-06-02T23:59:59+00:00",
+      "visible_through": "2026-06-02T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:20:53.902260+00:00",
+        "finished_at_utc": "2026-07-04T02:21:43.247958+00:00",
+        "elapsed_seconds": 49.345688899999914
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99888.30000000005,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-03",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-03",
+      "decision_at": "2026-06-03T23:59:59+00:00",
+      "visible_through": "2026-06-03T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:21:43.271254+00:00",
+        "finished_at_utc": "2026-07-04T02:22:39.497722+00:00",
+        "elapsed_seconds": 56.226459500000146
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99801.10000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-04",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-04",
+      "decision_at": "2026-06-04T23:59:59+00:00",
+      "visible_through": "2026-06-04T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:22:39.516445+00:00",
+        "finished_at_utc": "2026-07-04T02:23:33.210680+00:00",
+        "elapsed_seconds": 53.694228600000315
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99801.10000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-05",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-05",
+      "decision_at": "2026-06-05T23:59:59+00:00",
+      "visible_through": "2026-06-05T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:23:33.233164+00:00",
+        "finished_at_utc": "2026-07-04T02:24:19.308441+00:00",
+        "elapsed_seconds": 46.07526920000009
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99342.30000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-08",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-08",
+      "decision_at": "2026-06-08T23:59:59+00:00",
+      "visible_through": "2026-06-08T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:24:19.330237+00:00",
+        "finished_at_utc": "2026-07-04T02:25:04.366777+00:00",
+        "elapsed_seconds": 45.03653059999988
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99342.30000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 4,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-09",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-09",
+      "decision_at": "2026-06-09T23:59:59+00:00",
+      "visible_through": "2026-06-09T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:25:04.392481+00:00",
+        "finished_at_utc": "2026-07-04T02:25:56.125726+00:00",
+        "elapsed_seconds": 51.73323789999995
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99949.90000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-10",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-10",
+      "decision_at": "2026-06-10T23:59:59+00:00",
+      "visible_through": "2026-06-10T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:25:56.153113+00:00",
+        "finished_at_utc": "2026-07-04T02:26:50.801841+00:00",
+        "elapsed_seconds": 54.64872050000031
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99949.90000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 4,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-11",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-11",
+      "decision_at": "2026-06-11T23:59:59+00:00",
+      "visible_through": "2026-06-11T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:26:50.827805+00:00",
+        "finished_at_utc": "2026-07-04T02:27:46.402295+00:00",
+        "elapsed_seconds": 55.574480499999936
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99451.50000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-12",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-12",
+      "decision_at": "2026-06-12T23:59:59+00:00",
+      "visible_through": "2026-06-12T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:27:46.449852+00:00",
+        "finished_at_utc": "2026-07-04T02:28:36.234304+00:00",
+        "elapsed_seconds": 49.784441100000095
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99451.50000000003,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-15",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-15",
+      "decision_at": "2026-06-15T23:59:59+00:00",
+      "visible_through": "2026-06-15T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:28:36.265602+00:00",
+        "finished_at_utc": "2026-07-04T02:29:29.203078+00:00",
+        "elapsed_seconds": 52.9374657999997
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99702.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-16",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-16",
+      "decision_at": "2026-06-16T23:59:59+00:00",
+      "visible_through": "2026-06-16T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:29:29.228147+00:00",
+        "finished_at_utc": "2026-07-04T02:30:22.938512+00:00",
+        "elapsed_seconds": 53.71035579999989
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "long",
+      "portfolio_value_after_execution": 99702.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "buy",
+      "position_after_execution": {
+        "long_units": 4,
+        "short_units": 0,
+        "net_units": 4,
+        "position_sign": "long"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-17",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-17",
+      "decision_at": "2026-06-17T23:59:59+00:00",
+      "visible_through": "2026-06-17T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:30:22.967261+00:00",
+        "finished_at_utc": "2026-07-04T02:31:28.166832+00:00",
+        "elapsed_seconds": 65.19955770000024
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99653.50000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "sell",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-18",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-18",
+      "decision_at": "2026-06-18T23:59:59+00:00",
+      "visible_through": "2026-06-18T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:31:28.199835+00:00",
+        "finished_at_utc": "2026-07-04T02:32:19.937509+00:00",
+        "elapsed_seconds": 51.73766420000038
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99653.50000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 4,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-19",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-19",
+      "decision_at": "2026-06-19T23:59:59+00:00",
+      "visible_through": "2026-06-19T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:32:19.962531+00:00",
+        "finished_at_utc": "2026-07-04T02:33:10.969211+00:00",
+        "elapsed_seconds": 51.00666649999994
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99680.70000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-22",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-22",
+      "decision_at": "2026-06-22T23:59:59+00:00",
+      "visible_through": "2026-06-22T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:33:11.007873+00:00",
+        "finished_at_utc": "2026-07-04T02:34:01.861209+00:00",
+        "elapsed_seconds": 50.85332430000017
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99680.70000000001,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 4,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-23",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-23",
+      "decision_at": "2026-06-23T23:59:59+00:00",
+      "visible_through": "2026-06-23T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:34:01.885856+00:00",
+        "finished_at_utc": "2026-07-04T02:34:53.705149+00:00",
+        "elapsed_seconds": 51.81928519999974
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100006.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-24",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-24",
+      "decision_at": "2026-06-24T23:59:59+00:00",
+      "visible_through": "2026-06-24T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:34:53.725442+00:00",
+        "finished_at_utc": "2026-07-04T02:35:40.958696+00:00",
+        "elapsed_seconds": 47.233246300000246
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 100006.30000000002,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 4,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-25",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-25",
+      "decision_at": "2026-06-25T23:59:59+00:00",
+      "visible_through": "2026-06-25T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:35:40.984982+00:00",
+        "finished_at_utc": "2026-07-04T02:36:32.535962+00:00",
+        "elapsed_seconds": 51.550971200000276
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 99973.1,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-26",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-26",
+      "decision_at": "2026-06-26T23:59:59+00:00",
+      "visible_through": "2026-06-26T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:36:32.567262+00:00",
+        "finished_at_utc": "2026-07-04T02:37:35.414245+00:00",
+        "elapsed_seconds": 62.84697509999978
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "short",
+      "portfolio_value_after_execution": 99973.1,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 4,
+        "net_units": -4,
+        "position_sign": "short"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-29",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-29",
+      "decision_at": "2026-06-29T23:59:59+00:00",
+      "visible_through": "2026-06-29T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:37:35.435250+00:00",
+        "finished_at_utc": "2026-07-04T02:38:22.898635+00:00",
+        "elapsed_seconds": 47.46337700000004
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "filled",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": 100447.5,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "cover",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    },
+    {
+      "decision_id": "ai-hedge-fund|GCUSD|2026-06-30",
+      "baseline_id": "ai-hedge-fund",
+      "market_symbol": "GCUSD",
+      "trade_date": "2026-06-30",
+      "decision_at": "2026-06-30T23:59:59+00:00",
+      "visible_through": "2026-06-30T23:59:59+00:00",
+      "timing": {
+        "started_at_utc": "2026-07-04T02:38:22.918180+00:00",
+        "finished_at_utc": "2026-07-04T02:39:12.486765+00:00",
+        "elapsed_seconds": 49.568576699999994
+      },
+      "model_name": "MiniMax-M2.1",
+      "model_provider": "Anthropic",
+      "llm_usage": {
+        "llm_calls": 6,
+        "tokens_in": 0,
+        "tokens_out": 0,
+        "tokens_total": 0,
+        "usage_observed": false,
+        "calls_missing_usage": 6,
+        "per_agent_calls": {
+          "news_sentiment_agent": 5,
+          "portfolio_manager": 1
+        },
+        "estimated_cost_usd": null,
+        "cost_note": "usage metadata missing or price flags not provided"
+      },
+      "status": "unfilled_no_next_bar",
+      "normalized_position": "flat",
+      "portfolio_value_after_execution": null,
+      "action_semantics": "native_execution_instruction",
+      "native_action": "short",
+      "position_after_execution": {
+        "long_units": 0,
+        "short_units": 0,
+        "net_units": 0,
+        "position_sign": "flat"
+      },
+      "decision": {}
+    }
+  ],
+  "sanitization": "Inputs, raw output, reasoning, news content, portfolio details and workstation paths removed. Historical evaluators may require excluded original artifacts."
+}

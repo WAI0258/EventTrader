@@ -1,0 +1,3 @@
+metric,record_id,reason
+analysis runtime and successful tokens,event-trader-analysis-gold-3f8db2ee939e27abf4ef3162,upstream_llm_fault
+evidence-to-emission delay,unit-e4f31303a30662095d3d13aa,replay_watermark_gap

@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the accompanying Event-Trader manuscript."
+title: "Event-Trader: An Event-Driven LLM Research Runtime for Asynchronous Financial Evidence"
+authors:
+  - family-names: Cai
+    given-names: Jia Wei
+type: software
+license: Apache-2.0
+abstract: "Research source and saved-result evaluation artifact for an event-driven LLM research runtime, evaluated in a gold-trading application."
+repository-code: "https://github.com/WAI0258/EventTrader"

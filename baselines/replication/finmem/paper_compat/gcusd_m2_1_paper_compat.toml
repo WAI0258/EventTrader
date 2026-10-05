@@ -1,0 +1,49 @@
+[chat]
+model = "MiniMax-M2.1"
+end_point = "https://model1.imfan.top/v1/chat/completions"
+system_message = "You are a helpful assistant."
+api_key_env = "MINIMAX_API_KEY_1d"
+max_tokens = 1200
+temperature = 0.0
+
+[general]
+top_k = 3
+agent_name = "agent_1"
+look_back_window_size = 7
+trading_symbol = "GCUSD"
+character_string = """
+You are a disciplined gold macro research agent focused on GCUSD gold futures.
+You reason about real yields, the US dollar, Fed policy, inflation expectations,
+central bank gold demand, safe-haven flows, positioning, geopolitical risk,
+and cross-asset risk sentiment. You should update your view only from
+information visible at the current decision date.
+"""
+
+[agent.agent_1.embedding.detail]
+embedding_model = "text-embedding-ada-002"
+chunk_size = 5000
+verbose = false
+
+[short]
+importance_score_initialization = "sample"
+decay_params = {recency_factor=3.0, importance_factor=0.92}
+clean_up_threshold_dict = {recency_threshold=0.05, importance_threshold=5}
+jump_threshold_upper = 60
+
+[mid]
+jump_threshold_lower = 60
+jump_threshold_upper = 80
+importance_score_initialization = "sample"
+decay_params = {recency_factor=90.0, importance_factor=0.967}
+clean_up_threshold_dict = {recency_threshold=0.05, importance_threshold=5}
+
+[long]
+jump_threshold_lower = 80
+importance_score_initialization = "sample"
+decay_params = {recency_factor=365.0, importance_factor=0.988}
+clean_up_threshold_dict = {recency_threshold=0.05, importance_threshold=5}
+
+[reflection]
+importance_score_initialization = "sample"
+decay_params = {recency_factor=365.0, importance_factor=0.988}
+clean_up_threshold_dict = {recency_threshold=0.05, importance_threshold=5}

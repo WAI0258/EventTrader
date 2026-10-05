@@ -1,0 +1,1542 @@
+[
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-01",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-01\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-01\\audit.json",
+    "execution_day": "2026-01-02"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-02",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-02\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-02\\audit.json",
+    "execution_day": "2026-01-04"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-04",
+    "pm_rating": "Hold",
+    "trader_action": "Buy",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-04\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-04\\audit.json",
+    "execution_day": "2026-01-05"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-05",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-05\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-05\\audit.json",
+    "execution_day": "2026-01-06"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-06",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-06\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-06\\audit.json",
+    "execution_day": "2026-01-07"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-07",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-07\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-07\\audit.json",
+    "execution_day": "2026-01-08"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-08",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-08\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-08\\audit.json",
+    "execution_day": "2026-01-09"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-09",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-09\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-09\\audit.json",
+    "execution_day": "2026-01-11"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-11",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-11\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-11\\audit.json",
+    "execution_day": "2026-01-12"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-12",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-12\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-12\\audit.json",
+    "execution_day": "2026-01-13"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-13",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-13\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-13\\audit.json",
+    "execution_day": "2026-01-14"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-14",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-14\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-14\\audit.json",
+    "execution_day": "2026-01-15"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-15",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-15\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-15\\audit.json",
+    "execution_day": "2026-01-16"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-16",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-16\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-16\\audit.json",
+    "execution_day": "2026-01-18"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-18",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-18\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-18\\audit.json",
+    "execution_day": "2026-01-19"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-19",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-19\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-19\\audit.json",
+    "execution_day": "2026-01-20"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-20",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-20\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-20\\audit.json",
+    "execution_day": "2026-01-21"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-21",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-21\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-21\\audit.json",
+    "execution_day": "2026-01-22"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-22",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-22\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-22\\audit.json",
+    "execution_day": "2026-01-23"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-23",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-23\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-23\\audit.json",
+    "execution_day": "2026-01-25"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-25",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-25\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 0.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-25\\audit.json",
+    "execution_day": "2026-01-26"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-26",
+    "pm_rating": "Underweight",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-26\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-26\\audit.json",
+    "execution_day": "2026-01-27"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-27",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-27\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-27\\audit.json",
+    "execution_day": "2026-01-28"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-28",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-28\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-28\\audit.json",
+    "execution_day": "2026-01-29"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-29",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-29\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-29\\audit.json",
+    "execution_day": "2026-01-30"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-01-30",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-30\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-01-30\\audit.json",
+    "execution_day": "2026-02-01"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-01",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-01\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-01\\audit.json",
+    "execution_day": "2026-02-02"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-02",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-02\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-02\\audit.json",
+    "execution_day": "2026-02-03"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-03",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-03\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-03\\audit.json",
+    "execution_day": "2026-02-04"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-04",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-04\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-04\\audit.json",
+    "execution_day": "2026-02-05"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-05",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-05\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-05\\audit.json",
+    "execution_day": "2026-02-06"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-06",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-06\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-06\\audit.json",
+    "execution_day": "2026-02-08"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-08",
+    "pm_rating": "Underweight",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-08\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-08\\audit.json",
+    "execution_day": "2026-02-09"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-09",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-09\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-09\\audit.json",
+    "execution_day": "2026-02-10"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-10",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-10\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-10\\audit.json",
+    "execution_day": "2026-02-11"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-11",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-11\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-11\\audit.json",
+    "execution_day": "2026-02-12"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-12",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-12\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-12\\audit.json",
+    "execution_day": "2026-02-13"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-13",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-13\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-13\\audit.json",
+    "execution_day": "2026-02-15"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-15",
+    "pm_rating": "Overweight",
+    "trader_action": "Buy",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-15\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-15\\audit.json",
+    "execution_day": "2026-02-16"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-16",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-16\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-16\\audit.json",
+    "execution_day": "2026-02-17"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-17",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-17\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-17\\audit.json",
+    "execution_day": "2026-02-18"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-18",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-18\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-18\\audit.json",
+    "execution_day": "2026-02-19"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-19",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-19\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-19\\audit.json",
+    "execution_day": "2026-02-20"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-20",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-20\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-20\\audit.json",
+    "execution_day": "2026-02-22"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-22",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-22\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-22\\audit.json",
+    "execution_day": "2026-02-23"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-23",
+    "pm_rating": "Hold",
+    "trader_action": "Buy",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-23\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-23\\audit.json",
+    "execution_day": "2026-02-24"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-24",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-24\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-24\\audit.json",
+    "execution_day": "2026-02-25"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-25",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-25\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-25\\audit.json",
+    "execution_day": "2026-02-26"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-26",
+    "pm_rating": "Overweight",
+    "trader_action": "Buy",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-26\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-26\\audit.json",
+    "execution_day": "2026-02-27"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-02-27",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-27\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-02-27\\audit.json",
+    "execution_day": "2026-03-01"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-01",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-01\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-01\\audit.json",
+    "execution_day": "2026-03-02"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-02",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-02\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-02\\audit.json",
+    "execution_day": "2026-03-03"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-03",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-03\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-03\\audit.json",
+    "execution_day": "2026-03-04"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-04",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-04\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-04\\audit.json",
+    "execution_day": "2026-03-05"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-05",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-05\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-05\\audit.json",
+    "execution_day": "2026-03-06"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-06",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-06\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-06\\audit.json",
+    "execution_day": "2026-03-08"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-08",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-08\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-08\\audit.json",
+    "execution_day": "2026-03-09"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-09",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-09\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-09\\audit.json",
+    "execution_day": "2026-03-10"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-10",
+    "pm_rating": "Underweight",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-10\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-10\\audit.json",
+    "execution_day": "2026-03-11"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-11",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-11\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-11\\audit.json",
+    "execution_day": "2026-03-12"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-12",
+    "pm_rating": "Underweight",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-12\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-12\\audit.json",
+    "execution_day": "2026-03-13"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-13",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-13\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-13\\audit.json",
+    "execution_day": "2026-03-15"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-15",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-15\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-15\\audit.json",
+    "execution_day": "2026-03-16"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-16",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-16\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-16\\audit.json",
+    "execution_day": "2026-03-17"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-17",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-17\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-17\\audit.json",
+    "execution_day": "2026-03-18"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-18",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-18\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-18\\audit.json",
+    "execution_day": "2026-03-19"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-19",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-19\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-19\\audit.json",
+    "execution_day": "2026-03-20"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-20",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-20\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-20\\audit.json",
+    "execution_day": "2026-03-22"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-22",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-22\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-22\\audit.json",
+    "execution_day": "2026-03-23"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-23",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-23\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-23\\audit.json",
+    "execution_day": "2026-03-24"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-24",
+    "pm_rating": "Sell",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-24\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-24\\audit.json",
+    "execution_day": "2026-03-25"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-25",
+    "pm_rating": "Underweight",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-25\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-25\\audit.json",
+    "execution_day": "2026-03-26"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-26",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-26\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-26\\audit.json",
+    "execution_day": "2026-03-27"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-27",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-27\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-27\\audit.json",
+    "execution_day": "2026-03-29"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-29",
+    "pm_rating": "Underweight",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-29\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-29\\audit.json",
+    "execution_day": "2026-03-30"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-30",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-30\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-30\\audit.json",
+    "execution_day": "2026-03-31"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-03-31",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-31\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-03-31\\audit.json",
+    "execution_day": "2026-04-01"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-01",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-01\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-01\\audit.json",
+    "execution_day": "2026-04-02"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-02",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-02\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-02\\audit.json",
+    "execution_day": "2026-04-05"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-05",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-05\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-05\\audit.json",
+    "execution_day": "2026-04-06"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-06",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-06\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-06\\audit.json",
+    "execution_day": "2026-04-07"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-07",
+    "pm_rating": "Buy",
+    "trader_action": "Buy",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-07\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-07\\audit.json",
+    "execution_day": "2026-04-08"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-08",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-08\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-08\\audit.json",
+    "execution_day": "2026-04-09"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-09",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-09\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-09\\audit.json",
+    "execution_day": "2026-04-10"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-10",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-10\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-10\\audit.json",
+    "execution_day": "2026-04-12"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-12",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-12\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-12\\audit.json",
+    "execution_day": "2026-04-13"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-13",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-13\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-13\\audit.json",
+    "execution_day": "2026-04-14"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-14",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-14\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-14\\audit.json",
+    "execution_day": "2026-04-15"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-15",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-15\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-15\\audit.json",
+    "execution_day": "2026-04-16"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-16",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-16\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-16\\audit.json",
+    "execution_day": "2026-04-17"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-17",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-17\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-17\\audit.json",
+    "execution_day": "2026-04-19"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-19",
+    "pm_rating": "Underweight",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-19\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-19\\audit.json",
+    "execution_day": "2026-04-20"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-20",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-20\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-20\\audit.json",
+    "execution_day": "2026-04-21"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-21",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-21\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-21\\audit.json",
+    "execution_day": "2026-04-22"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-22",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-22\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-22\\audit.json",
+    "execution_day": "2026-04-23"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-23",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-23\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-23\\audit.json",
+    "execution_day": "2026-04-24"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-24",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-24\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-24\\audit.json",
+    "execution_day": "2026-04-26"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-26",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-26\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-26\\audit.json",
+    "execution_day": "2026-04-27"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-27",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-27\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-27\\audit.json",
+    "execution_day": "2026-04-28"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-28",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-28\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-28\\audit.json",
+    "execution_day": "2026-04-29"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-29",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-29\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-29\\audit.json",
+    "execution_day": "2026-04-30"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-04-30",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-30\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-04-30\\audit.json",
+    "execution_day": "2026-05-01"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-01",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-01\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-01\\audit.json",
+    "execution_day": "2026-05-03"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-03",
+    "pm_rating": "Underweight",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-03\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-03\\audit.json",
+    "execution_day": "2026-05-04"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-04",
+    "pm_rating": "Underweight",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-04\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-04\\audit.json",
+    "execution_day": "2026-05-05"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-05",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-05\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-05\\audit.json",
+    "execution_day": "2026-05-06"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-06",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-06\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-06\\audit.json",
+    "execution_day": "2026-05-07"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-07",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-07\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-07\\audit.json",
+    "execution_day": "2026-05-08"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-08",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-08\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-08\\audit.json",
+    "execution_day": "2026-05-10"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-10",
+    "pm_rating": "Overweight",
+    "trader_action": "Buy",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-10\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-10\\audit.json",
+    "execution_day": "2026-05-11"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-11",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-11\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-11\\audit.json",
+    "execution_day": "2026-05-12"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-12",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-12\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-12\\audit.json",
+    "execution_day": "2026-05-13"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-13",
+    "pm_rating": "Overweight",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-13\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-13\\audit.json",
+    "execution_day": "2026-05-14"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-14",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-14\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-14\\audit.json",
+    "execution_day": "2026-05-15"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-15",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-15\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-15\\audit.json",
+    "execution_day": "2026-05-17"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-17",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-17\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-17\\audit.json",
+    "execution_day": "2026-05-18"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-18",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-18\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-18\\audit.json",
+    "execution_day": "2026-05-19"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-19",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-19\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-19\\audit.json",
+    "execution_day": "2026-05-20"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-20",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-20\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-20\\audit.json",
+    "execution_day": "2026-05-21"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-21",
+    "pm_rating": "Underweight",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-21\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-21\\audit.json",
+    "execution_day": "2026-05-22"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-22",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-22\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-22\\audit.json",
+    "execution_day": "2026-05-24"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-24",
+    "pm_rating": "Sell",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-24\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-24\\audit.json",
+    "execution_day": "2026-05-25"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-25",
+    "pm_rating": "Hold",
+    "trader_action": "Unavailable",
+    "trader_action_source": "missing_or_unparseable",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-25\\audit.json",
+    "execution_day": "2026-05-26"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-26",
+    "pm_rating": "Overweight",
+    "trader_action": "Buy",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-26\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-26\\audit.json",
+    "execution_day": "2026-05-27"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-27",
+    "pm_rating": "Overweight",
+    "trader_action": "Buy",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-27\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-27\\audit.json",
+    "execution_day": "2026-05-28"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-28",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-28\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-28\\audit.json",
+    "execution_day": "2026-05-29"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-29",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-29\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-29\\audit.json",
+    "execution_day": "2026-05-31"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-05-31",
+    "pm_rating": "Underweight",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-31\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-05-31\\audit.json",
+    "execution_day": "2026-06-01"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-01",
+    "pm_rating": "Underweight",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-01\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-01\\audit.json",
+    "execution_day": "2026-06-02"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-02",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-02\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-02\\audit.json",
+    "execution_day": "2026-06-03"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-03",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-03\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-03\\audit.json",
+    "execution_day": "2026-06-04"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-04",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-04\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-04\\audit.json",
+    "execution_day": "2026-06-05"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-05",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-05\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-05\\audit.json",
+    "execution_day": "2026-06-07"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-07",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-07\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-07\\audit.json",
+    "execution_day": "2026-06-08"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-08",
+    "pm_rating": "Underweight",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-08\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-08\\audit.json",
+    "execution_day": "2026-06-09"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-09",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-09\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-09\\audit.json",
+    "execution_day": "2026-06-10"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-10",
+    "pm_rating": "Sell",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-10\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-10\\audit.json",
+    "execution_day": "2026-06-11"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-11",
+    "pm_rating": "Underweight",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-11\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-11\\audit.json",
+    "execution_day": "2026-06-12"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-12",
+    "pm_rating": "Sell",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-12\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-12\\audit.json",
+    "execution_day": "2026-06-14"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-14",
+    "pm_rating": "Hold",
+    "trader_action": "Unavailable",
+    "trader_action_source": "missing_or_unparseable",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-14\\audit.json",
+    "execution_day": "2026-06-15"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-15",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-15\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-15\\audit.json",
+    "execution_day": "2026-06-16"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-16",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-16\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-16\\audit.json",
+    "execution_day": "2026-06-17"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-17",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-17\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-17\\audit.json",
+    "execution_day": "2026-06-18"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-18",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-18\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-18\\audit.json",
+    "execution_day": "2026-06-19"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-19",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-19\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-19\\audit.json",
+    "execution_day": "2026-06-21"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-21",
+    "pm_rating": "Hold",
+    "trader_action": "Unavailable",
+    "trader_action_source": "missing_or_unparseable",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-21\\audit.json",
+    "execution_day": "2026-06-22"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-22",
+    "pm_rating": "Underweight",
+    "trader_action": "Sell",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-22\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": -1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-22\\audit.json",
+    "execution_day": "2026-06-23"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-23",
+    "pm_rating": "Overweight",
+    "trader_action": "Buy",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-23\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-23\\audit.json",
+    "execution_day": "2026-06-24"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-24",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-24\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-24\\audit.json",
+    "execution_day": "2026-06-25"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-25",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-25\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-25\\audit.json",
+    "execution_day": "2026-06-26"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-26",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-26\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-26\\audit.json",
+    "execution_day": "2026-06-28"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-28",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-28\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-28\\audit.json",
+    "execution_day": "2026-06-29"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-29",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-29\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-29\\audit.json",
+    "execution_day": "2026-06-30"
+  },
+  {
+    "baseline": "tradingagents",
+    "trade_date": "2026-06-30",
+    "pm_rating": "Hold",
+    "trader_action": "Hold",
+    "trader_action_source": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-30\\reports\\3_trading\\trader.md",
+    "target_exposure_after_decision": 1.0,
+    "source_path": "baselines\\experiments\\tradingagents_gcusd_full_20260101_20260630_processed_news\\2026-06-30\\audit.json",
+    "execution_day": null
+  }
+]

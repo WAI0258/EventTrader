@@ -1,0 +1,78 @@
+{
+  "source_revision": "a8c8f855088c7be332e40c264e5839ac59a476bf",
+  "source_selection": "Last mainline commit before 2026-07-23; candidate paper-era source, NOT proven exact execution revision",
+  "vendor_revision": "25bd91be4338180fdfd23b16a57b21f69533b836",
+  "baseline_upstreams": [
+    {
+      "directory": "tradingagents",
+      "revision": "85946c2f60768ab2dae23a5a36cd927662feef94",
+      "source_included": false,
+      "local_changes_present": true,
+      "overlay_files": [
+        "scripts/run_gcusd_baseline_smoke.py",
+        "tradingagents/agents/utils/agent_utils.py",
+        "tradingagents/dataflows/gcusd_local.py",
+        "tradingagents/dataflows/interface.py",
+        "tradingagents/dataflows/stockstats_utils.py",
+        "tradingagents/graph/trading_graph.py",
+        "tradingagents/llm_clients/model_catalog.py"
+      ],
+      "overlay_selection": "Current tracked modifications and untracked Python helpers outside test/runtime/output directories; exact experiment provenance unverified.",
+      "upstream_url": "https://github.com/TauricResearch/TradingAgents.git",
+      "untracked_helper_files": [
+        "scripts/run_gcusd_baseline_smoke.py",
+        "tradingagents/dataflows/gcusd_local.py"
+      ]
+    },
+    {
+      "directory": "FinMem-LLM-StockTrading",
+      "revision": "be814aa47970de9bf2fdd6a1d5a60ae5cf361b46",
+      "source_included": false,
+      "local_changes_present": false,
+      "overlay_files": [],
+      "overlay_selection": "Current tracked modifications and untracked Python helpers outside test/runtime/output directories; exact experiment provenance unverified.",
+      "upstream_url": "https://github.com/pipiku915/FinMem-LLM-StockTrading.git",
+      "untracked_helper_files": []
+    },
+    {
+      "directory": "ai-hedge-fund",
+      "revision": "65a0349ccc114ea936aa08c3a5f1c2b05faa1337",
+      "source_included": false,
+      "local_changes_present": true,
+      "overlay_files": [
+        "scripts/run_gcusd_baseline_smoke.py",
+        "src/agents/news_sentiment.py",
+        "src/backtesting/cli.py",
+        "src/backtesting/controller.py",
+        "src/backtesting/engine.py",
+        "src/backtesting/portfolio.py",
+        "src/backtesting/types.py",
+        "src/data/gcusd_local.py",
+        "src/llm/api_models.json",
+        "src/llm/models.py",
+        "src/main.py",
+        "src/tools/api.py",
+        "src/utils/llm.py",
+        "tests/backtesting/test_controller.py",
+        "tests/backtesting/test_portfolio.py"
+      ],
+      "overlay_selection": "Current tracked modifications and untracked Python helpers outside test/runtime/output directories; exact experiment provenance unverified.",
+      "upstream_url": "https://github.com/virattt/ai-hedge-fund.git",
+      "untracked_helper_files": [
+        "scripts/run_gcusd_baseline_smoke.py",
+        "src/data/gcusd_local.py"
+      ]
+    }
+  ],
+  "finmem_paper_compat": {
+    "vendor_commit_from_experiment_receipt": "be814aa47970de9bf2fdd6a1d5a60ae5cf361b46",
+    "config": "baselines/replication/finmem/paper_compat/gcusd_m2_1_paper_compat.toml",
+    "config_sha256": "5a380042e642112f1680876d0d53bbc1b7975433e8c94be41dba44ac40f50fa2",
+    "config_size_matches_recorded_manifest": true,
+    "config_mtime_matches_recorded_manifest": true,
+    "note": "Matching size/mtime and vendor receipt corroborate this configuration; they are not a historical content-hash receipt for all adapter files.",
+    "source_manifest_sha256": "14e3e5b0ff578f5be4f1290bd6d132537d89e9b844b1cc1edcd7acf2ce9a9ed5",
+    "source_receipt_sha256": "75e92da3fa5620629ece066d0f88fcd0e922fd18b274718c42555e3a85bbfe9e"
+  },
+  "vendor_scope": "Runtime source and configuration only; upstream benchmark suite and evaluation launchers excluded."
+}

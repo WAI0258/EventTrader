@@ -1,0 +1,240 @@
+[
+  {
+    "baseline": "ai_hedge_fund",
+    "action_family": "native_action",
+    "action_value": "buy",
+    "count": 43,
+    "ratio": 0.3333333333333333
+  },
+  {
+    "baseline": "ai_hedge_fund",
+    "action_family": "native_action",
+    "action_value": "sell",
+    "count": 32,
+    "ratio": 0.24806201550387597
+  },
+  {
+    "baseline": "ai_hedge_fund",
+    "action_family": "native_action",
+    "action_value": "short",
+    "count": 27,
+    "ratio": 0.20930232558139536
+  },
+  {
+    "baseline": "ai_hedge_fund",
+    "action_family": "native_action",
+    "action_value": "cover",
+    "count": 19,
+    "ratio": 0.14728682170542637
+  },
+  {
+    "baseline": "ai_hedge_fund",
+    "action_family": "native_action",
+    "action_value": "hold",
+    "count": 8,
+    "ratio": 0.06201550387596899
+  },
+  {
+    "baseline": "ai_hedge_fund",
+    "action_family": "native_state",
+    "action_value": "long",
+    "count": 51,
+    "ratio": 0.3953488372093023
+  },
+  {
+    "baseline": "ai_hedge_fund",
+    "action_family": "native_state",
+    "action_value": "flat",
+    "count": 48,
+    "ratio": 0.37209302325581395
+  },
+  {
+    "baseline": "ai_hedge_fund",
+    "action_family": "native_state",
+    "action_value": "short",
+    "count": 30,
+    "ratio": 0.23255813953488372
+  },
+  {
+    "baseline": "finmem",
+    "action_family": "native_action",
+    "action_value": "hold",
+    "count": 60,
+    "ratio": 0.38961038961038963
+  },
+  {
+    "baseline": "finmem",
+    "action_family": "native_action",
+    "action_value": "buy",
+    "count": 56,
+    "ratio": 0.36363636363636365
+  },
+  {
+    "baseline": "finmem",
+    "action_family": "native_action",
+    "action_value": "None",
+    "count": 23,
+    "ratio": 0.14935064935064934
+  },
+  {
+    "baseline": "finmem",
+    "action_family": "native_action",
+    "action_value": "sell",
+    "count": 15,
+    "ratio": 0.09740259740259741
+  },
+  {
+    "baseline": "tradingagents",
+    "action_family": "pm_rating",
+    "action_value": "Hold",
+    "count": 127,
+    "ratio": 0.8246753246753247
+  },
+  {
+    "baseline": "tradingagents",
+    "action_family": "pm_rating",
+    "action_value": "Underweight",
+    "count": 15,
+    "ratio": 0.09740259740259741
+  },
+  {
+    "baseline": "tradingagents",
+    "action_family": "pm_rating",
+    "action_value": "Overweight",
+    "count": 7,
+    "ratio": 0.045454545454545456
+  },
+  {
+    "baseline": "tradingagents",
+    "action_family": "pm_rating",
+    "action_value": "Sell",
+    "count": 4,
+    "ratio": 0.025974025974025976
+  },
+  {
+    "baseline": "tradingagents",
+    "action_family": "pm_rating",
+    "action_value": "Buy",
+    "count": 1,
+    "ratio": 0.006493506493506494
+  },
+  {
+    "baseline": "tradingagents",
+    "action_family": "trader_action",
+    "action_value": "Hold",
+    "count": 126,
+    "ratio": 0.8181818181818182
+  },
+  {
+    "baseline": "tradingagents",
+    "action_family": "trader_action",
+    "action_value": "Sell",
+    "count": 16,
+    "ratio": 0.1038961038961039
+  },
+  {
+    "baseline": "tradingagents",
+    "action_family": "trader_action",
+    "action_value": "Buy",
+    "count": 9,
+    "ratio": 0.05844155844155844
+  },
+  {
+    "baseline": "tradingagents",
+    "action_family": "trader_action",
+    "action_value": "Unavailable",
+    "count": 3,
+    "ratio": 0.01948051948051948
+  },
+  {
+    "baseline": "buy_and_hold",
+    "action_family": "rule_target",
+    "action_value": "long",
+    "count": 1,
+    "ratio": 1.0
+  },
+  {
+    "baseline": "tsmom_20d",
+    "action_family": "rule_target",
+    "action_value": "short",
+    "count": 85,
+    "ratio": 0.551948051948052
+  },
+  {
+    "baseline": "tsmom_20d",
+    "action_family": "rule_target",
+    "action_value": "long",
+    "count": 69,
+    "ratio": 0.44805194805194803
+  },
+  {
+    "baseline": "ma_10ema_50sma",
+    "action_family": "rule_target",
+    "action_value": "short",
+    "count": 87,
+    "ratio": 0.564935064935065
+  },
+  {
+    "baseline": "ma_10ema_50sma",
+    "action_family": "rule_target",
+    "action_value": "long",
+    "count": 67,
+    "ratio": 0.43506493506493504
+  },
+  {
+    "baseline": "rsi_14",
+    "action_family": "rule_target",
+    "action_value": "long",
+    "count": 88,
+    "ratio": 0.5714285714285714
+  },
+  {
+    "baseline": "rsi_14",
+    "action_family": "rule_target",
+    "action_value": "short",
+    "count": 51,
+    "ratio": 0.33116883116883117
+  },
+  {
+    "baseline": "rsi_14",
+    "action_family": "rule_target",
+    "action_value": "flat",
+    "count": 15,
+    "ratio": 0.09740259740259741
+  },
+  {
+    "baseline": "macd_12_26_9",
+    "action_family": "rule_target",
+    "action_value": "short",
+    "count": 90,
+    "ratio": 0.5844155844155844
+  },
+  {
+    "baseline": "macd_12_26_9",
+    "action_family": "rule_target",
+    "action_value": "long",
+    "count": 64,
+    "ratio": 0.4155844155844156
+  },
+  {
+    "baseline": "bollinger_20_2",
+    "action_family": "rule_target",
+    "action_value": "flat",
+    "count": 98,
+    "ratio": 0.6363636363636364
+  },
+  {
+    "baseline": "bollinger_20_2",
+    "action_family": "rule_target",
+    "action_value": "long",
+    "count": 42,
+    "ratio": 0.2727272727272727
+  },
+  {
+    "baseline": "bollinger_20_2",
+    "action_family": "rule_target",
+    "action_value": "short",
+    "count": 14,
+    "ratio": 0.09090909090909091
+  }
+]

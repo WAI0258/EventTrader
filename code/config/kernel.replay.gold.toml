@@ -1,0 +1,272 @@
+# Replay config for the full-window gold experiment.
+#
+# Experiment identity:
+# - Conceptual target: gold
+# - Canonical market feed: GCUSD
+# - Reported window: 2026-01-01 through 2026-06-30
+# - Primary bar granularity: 5min
+#
+# Price data is expected to be prepared separately under data/local_archives/gcusd.
+# The reported evidence/replay window is 2026H1, while the GCUSD market-data
+# archive intentionally spans 2025-06-30 through 2026-06-30 so Jan-2026
+# decisions have price warmup for returns, technicals, and market path.
+# Historical web-search evidence has already been archived in this workspace;
+# replay_build.include_web_search below reads that archive and does not run
+# another web-search backfill.
+
+workspace_root = ".local/replay-gold-20260101_20260630-workspace"
+mode = "replay"
+heartbeat_interval_seconds = 0.05
+reflection_interval_hours = 24
+reflection_lookback_hours = 168
+reflection_horizons_hours = [24, 72, 168]
+
+[execution]
+mode = "paper"
+price_basis = "open"
+buy_cost_bps = 0.0
+sell_cost_bps = 0.0
+missing_bar_policy = "reject"
+max_next_bar_wait_hours = 24
+
+[execution.target_cost_overrides.gold]
+buy_cost_bps = 0.0
+sell_cost_bps = 0.0
+
+[pm_review_runtime]
+auto_dispatch_after_analysis = true
+execute_pm_decisions = true
+require_workspace_ready = true
+position_review_gate_enabled = true
+position_review_cooldown_minutes = 60
+position_review_rearm_buffer_bps = 25.0
+
+[runtime_workers]
+checker_concurrency = 1
+analysis_concurrency = 1
+pm_review_concurrency = 1
+
+[analysis_agent]
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/gold-gcusd-20260101_20260630-run/logs/mirothinker/analysis"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.1"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+wall_clock_timeout_seconds = 1200
+
+[checker_agent]
+log_dir = ".local/gold-gcusd-20260101_20260630-run/logs/checker"
+llm_provider = "openai"
+llm_model_name = "MiniMax-M2.1"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/v1"
+evidence_excerpt_chars = 4000
+section_excerpt_chars = 2000
+recent_timeline_items = 10
+max_pack_chars = 16000
+force_escalate_on_insufficient_coverage = true
+
+[pm_review_agent]
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/gold-gcusd-20260101_20260630-run/logs/mirothinker/pm_review"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.1"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+wall_clock_timeout_seconds = 1200
+
+[reflection_agent]
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/gold-gcusd-20260101_20260630-run/logs/mirothinker/reflection"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.1"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+
+[validation.market_data]
+provider = "futu_openapi"
+base_url = "tcp://127.0.0.1:11111"
+timeout_seconds = 10.0
+local_archive_root = "data/local_archives/gcusd"
+
+[validation.market_mappings.gold]
+market_symbol = "GCUSD"
+market_session = "exchange_session"
+exchange = "FMP"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+execution_direction_mode = "long_short"
+
+[stream_routing]
+enabled = true
+policy_version = "gold_gcusd_5min_ceau_candidate_v0"
+policy_status = "candidate"
+target_key = "gold"
+bar_granularity = "5min"
+processing_time_safety_emit_enabled = false
+
+[stream_routing.default_unit_policy]
+route_default = "no_action"
+
+[stream_routing.lane_policies.operator_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.risk_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.news_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.context_window]
+route_default = "accumulate"
+candidate_default_route = "accumulate"
+max_delay_bars = 6
+max_unit_chars = 12000
+unit_scope = "context_window"
+completeness_requirements = [
+  { purpose = "evidence_maturity", domain = "market_bars", required_for = ["market_reaction_mature"] },
+]
+
+[stream_routing.lane_policies.episode_append]
+route_default = "accumulate"
+candidate_default_route = "accumulate"
+max_delay_bars = 6
+max_unit_chars = 12000
+unit_scope = "context_window"
+
+[market_context]
+enabled = true
+max_prompt_chars = 6000
+
+[market_context.target_profiles.gold]
+tradable_proxy_symbol = "GCUSD"
+bar_granularity = "5min"
+enabled_components = ["price_volume", "technical", "macro_cross_asset"]
+
+[[market_context.target_profiles.gold.market_data_subscriptions]]
+symbol = "GCUSD"
+provider = "local_archive"
+purpose = "primary_gold_feed"
+market_session = "exchange_session"
+exchange = "FMP"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[market_context.target_profiles.gold.market_data_subscriptions]]
+symbol = "UUP"
+provider = "futu_openapi"
+purpose = "usd_proxy"
+market_session = "exchange_session"
+exchange = "NYSE"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[market_context.target_profiles.gold.market_data_subscriptions]]
+symbol = "TLT"
+provider = "futu_openapi"
+purpose = "rates_duration_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[market_context.target_profiles.gold.market_data_subscriptions]]
+symbol = "IEF"
+provider = "futu_openapi"
+purpose = "rates_duration_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[market_context.target_profiles.gold.market_data_subscriptions]]
+symbol = "SPY"
+provider = "futu_openapi"
+purpose = "risk_asset_proxy"
+market_session = "exchange_session"
+exchange = "NYSE"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[market_context.target_profiles.gold.market_data_subscriptions]]
+symbol = "QQQ"
+provider = "futu_openapi"
+purpose = "risk_asset_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[market_context.target_profiles.gold.market_data_subscriptions]]
+symbol = "VIXY"
+provider = "futu_openapi"
+purpose = "volatility_proxy"
+market_session = "exchange_session"
+exchange = "NYSE"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[market_context.target_profiles.gold.market_data_subscriptions]]
+symbol = "USO"
+provider = "futu_openapi"
+purpose = "energy_proxy"
+market_session = "exchange_session"
+exchange = "NYSE"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[market_context.target_profiles.gold.price_volume]
+lookback_bars = 3456
+trailing_return_windows = ["1h", "4h", "1d", "5d", "20d"]
+
+[market_context.target_profiles.gold.market_path]
+enabled = true
+session = "continuous"
+range_lookback_calendar_days = 180
+range_lookback_sessions = 180
+range_lookback_daily_bars = 252
+atr_period = 14
+atr_multiple = 2.0
+pct_floor = 0.025
+min_leg_bars = 3
+large_move_pct = 0.08
+near_extreme_pct = 0.03
+
+[market_context.target_profiles.gold.technical]
+ema_periods = [136]
+ichimoku_enabled = true
+
+[market_context.target_profiles.gold.macro_cross_asset]
+enabled = true
+lookback_bars = 3456
+trailing_return_windows = ["1h", "4h", "1d", "5d", "20d"]
+
+[market_context.target_profiles.gold.macro_cross_asset.proxy_groups]
+usd = ["UUP"]
+rates_duration = ["TLT", "IEF"]
+risk_assets = ["SPY", "QQQ"]
+volatility_proxy = ["VIXY"]
+commodity_energy = ["USO"]
+
+[market_context.target_profiles.gold.macro_cross_asset.group_pressure_rules]
+usd = "positive_headwind"
+rates_duration = "positive_supportive"
+risk_assets = "positive_headwind"
+volatility_proxy = "positive_supportive"
+commodity_energy = "contextual"
+
+[replay_build]
+target_key = "gold"
+window_start = "2026-01-01"
+window_end = "2026-06-30"
+include_web_search = true
+include_market_news = false
+output = "data/gold_gcusd_20260101_20260630.jsonl"
+write_report = true

@@ -1,0 +1,6 @@
+variant,included_successful_analyses,excluded_successful_analyses,analysis_triggers,average_analysis_seconds,total_analysis_seconds,total_analysis_hours,successful_tokens,successful_tokens_millions
+Event-driven,164,1,166,155.9329268292683,25573.0,7.103611111111111,44141848,44.141848
+Time-batch (5 min),192,0,197,144.0,27648.0,7.68,47543872,47.543872
+Time-batch (1 h),168,0,171,128.91071428571428,21657.0,6.015833333333333,37795127,37.795127
+Time-batch (4 h),120,0,120,110.725,13287.0,3.6908333333333334,26040864,26.040864
+Time-batch (1 day),30,0,30,161.93333333333334,4858.0,1.3494444444444444,7413129,7.413129

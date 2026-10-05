@@ -1,0 +1,10 @@
+{
+  "vendor_commit_from_experiment_receipt": "be814aa47970de9bf2fdd6a1d5a60ae5cf361b46",
+  "config": "baselines/replication/finmem/paper_compat/gcusd_m2_1_paper_compat.toml",
+  "config_sha256": "5a380042e642112f1680876d0d53bbc1b7975433e8c94be41dba44ac40f50fa2",
+  "config_size_matches_recorded_manifest": true,
+  "config_mtime_matches_recorded_manifest": true,
+  "note": "Matching size/mtime and vendor receipt corroborate this configuration; they are not a historical content-hash receipt for all adapter files.",
+  "source_manifest_sha256": "14e3e5b0ff578f5be4f1290bd6d132537d89e9b844b1cc1edcd7acf2ce9a9ed5",
+  "source_receipt_sha256": "75e92da3fa5620629ece066d0f88fcd0e922fd18b274718c42555e3a85bbfe9e"
+}

@@ -1,0 +1,84 @@
+{
+  "provider": "Financial Modeling Prep",
+  "symbol": "GCUSD",
+  "data_window": [
+    "2025-06-30",
+    "2026-06-30"
+  ],
+  "reported_window": [
+    "2026-01-01",
+    "2026-06-30"
+  ],
+  "files": [
+    {
+      "source_file": "gold_futures/fmp_gcusd_20250630_20260630/gcusd_1d_eod_ohlcv_20250630_20260630.csv",
+      "rows": 295,
+      "size_bytes": 21843,
+      "sha256": "0fb90b857cc502d6f68f776e991fa344e16042c0f8c26ed4bd363da2cf587d1c",
+      "raw_data_included": false
+    },
+    {
+      "source_file": "gold_futures/fmp_gcusd_20250630_20260630/gcusd_1d_ohlcv_from_1min_20250630_20260630.csv",
+      "rows": 313,
+      "size_bytes": 17934,
+      "sha256": "31fc7d00c6e4ee19afa452de8bfcf7ad099c8840e5d9bbb4716e15c653547f3c",
+      "raw_data_included": false
+    },
+    {
+      "source_file": "gold_futures/fmp_gcusd_20250630_20260630/gcusd_1h_ohlcv_from_1min_20250630_20260630.csv",
+      "rows": 5991,
+      "size_bytes": 334239,
+      "sha256": "86904f7c51d0ba0b89141e861552a216e6d8917d4f06d8c5043da5079a78a3b6",
+      "raw_data_included": false
+    },
+    {
+      "source_file": "gold_futures/fmp_gcusd_20250630_20260630/gcusd_1min_ohlcv_20250630_20260630.csv",
+      "rows": 354755,
+      "size_bytes": 18255464,
+      "sha256": "767c95cd38ba1cfbde16ebc1950d96099183b9f96433195d354d7dc2e5c9dfef",
+      "raw_data_included": false
+    },
+    {
+      "source_file": "gold_futures/fmp_gcusd_20250630_20260630/gcusd_5min_ohlcv_from_1min_20250630_20260630.csv",
+      "rows": 71078,
+      "size_bytes": 3887516,
+      "sha256": "c7fe799551af07468b9d9a02ff12956baec701f3a8b9b2b29bc4953cd917844b",
+      "raw_data_included": false
+    },
+    {
+      "source_file": "gold_futures/experiment_gcusd_inputs/canonical/gcusd_1d_eod_canonical_20250630_20260630.csv",
+      "rows": 295,
+      "size_bytes": 21843,
+      "sha256": "0fb90b857cc502d6f68f776e991fa344e16042c0f8c26ed4bd363da2cf587d1c",
+      "raw_data_included": false
+    },
+    {
+      "source_file": "gold_futures/experiment_gcusd_inputs/canonical/gcusd_1d_from_1min_canonical_20250630_20260630.csv",
+      "rows": 313,
+      "size_bytes": 17934,
+      "sha256": "31fc7d00c6e4ee19afa452de8bfcf7ad099c8840e5d9bbb4716e15c653547f3c",
+      "raw_data_included": false
+    },
+    {
+      "source_file": "gold_futures/experiment_gcusd_inputs/canonical/gcusd_1h_canonical_20250630_20260630.csv",
+      "rows": 5991,
+      "size_bytes": 334239,
+      "sha256": "86904f7c51d0ba0b89141e861552a216e6d8917d4f06d8c5043da5079a78a3b6",
+      "raw_data_included": false
+    },
+    {
+      "source_file": "gold_futures/experiment_gcusd_inputs/canonical/gcusd_1min_canonical_20250630_20260630.csv",
+      "rows": 354755,
+      "size_bytes": 18255464,
+      "sha256": "767c95cd38ba1cfbde16ebc1950d96099183b9f96433195d354d7dc2e5c9dfef",
+      "raw_data_included": false
+    },
+    {
+      "source_file": "gold_futures/experiment_gcusd_inputs/canonical/gcusd_5min_canonical_20250630_20260630.csv",
+      "rows": 71078,
+      "size_bytes": 3887516,
+      "sha256": "c7fe799551af07468b9d9a02ff12956baec701f3a8b9b2b29bc4953cd917844b",
+      "raw_data_included": false
+    }
+  ]
+}

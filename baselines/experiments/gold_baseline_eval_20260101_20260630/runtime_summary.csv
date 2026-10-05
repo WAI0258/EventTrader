@@ -1,0 +1,10 @@
+baseline,raw_decision_count,aligned_real_decision_count,decision_count,evaluation_mode,excluded_non_common_calendar_count,synthetic_hold_count,failed_decision_count,transient_failure_artifact_count,llm_calls,tokens_in,tokens_out,wall_clock_seconds_sum,average_decision_latency_seconds,p50_decision_latency_seconds,p90_decision_latency_seconds,max_decision_latency_seconds,provider_usage_observed
+ai_hedge_fund,129,128,128,native_state_to_full_exposure,1,26,0,0,772,0,0,5937.975075900256,46.030814541862455,45.03653059999988,53.95873416000805,65.91801900000428,False
+finmem,154,154,154,repository_action_score_same_close,0,0,0,0,216,627612,207262,4653.277941199718,30.216090527270897,20.65552210000169,49.31302426999324,133.88248359999852,True
+tradingagents,154,154,154,ama_recommended_action_stateful_long_short,0,0,0,17,2465,15832880,2809857,51275.729472999905,332.95928229220715,322.57558405000054,407.0396697399992,459.8115405999997,True
+buy_and_hold,1,1,1,deterministic_price_rule,0,0,0,0,0,0,0,0,,,,,False
+tsmom_20d,154,154,154,deterministic_price_rule,0,0,0,0,0,0,0,0,,,,,False
+ma_10ema_50sma,154,154,154,deterministic_price_rule,0,0,0,0,0,0,0,0,,,,,False
+rsi_14,154,154,154,deterministic_price_rule,0,0,0,0,0,0,0,0,,,,,False
+macd_12_26_9,154,154,154,deterministic_price_rule,0,0,0,0,0,0,0,0,,,,,False
+bollinger_20_2,154,154,154,deterministic_price_rule,0,0,0,0,0,0,0,0,,,,,False

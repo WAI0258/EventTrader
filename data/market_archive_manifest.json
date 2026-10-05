@@ -1,0 +1,18 @@
+{
+  "source_sha256": "0742883d7a57be0bdc8bbc5744897bedf9ccea55bdaeceae2f8e1c545ebe2a54",
+  "top_level_fields": [
+    "aggregates",
+    "design_notes",
+    "end_date_utc",
+    "eod",
+    "intraday",
+    "metadata",
+    "official_docs",
+    "outputs",
+    "provider",
+    "search_query",
+    "start_date_utc",
+    "symbol"
+  ],
+  "raw_manifest_included": false
+}

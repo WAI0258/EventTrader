@@ -1,0 +1,16 @@
+{
+  "source_sha256": "375b42e2959f58f936710c403ec95e3f03f9a16b1a1b445c543faec766b3c145",
+  "top_level_fields": [
+    "canonical_outputs",
+    "canonical_symbol",
+    "canonical_window",
+    "notes",
+    "project_inputs",
+    "provider",
+    "reported_experiment_window",
+    "source_intraday_row_count",
+    "source_manifest_path",
+    "timezone"
+  ],
+  "raw_manifest_included": false
+}

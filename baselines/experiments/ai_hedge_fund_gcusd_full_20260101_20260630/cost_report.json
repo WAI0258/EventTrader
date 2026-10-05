@@ -1,0 +1,34 @@
+{
+  "baseline": "ai-hedge-fund",
+  "symbol": "GCUSD",
+  "llm_usage": {
+    "llm_calls": 772,
+    "tokens_in": 0,
+    "tokens_out": 0,
+    "tokens_total": 0,
+    "usage_observed": false,
+    "calls_missing_usage": 772,
+    "estimated_cost_usd": null
+  },
+  "run_count": 129,
+  "filled_count": 128,
+  "calibrated_usage_estimate": {
+    "method": "model1_dashboard_probe_linear_per_request",
+    "calibration": {
+      "model_name": "MiniMax-M2.1",
+      "endpoint": "https://model1.imfan.top/v1",
+      "observed_requests": 20,
+      "observed_total_tokens": 12100,
+      "observed_tokens_per_request": 605.0,
+      "observed_cost_usd_per_request": 0.003
+    },
+    "mapped_gold_run": {
+      "audit_llm_calls": 772,
+      "estimated_total_tokens": 467060,
+      "estimated_cost_usd": 2.316,
+      "total_elapsed_seconds": 5937.975075900256,
+      "total_elapsed_hms": "01:38:57.98"
+    },
+    "note": "Calibrated estimate. Raw provider usage was unavailable for all 772 archived Gold calls and remains unchanged in llm_usage."
+  }
+}

@@ -1,0 +1,116 @@
+"""Project-owned deterministic validation building blocks."""
+
+from .episode_artifacts import (
+    EpisodeArtifactStoreError,
+    closed_episode_artifact_path,
+    open_episode_artifact_path,
+    refresh_episode_artifacts,
+)
+from .episode_builder import EpisodeBuildResult, ValidationEpisodeBuilderError, build_episodes
+from .episode_runtime import load_target_episode_state
+from .episode_snapshot import ClosedEpisodeSnapshot, ValidationEpisodeSnapshotError
+from .market_data import ApiStocksMarketDataPort, ValidationMarketDataError
+from .market_mapping import ValidationMarketMappingError, resolve_market_mapping
+from .portfolio_feedback import (
+    DecisionFact,
+    DecisionTimingLabel,
+    ExposureChange,
+    ExposurePathFact,
+    PortfolioFacts,
+    PortfolioFeedbackConfig,
+    PortfolioFeedbackError,
+    PortfolioFeedbackSnapshot,
+    ReturnWindowFact,
+    SegmentFact,
+    build_default_portfolio_feedback_config,
+    build_portfolio_feedback_run_id,
+    build_portfolio_feedback_snapshot,
+)
+from .returns import (
+    EpisodeReturn,
+    HorizonBaseline,
+    OpenEpisodeTerminalMark,
+    SegmentReturn,
+    ValidationReturnsError,
+    ValidationReturnsResult,
+    calculate_open_episode_terminal_mark,
+    calculate_returns,
+)
+from .state_change_store import (
+    StateChangeStoreError,
+    append_state_change,
+    append_state_change_once,
+    read_state_changes,
+    state_change_shard_path,
+)
+from .state_machine import (
+    TransitionResult,
+    ValidationStateMachineError,
+    resolve_transition,
+    transition_actions,
+)
+from .window_performance import (
+    ValidationWindowBarReturn,
+    ValidationWindowPerformanceError,
+    ValidationWindowPerformanceResult,
+    ValidationWindowPerformanceSummary,
+    calculate_window_performance,
+    render_window_market_kline_svg,
+    render_window_performance_svg,
+    render_window_presentation_zh_svg,
+)
+
+__all__ = [
+    "EpisodeBuildResult",
+    "ClosedEpisodeSnapshot",
+    "DecisionFact",
+    "DecisionTimingLabel",
+    "EpisodeReturn",
+    "ExposureChange",
+    "ExposurePathFact",
+    "HorizonBaseline",
+    "OpenEpisodeTerminalMark",
+    "PortfolioFacts",
+    "PortfolioFeedbackConfig",
+    "PortfolioFeedbackError",
+    "PortfolioFeedbackSnapshot",
+    "ReturnWindowFact",
+    "SegmentReturn",
+    "SegmentFact",
+    "TransitionResult",
+    "ValidationWindowBarReturn",
+    "ValidationEpisodeBuilderError",
+    "ValidationReturnsError",
+    "ValidationReturnsResult",
+    "ValidationEpisodeSnapshotError",
+    "ValidationStateMachineError",
+    "ValidationWindowPerformanceError",
+    "ValidationWindowPerformanceResult",
+    "ValidationWindowPerformanceSummary",
+    "EpisodeArtifactStoreError",
+    "StateChangeStoreError",
+    "ApiStocksMarketDataPort",
+    "append_state_change",
+    "append_state_change_once",
+    "build_episodes",
+    "build_default_portfolio_feedback_config",
+    "build_portfolio_feedback_run_id",
+    "build_portfolio_feedback_snapshot",
+    "calculate_open_episode_terminal_mark",
+    "calculate_window_performance",
+    "calculate_returns",
+    "closed_episode_artifact_path",
+    "load_target_episode_state",
+    "open_episode_artifact_path",
+    "read_state_changes",
+    "refresh_episode_artifacts",
+    "render_window_market_kline_svg",
+    "render_window_presentation_zh_svg",
+    "render_window_performance_svg",
+    "resolve_market_mapping",
+    "resolve_transition",
+    "state_change_shard_path",
+    "transition_actions",
+    "ValidationMarketDataError",
+    "ValidationMarketMappingError",
+]

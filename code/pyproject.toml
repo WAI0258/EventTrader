@@ -1,0 +1,60 @@
+[build-system]
+requires = ["hatchling>=1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "event-trader"
+version = "0.1.0"
+description = "Project-owned kernel bootstrap for the event-trader runtime."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "mcp>=1.0.0",
+    "nautilus_trader>=1.229.0",
+    "pandas-market-calendars>=5.3.2",
+]
+
+[project.optional-dependencies]
+futu = [
+    "futu-api>=9.4.5408,<11",
+]
+
+[project.scripts]
+event-trader = "event_trader.cli:main"
+event-trader-live = "event_trader.tools.live_runtime:main"
+event-trader-pm-console = "event_trader.tools.pm_console_server:main"
+
+[dependency-groups]
+dev = [
+    "mypy>=1.11.2",
+    "pytest>=9.0.3",
+    "ruff>=0.11.8",
+]
+
+[tool.pytest.ini_options]
+minversion = "9.0"
+addopts = "-ra"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.mypy]
+python_version = "3.13"
+mypy_path = ["src"]
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+strict_equality = true
+no_implicit_optional = true
+check_untyped_defs = true
+explicit_package_bases = true
+show_error_codes = true
+pretty = true
+files = ["src", "tests"]
