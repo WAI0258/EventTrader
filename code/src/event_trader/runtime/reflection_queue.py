@@ -316,29 +316,16 @@ class FileBackedReflectionWorkQueue:
     def claim_next(self) -> ReflectionQueueClaim | None:
         with self._lock:
             for pending_path in sorted(self._pending_root.glob("*.json")):
-                try:
-                    item = _read_work_item(pending_path)
-                except FileNotFoundError:
-                    continue
-                if self._completed_path(item.idempotency_key).exists():
-                    self._remove_if_exists(pending_path)
-                    continue
-                claim_path = self._in_flight_path(item.idempotency_key)
-                if claim_path.exists():
-                    continue
-                try:
-                    pending_path.replace(claim_path)
-                except FileNotFoundError:
-                    continue
-                return ReflectionQueueClaim(
-                    queue_name=self._queue_name,
-                    work_item_id=item.work_item_id,
-                    idempotency_key=item.idempotency_key,
-                    item=item,
-                    claimed_at=self._now(),
-                    claim_path=claim_path,
-                )
+                claim = self._claim_pending_path(pending_path)
+                if claim is not None:
+                    return claim
             return None
+
+    def claim_by_idempotency_key(self, idempotency_key: str) -> ReflectionQueueClaim | None:
+        """Atomically claim the pending item for one exact idempotency key."""
+        normalized_key = _validate_identifier(idempotency_key, "idempotency_key")
+        with self._lock:
+            return self._claim_pending_path(self._pending_path(normalized_key))
 
     def complete(
         self,
@@ -528,6 +515,30 @@ class FileBackedReflectionWorkQueue:
     def _dead_letter_path(self, idempotency_key: str) -> Path:
         return self._dead_letter_root / f"{_idempotency_digest(idempotency_key)}.json"
 
+    def _claim_pending_path(self, pending_path: Path) -> ReflectionQueueClaim | None:
+        try:
+            item = _read_work_item(pending_path)
+        except FileNotFoundError:
+            return None
+        if self._completed_path(item.idempotency_key).exists():
+            self._remove_if_exists(pending_path)
+            return None
+        claim_path = self._in_flight_path(item.idempotency_key)
+        if claim_path.exists():
+            return None
+        try:
+            pending_path.replace(claim_path)
+        except FileNotFoundError:
+            return None
+        return ReflectionQueueClaim(
+            queue_name=self._queue_name,
+            work_item_id=item.work_item_id,
+            idempotency_key=item.idempotency_key,
+            item=item,
+            claimed_at=self._now(),
+            claim_path=claim_path,
+        )
+
     def _has_known_state(self, idempotency_key: str) -> bool:
         return any(
             path.exists()
@@ -623,7 +634,10 @@ def _read_completion(path: Path) -> ReflectionQueueCompletion:
 
 
 def _read_failure(path: Path) -> ReflectionQueueFailure:
-    payload = _require_dict(json.loads(path.read_text(encoding="utf-8-sig")), "ReflectionQueueFailure")
+    payload = _require_dict(
+        json.loads(path.read_text(encoding="utf-8-sig")),
+        "ReflectionQueueFailure",
+    )
     return ReflectionQueueFailure(
         queue_name=_require_text(payload.get("queue_name"), "queue_name"),
         work_item_id=_require_text(payload.get("work_item_id"), "work_item_id"),

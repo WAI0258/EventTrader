@@ -1,0 +1,90 @@
+{
+  "episode": {
+    "close_reason": "state_changed_to_flat",
+    "closed_at": "2026-07-23T13:15:00+00:00",
+    "closed_by_event_ids": [
+      "78e51a1f37ed7301714283c1"
+    ],
+    "closed_by_state_change_id": "state-change:pm-execution:570777af0bfb957fa8009c8c1253087d",
+    "direction": "long",
+    "episode_id": "gold:episode:2",
+    "opened_at": "2026-07-20T08:00:00+00:00",
+    "opened_by_event_ids": [
+      "f344dd631e37c0cf3bbecf92",
+      "c87af96ca64abe709518e2a3",
+      "75fc7ada769ec51c2fd17a63",
+      "c646db7c303911e42a4a1a02"
+    ],
+    "opened_by_state_change_id": "state-change:pm-execution:65f5c49dba85fefe3aa24f077bea995e",
+    "target_key": "gold"
+  },
+  "generated_at": "2026-10-07T09:18:57.220386+00:00",
+  "reflection_triggers": [
+    {
+      "close_reason": "state_changed_to_flat",
+      "closed_by_event_ids": [
+        "78e51a1f37ed7301714283c1"
+      ],
+      "closed_by_state_change_id": "state-change:pm-execution:570777af0bfb957fa8009c8c1253087d",
+      "episode_id": "gold:episode:2",
+      "target_key": "gold",
+      "triggered_at": "2026-07-23T13:15:00+00:00"
+    }
+  ],
+  "segments": [
+    {
+      "close_reason": "view_closed",
+      "closed_at": "2026-07-23T13:15:00+00:00",
+      "closed_by_state_change_id": "state-change:pm-execution:570777af0bfb957fa8009c8c1253087d",
+      "episode_id": "gold:episode:2",
+      "opened_at": "2026-07-20T08:00:00+00:00",
+      "opened_by_state_change_id": "state-change:pm-execution:65f5c49dba85fefe3aa24f077bea995e",
+      "segment_id": "gold:segment:2",
+      "target_key": "gold",
+      "target_weight": 0.5
+    }
+  ],
+  "state_changes": [
+    {
+      "conviction": "weak",
+      "direction": "long",
+      "effective_at": "2026-07-20T08:00:00+00:00",
+      "execution_record_id": "execution-record:b40b2340b67e3465844c98f3d227a34b",
+      "instrument_basis": null,
+      "pm_decision_id": "pm-decision:5c12c33fd7d0d06643ad68ab7b0d58ee",
+      "predecessor_instrument_basis": null,
+      "rationale_md": "Text omitted from numerical sample.",
+      "source_event_ids": [
+        "f344dd631e37c0cf3bbecf92",
+        "c87af96ca64abe709518e2a3",
+        "75fc7ada769ec51c2fd17a63",
+        "c646db7c303911e42a4a1a02"
+      ],
+      "source_kind": "pm_execution_sidecar",
+      "state": "weak_long",
+      "state_change_id": "state-change:pm-execution:65f5c49dba85fefe3aa24f077bea995e",
+      "target_key": "gold",
+      "target_weight": 0.5,
+      "used_lesson_ids": []
+    },
+    {
+      "conviction": "none",
+      "direction": "flat",
+      "effective_at": "2026-07-23T13:15:00+00:00",
+      "execution_record_id": "execution-record:20a82ff0ca140c0aa51cc9b9686b79ee",
+      "instrument_basis": null,
+      "pm_decision_id": "pm-decision:9354abed27e989a51dd37fbf51eb1f44",
+      "predecessor_instrument_basis": null,
+      "rationale_md": "Text omitted from numerical sample.",
+      "source_event_ids": [
+        "78e51a1f37ed7301714283c1"
+      ],
+      "source_kind": "pm_execution_sidecar",
+      "state": "flat",
+      "state_change_id": "state-change:pm-execution:570777af0bfb957fa8009c8c1253087d",
+      "target_key": "gold",
+      "target_weight": 0.0,
+      "used_lesson_ids": []
+    }
+  ]
+}

@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, field
 from datetime import datetime
 from hashlib import sha256
 from pathlib import Path
-from typing import Generic, TypeVar
 
 from event_trader.contracts import EvidenceLedgerRecord
 from event_trader.contracts.view_state_change import MarketDataBar
@@ -17,15 +17,15 @@ from event_trader.episode_memory.projection import (
 )
 from event_trader.episode_memory.store import FileBackedEpisodeMemoryStore
 from event_trader.learning_cards import LearningCard
+from event_trader.pm_review.context import (
+    DEFAULT_PM_REVIEW_HISTORY_LIMIT,
+    validate_candidate_review_anchor_for_request,
+)
 from event_trader.pm_review.contracts import (
     CandidateReviewAnchor,
     PMReviewEpisodeMemoryReadReceipt,
     PMReviewRequest,
     PMReviewToolReadReceipt,
-)
-from event_trader.pm_review.context import (
-    DEFAULT_PM_REVIEW_HISTORY_LIMIT,
-    validate_candidate_review_anchor_for_request,
 )
 from event_trader.pm_review.store import (
     PMReviewEpisodeMemoryReadReceiptStore,
@@ -35,7 +35,16 @@ from event_trader.portfolio.active_exposure import ActiveExposure
 from event_trader.portfolio.contracts import PMDecision
 from event_trader.storage import WorkspaceLayout
 
-_RecordT = TypeVar("_RecordT")
+PM_REVIEW_TOOL_SERVER_NAME = "event_trader_pm_review"
+REQUIRED_PM_REVIEW_TOOL_NAMES: tuple[str, ...] = (
+    "read_pm_review_request",
+    "read_pm_review_evidence",
+    "read_pm_review_market_bars",
+    "read_pm_review_history",
+    "read_pm_episode_memory",
+    "read_pm_review_learning_cards",
+    "read_pm_review_active_exposure",
+)
 
 
 class PMReviewToolError(ValueError):
@@ -43,10 +52,10 @@ class PMReviewToolError(ValueError):
 
 
 @dataclass(frozen=True, slots=True)
-class PMReviewToolResult(Generic[_RecordT]):
+class PMReviewToolResult[RecordT]:
     """One PMReview tool result plus its persisted read receipt."""
 
-    records: tuple[_RecordT, ...]
+    records: tuple[RecordT, ...]
     receipt: PMReviewToolReadReceipt
 
 
@@ -119,6 +128,124 @@ class PMReviewToolSession:
             request=self.request,
             candidate_anchor=self.candidate_anchor,
         )
+
+
+@dataclass(slots=True)
+class PMReviewAgentToolbox:
+    """Request-bound implementation of the provider-neutral PMReview tool gateway."""
+
+    session: PMReviewToolSession
+    _read_receipts: list[PMReviewToolReadReceipt] = field(default_factory=list)
+
+    @property
+    def server_name(self) -> str:
+        return PM_REVIEW_TOOL_SERVER_NAME
+
+    @property
+    def available_tool_names(self) -> tuple[str, ...]:
+        return REQUIRED_PM_REVIEW_TOOL_NAMES
+
+    @property
+    def read_receipts(self) -> tuple[PMReviewToolReadReceipt, ...]:
+        return tuple(self._read_receipts)
+
+    def read_pm_review_request(self) -> PMReviewToolResult[PMReviewRequest]:
+        return self._record(
+            read_pm_review_request(
+                session=self.session,
+                session_id=self.session.session_id,
+                pm_review_request_id=self.session.request.request_id,
+            )
+        )
+
+    def read_pm_review_evidence(
+        self,
+        *,
+        event_ids: tuple[str, ...] = (),
+    ) -> PMReviewToolResult[EvidenceLedgerRecord]:
+        return self._record(
+            read_pm_review_evidence(
+                session=self.session,
+                session_id=self.session.session_id,
+                pm_review_request_id=self.session.request.request_id,
+                event_ids=event_ids,
+            )
+        )
+
+    def read_pm_review_market_bars(self) -> PMReviewToolResult[MarketDataBar]:
+        return self._record(
+            read_pm_review_market_bars(
+                session=self.session,
+                session_id=self.session.session_id,
+                pm_review_request_id=self.session.request.request_id,
+            )
+        )
+
+    def read_pm_review_history(self) -> PMReviewToolResult[PMReviewHistory]:
+        return self._record(
+            read_pm_review_history(
+                session=self.session,
+                session_id=self.session.session_id,
+                pm_review_request_id=self.session.request.request_id,
+            )
+        )
+
+    def read_pm_episode_memory(self) -> PMReviewToolResult[PMEpisodeMemoryView]:
+        return self._record(
+            read_pm_episode_memory(
+                session=self.session,
+                session_id=self.session.session_id,
+                pm_review_request_id=self.session.request.request_id,
+            )
+        )
+
+    def read_pm_review_learning_cards(self) -> PMReviewToolResult[LearningCard]:
+        return self._record(
+            read_pm_review_learning_cards(
+                session=self.session,
+                session_id=self.session.session_id,
+                pm_review_request_id=self.session.request.request_id,
+            )
+        )
+
+    def read_pm_review_active_exposure(self) -> PMReviewToolResult[ActiveExposure]:
+        return self._record(
+            read_pm_review_active_exposure(
+                session=self.session,
+                session_id=self.session.session_id,
+                pm_review_request_id=self.session.request.request_id,
+            )
+        )
+
+    async def call_tool(
+        self,
+        tool_name: str,
+        arguments: Mapping[str, object],
+    ) -> object:
+        if tool_name == "read_pm_review_request":
+            return self.read_pm_review_request()
+        if tool_name == "read_pm_review_evidence":
+            raw_event_ids = arguments.get("event_ids", ())
+            event_ids = tuple(raw_event_ids) if isinstance(raw_event_ids, list | tuple) else ()
+            return self.read_pm_review_evidence(event_ids=event_ids)
+        if tool_name == "read_pm_review_market_bars":
+            return self.read_pm_review_market_bars()
+        if tool_name == "read_pm_review_history":
+            return self.read_pm_review_history()
+        if tool_name == "read_pm_episode_memory":
+            return self.read_pm_episode_memory()
+        if tool_name == "read_pm_review_learning_cards":
+            return self.read_pm_review_learning_cards()
+        if tool_name == "read_pm_review_active_exposure":
+            return self.read_pm_review_active_exposure()
+        raise PMReviewToolError(f"unsupported PMReview tool: {tool_name}")
+
+    def _record[RecordT](
+        self,
+        result: PMReviewToolResult[RecordT],
+    ) -> PMReviewToolResult[RecordT]:
+        self._read_receipts.append(result.receipt)
+        return result
 
 
 def read_pm_review_request(
@@ -675,6 +802,9 @@ def _active_exposure_source_ids(exposure: ActiveExposure) -> tuple[str, ...]:
 
 
 __all__ = [
+    "PM_REVIEW_TOOL_SERVER_NAME",
+    "REQUIRED_PM_REVIEW_TOOL_NAMES",
+    "PMReviewAgentToolbox",
     "PMReviewHistory",
     "PMReviewToolError",
     "PMReviewToolResult",

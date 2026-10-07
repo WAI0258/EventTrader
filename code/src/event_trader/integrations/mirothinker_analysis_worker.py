@@ -12,12 +12,11 @@ import traceback
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
+from event_trader.integrations.analysis_mcp_transport import (
+    ANALYSIS_MCP_SERVER_MODULE,
+    ANALYSIS_MCP_SERVER_NAME,
+)
 from event_trader.integrations.mirothinker_analysis import (
-    _ANALYSIS_AGENT_CONTRACT,
-    _ANALYSIS_MCP_SERVER_NAME,
-    _analysis_contract_repair_supervision_payload,
-    _AnalysisContractRepairRequired,
-    _AnalysisWriteFailureBudgetExceeded,
     _build_analysis_tool_manager,
     _install_analysis_write_failure_budget_guard,
     _load_vendor_runtime,
@@ -27,13 +26,29 @@ from event_trader.integrations.mirothinker_llm_config import (
     build_mirothinker_llm_config,
 )
 from event_trader.integrations.strict_mirothinker_agent import (
+    StrictMiroThinkerAgentContract,
     raise_on_mirothinker_limit_failure,
     run_strict_mirothinker_agent,
+)
+from event_trader.reasoning.analysis_agent import ANALYSIS_AGENT_CONTRACT
+from event_trader.reasoning.analysis_contract_repair import (
+    AnalysisContractRepairRequired,
+    AnalysisWriteFailureBudgetExceeded,
+    analysis_contract_repair_supervision_payload,
 )
 
 
 class AnalysisWorkerError(RuntimeError):
     """Raised when the supervised analysis worker cannot run safely."""
+
+
+_MIROTHINKER_ANALYSIS_AGENT_CONTRACT = StrictMiroThinkerAgentContract(
+    agent_name="MiroThinker analysis agent",
+    required_tools=tuple(
+        (ANALYSIS_MCP_SERVER_NAME, tool_name)
+        for tool_name in ANALYSIS_AGENT_CONTRACT.required_tool_names
+    ),
+)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -53,12 +68,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         payload = _load_payload(Path(args.input).resolve(strict=False))
         run_result = asyncio.run(_run_worker(payload))
-    except _AnalysisContractRepairRequired as exc:
-        output = _analysis_contract_repair_supervision_payload(exc)
+    except AnalysisContractRepairRequired as exc:
+        output = analysis_contract_repair_supervision_payload(exc)
         output["traceback"] = traceback.format_exc()
         _write_output(output_path, output)
         return 1
-    except _AnalysisWriteFailureBudgetExceeded as exc:
+    except AnalysisWriteFailureBudgetExceeded as exc:
         _write_output(
             output_path,
             {
@@ -107,9 +122,7 @@ async def _run_worker(payload: Mapping[str, object]) -> dict[str, object]:
                 base_url=_require_text(payload, "llm_base_url"),
                 temperature=0.2,
                 max_tokens=4096,
-                max_context_length=_require_positive_int(
-                    payload, "llm_max_context_length"
-                ),
+                max_context_length=_require_positive_int(payload, "llm_max_context_length"),
                 reasoning_effort=_optional_text(payload, "llm_reasoning_effort"),
             ),
             "agent": {
@@ -127,10 +140,10 @@ async def _run_worker(payload: Mapping[str, object]) -> dict[str, object]:
     )
     analysis_server_env = _require_string_mapping(payload, "analysis_server_env")
     server_config = {
-        "name": _ANALYSIS_MCP_SERVER_NAME,
+        "name": ANALYSIS_MCP_SERVER_NAME,
         "params": StdioServerParameters(
             command=sys.executable,
-            args=["-m", "event_trader.integrations.analysis_mcp_server"],
+            args=["-m", ANALYSIS_MCP_SERVER_MODULE],
             env=dict(analysis_server_env),
         ),
     }
@@ -143,7 +156,7 @@ async def _run_worker(payload: Mapping[str, object]) -> dict[str, object]:
     output_formatter = OutputFormatter()
     try:
         run_result = await run_strict_mirothinker_agent(
-            contract=_ANALYSIS_AGENT_CONTRACT,
+            contract=_MIROTHINKER_ANALYSIS_AGENT_CONTRACT,
             tool_manager=tool_manager,
             execute_task_pipeline=execute_task_pipeline,
             cfg=agent_cfg,
@@ -158,7 +171,7 @@ async def _run_worker(payload: Mapping[str, object]) -> dict[str, object]:
         raise_on_mirothinker_limit_failure(
             log_file_path=run_result.log_file_path,
             error_factory=AnalysisWorkerError,
-            agent_name=_ANALYSIS_AGENT_CONTRACT.agent_name,
+            agent_name=_MIROTHINKER_ANALYSIS_AGENT_CONTRACT.agent_name,
         )
         return {
             "final_summary": run_result.final_summary,

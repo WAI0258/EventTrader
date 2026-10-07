@@ -302,6 +302,8 @@ def _serialize_state_change(state_change: ViewStateChange) -> dict[str, object]:
         "source_kind": state_change.source_kind,
         "pm_decision_id": state_change.pm_decision_id,
         "execution_record_id": state_change.execution_record_id,
+        "predecessor_instrument_basis": state_change.predecessor_instrument_basis,
+        "instrument_basis": state_change.instrument_basis,
     }
 
 
@@ -380,6 +382,8 @@ def _deserialize_state_changes(
                     source_kind=item["source_kind"],
                     pm_decision_id=item.get("pm_decision_id"),
                     execution_record_id=item.get("execution_record_id"),
+                    predecessor_instrument_basis=item.get("predecessor_instrument_basis"),
+                    instrument_basis=item.get("instrument_basis"),
                 )
             )
         except (KeyError, TypeError, ValueError, ViewStateChangeContractError) as exc:

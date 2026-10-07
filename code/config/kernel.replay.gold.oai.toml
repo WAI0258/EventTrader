@@ -1,0 +1,183 @@
+# Replay config for gold historical backfill/build/run.
+
+workspace_root = ".local/replay-gold-20260101_20260430-workspace"
+mode = "replay"
+heartbeat_interval_seconds = 0.05
+reflection_interval_hours = 24
+reflection_lookback_hours = 168
+reflection_horizons_hours = [24, 72, 168]
+
+[analysis_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/mirothinker-analysis-logs"
+llm_provider = "openai"
+llm_model_name = "gpt-5.2"
+llm_api_key_env = "OPENAI_API_KEY"
+llm_base_url = "http://100.69.42.2:8317/v1"
+
+[checker_agent]
+implementation = "single_pass"
+log_dir = ".local/mirothinker-checker-logs"
+llm_provider = "openai"
+llm_model_name = "gpt-5.2"
+llm_api_key_env = "OPENAI_API_KEY"
+llm_base_url = "http://100.69.42.2:8317/v1"
+evidence_excerpt_chars = 4000
+section_excerpt_chars = 2000
+recent_timeline_items = 10
+max_pack_chars = 16000
+force_escalate_on_insufficient_coverage = true
+
+[reflection_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/mirothinker-reflection-logs"
+llm_provider = "openai"
+llm_model_name = "gpt-5.2"
+llm_api_key_env = "OPENAI_API_KEY"
+llm_base_url = "http://100.69.42.2:8317/v1"
+
+[validation.market_data]
+provider = "bc_private_v1"
+base_url = "http://bcprivateserver.site/api/v1/market/stocks/bars"
+api_key_env = "STOCK_BARS_API_KEY"
+timeout_seconds = 10.0
+
+[validation.market_mappings.gold]
+market_symbol = "IAU"
+market_session = "exchange_session"
+exchange = "NYSE"
+exchange_session_scope = "extended"
+bar_granularity = "1h"
+
+[stream_routing]
+enabled = true
+policy_version = "gold_iau_1h_ceau_candidate_v0"
+policy_status = "candidate"
+target_key = "gold"
+bar_granularity = "1h"
+processing_time_safety_emit_enabled = false
+
+[stream_routing.default_unit_policy]
+route_default = "no_action"
+
+[stream_routing.lane_policies.operator_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.risk_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.news_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.context_window]
+route_default = "accumulate"
+candidate_default_route = "accumulate"
+max_delay_bars = 1
+max_unit_chars = 12000
+unit_scope = "context_window"
+completeness_requirements = [
+  { purpose = "evidence_maturity", domain = "market_bars", required_for = ["market_reaction_mature"] },
+]
+
+[stream_routing.lane_policies.episode_append]
+route_default = "accumulate"
+candidate_default_route = "accumulate"
+max_delay_bars = 1
+max_unit_chars = 12000
+unit_scope = "context_window"
+
+[market_context]
+enabled = true
+max_prompt_chars = 6000
+
+[market_context.target_profiles.gold]
+tradable_proxy_symbol = "IAU"
+derivatives_underlying_symbol = "IAU"
+bar_granularity = "1h"
+enabled_components = ["price_volume", "technical", "derivatives", "macro_cross_asset"]
+
+[market_context.target_profiles.gold.price_volume]
+lookback_bars = 240
+trailing_return_windows = ["1h", "4h", "1d", "5d", "20d"]
+
+[market_context.target_profiles.gold.technical]
+ema_periods = [136]
+ichimoku_enabled = true
+
+[market_context.target_profiles.gold.derivatives]
+enabled = true
+data_feed = "opra"
+chain_max_rows = 500
+max_contracts_per_snapshot = 40
+expiry_days_min = 0
+expiry_days_max = 45
+strike_pct_window = 0.15
+atm_contract_count = 10
+otm_contract_count = 20
+min_trade_count = 1
+large_trade_notional_threshold = 100000
+include_historical_trades = true
+include_historical_bars = true
+include_latest_snapshot_quotes = true
+bars_granularity = "1h"
+lookback_hours = 24
+
+[market_context.target_profiles.gold.macro_cross_asset]
+enabled = true
+lookback_bars = 240
+trailing_return_windows = ["1d", "5d", "20d"]
+
+[market_context.target_profiles.gold.macro_cross_asset.proxy_groups]
+usd = ["UUP"]
+rates_duration = ["TLT", "IEF"]
+risk_assets = ["SPY", "QQQ"]
+volatility_proxy = ["VIXY"]
+commodity_energy = ["USO"]
+
+[market_context.target_profiles.gold.macro_cross_asset.group_pressure_rules]
+usd = "positive_headwind"
+rates_duration = "positive_supportive"
+risk_assets = "positive_headwind"
+volatility_proxy = "positive_supportive"
+commodity_energy = "contextual"
+
+[replay_build]
+target_key = "gold"
+window_start = "2026-01-01"
+window_end = "2026-04-30"
+include_web_search = true
+output = "data/gold_20260101_20260430.jsonl"
+write_report = true
+
+[replay_backfill.web_search]
+implementation = "mirothinker"
+search_intent = "find the most material developments, releases, policy signals, macro surprises, positioning shifts, and geopolitical events within the requested historical window that could move gold directly or through USD, real yields, inflation expectations, central-bank behavior, risk sentiment, or related safe-haven flows"
+slice_hours = 8
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/mirothinker-replay-search-logs"
+llm_provider = "openai"
+llm_model_name = "gpt-5.2"
+llm_api_key_env = "OPENAI_API_KEY"
+llm_base_url = "http://100.69.42.2:8317/v1"
+acquisition_tool_names = ["search_and_scrape_webpage", "jina_scrape_llm_summary", "event_trader_openai_web_search"]
+serper_api_key_env = "SERPER_API_KEY"
+serper_base_url = "https://google.serper.dev"
+jina_api_key_env = "JINA_API_KEY"
+jina_base_url = "https://r.jina.ai"
+summary_llm_api_key_env = "OPENAI_API_KEY"
+summary_llm_base_url = "http://100.69.42.2:8317/v1/chat/completions"
+summary_llm_model_name = "gpt-5.2"
+openai_web_search_api_key_env = "OPENAI_API_KEY"
+openai_web_search_base_url = "http://100.69.42.2:8317/v1"
+openai_web_search_model = "gpt-5.2"
+openai_web_search_tool_type = "web_search_20250305"
+openai_web_search_max_uses = 5
+openai_web_search_version = "2023-06-01"

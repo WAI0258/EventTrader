@@ -10,11 +10,11 @@ from typing import Literal, cast
 
 from event_trader.ceau.contracts import UnitFormationLane
 from event_trader.contracts import EvidenceLedgerRecord, PageReadResult
-from event_trader.contracts.view_state_change import ViewState
 from event_trader.contracts.evidence_review import (
     EvidenceReviewDimensions,
     classify_evidence_review_dimensions,
 )
+from event_trader.contracts.view_state_change import ViewState
 from event_trader.feeds.historical_web_search_guard import (
     HistoricalWebSearchFutureLeakage,
     detect_historical_web_search_future_leakage,
@@ -24,11 +24,7 @@ from event_trader.integrations.markdown_context import (
     find_markdown_section,
 )
 from event_trader.market.contracts import MarketContextSnapshot
-from event_trader.operator_context import (
-    OperatorContextCard,
-    OperatorContextContractError,
-    parse_operator_context_page,
-)
+from event_trader.operator_context import OperatorContextSnapshot
 from event_trader.source_policy import (
     SourcePolicyError,
     extract_event_type,
@@ -43,8 +39,6 @@ ACTIVE_EVIDENCE_EXCERPT_CHARS = 1200
 MAX_EVIDENCE_LANE_CHARS = 5000
 MEMORY_SECTION_EXCERPT_CHARS = 700
 MAX_MEMORY_IMPACT_LANE_CHARS = 7000
-OPERATOR_CONTEXT_CARD_EXCERPT_CHARS = 700
-MAX_OPERATOR_CONTEXT_LANE_CHARS = 6000
 MAX_MARKET_LANE_CHARS = 3000
 MAX_METHOD_LANE_CHARS = 5000
 WORKBENCH_COMPILER_POLICY_VERSION = "analysis_workbench_slice_d_v1"
@@ -59,7 +53,6 @@ type MemoryGroundingStatus = Literal["compiled", "tool_read", "missing"]
 type MarketGroundingStatus = Literal["compiled", "tool_read", "not_required", "missing"]
 type MemoryCardStatus = Literal["available", "missing", "empty"]
 type OperatorContextPageStatus = Literal["available", "missing", "empty"]
-type WorkbenchOperatorContextCardStatus = Literal["active"]
 type RecapReconciliationStatus = Literal[
     "directionally_consistent",
     "not_directionally_consistent",
@@ -415,105 +408,6 @@ class WorkbenchCompilerReadReceipt:
 
 
 @dataclass(frozen=True, slots=True)
-class WorkbenchOperatorContextCard:
-    card_id: str
-    section_name: str
-    status: WorkbenchOperatorContextCardStatus
-    excerpt: str
-    content_sha256: str
-    excerpt_sha256: str
-    char_count: int
-    excerpt_truncated: bool
-    full_section_available_via: str
-    compiler_read_receipt_id: str
-
-    def __post_init__(self) -> None:
-        if self.status != "active":
-            raise AnalysisWorkbenchError("operator context card status is invalid.")
-
-    def to_json_payload(self) -> dict[str, object]:
-        return {
-            "card_id": self.card_id,
-            "section_name": self.section_name,
-            "status": self.status,
-            "excerpt": self.excerpt,
-            "content_sha256": self.content_sha256,
-            "excerpt_sha256": self.excerpt_sha256,
-            "char_count": self.char_count,
-            "excerpt_truncated": self.excerpt_truncated,
-            "full_section_available_via": self.full_section_available_via,
-            "compiler_read_receipt_id": self.compiler_read_receipt_id,
-        }
-
-    @classmethod
-    def from_json_payload(cls, payload: object) -> WorkbenchOperatorContextCard:
-        if not isinstance(payload, dict):
-            raise AnalysisWorkbenchError("operator context card must be an object.")
-        return cls(
-            card_id=_require_string(payload, "card_id"),
-            section_name=_require_string(payload, "section_name"),
-            status=_workbench_operator_context_card_status(payload.get("status")),
-            excerpt=_require_raw_string(payload, "excerpt"),
-            content_sha256=_require_string(payload, "content_sha256"),
-            excerpt_sha256=_require_string(payload, "excerpt_sha256"),
-            char_count=_require_non_negative_int(payload, "char_count"),
-            excerpt_truncated=payload.get("excerpt_truncated") is True,
-            full_section_available_via=_require_string(
-                payload,
-                "full_section_available_via",
-            ),
-            compiler_read_receipt_id=_require_string(
-                payload,
-                "compiler_read_receipt_id",
-            ),
-        )
-
-
-@dataclass(frozen=True, slots=True)
-class OperatorContextCompilerReadReceipt:
-    receipt_id: str
-    context_packet_id: str
-    stage: Literal["analysis"]
-    target_key: str
-    business_at: datetime
-    runtime_scope: Literal["live", "replay"]
-    run_id: str
-    page_path: str
-    section_name: str
-    content_sha256: str
-    excerpt_sha256: str
-    excerpt_char_count: int
-    excerpt_truncated: bool
-    read_policy: str
-    read_run_id: str
-    compiler_policy_version: str = WORKBENCH_COMPILER_POLICY_VERSION
-
-    def __post_init__(self) -> None:
-        object.__setattr__(self, "business_at", _normalize_datetime(self.business_at))
-
-    def to_json_payload(self) -> dict[str, object]:
-        return {
-            "receipt_type": "operator_context_compiler_read",
-            "receipt_id": self.receipt_id,
-            "context_packet_id": self.context_packet_id,
-            "stage": self.stage,
-            "target_key": self.target_key,
-            "business_at": self.business_at.isoformat(),
-            "runtime_scope": self.runtime_scope,
-            "run_id": self.run_id,
-            "page_path": self.page_path,
-            "section_name": self.section_name,
-            "content_sha256": self.content_sha256,
-            "excerpt_sha256": self.excerpt_sha256,
-            "excerpt_char_count": self.excerpt_char_count,
-            "excerpt_truncated": self.excerpt_truncated,
-            "read_policy": self.read_policy,
-            "read_run_id": self.read_run_id,
-            "compiler_policy_version": self.compiler_policy_version,
-        }
-
-
-@dataclass(frozen=True, slots=True)
 class WorkbenchMemoryCard:
     card_id: str
     page_path: str
@@ -660,34 +554,19 @@ class MemoryImpactLane:
 class OperatorContextLane:
     page_path: str
     page_status: OperatorContextPageStatus
-    cards: tuple[WorkbenchOperatorContextCard, ...]
-    active_card_ids: tuple[str, ...]
-    budget_chars: int
-    used_chars: int
-    omission_receipts: tuple[WorkbenchOmissionReceipt, ...] = ()
+    content_md: str
+    content_sha256: str
 
     def __post_init__(self) -> None:
         if self.page_status not in {"available", "missing", "empty"}:
             raise AnalysisWorkbenchError("operator context page status is invalid.")
-        object.__setattr__(self, "cards", tuple(self.cards))
-        object.__setattr__(self, "active_card_ids", tuple(self.active_card_ids))
-        object.__setattr__(self, "omission_receipts", tuple(self.omission_receipts))
-
-    @property
-    def active_cards(self) -> tuple[WorkbenchOperatorContextCard, ...]:
-        return tuple(card for card in self.cards if card.status == "active")
 
     def to_json_payload(self) -> dict[str, object]:
         return {
             "page_path": self.page_path,
             "page_status": self.page_status,
-            "cards": [card.to_json_payload() for card in self.cards],
-            "active_card_ids": list(self.active_card_ids),
-            "budget_chars": self.budget_chars,
-            "used_chars": self.used_chars,
-            "omission_receipts": [
-                receipt.to_json_payload() for receipt in self.omission_receipts
-            ],
+            "content_md": self.content_md,
+            "content_sha256": self.content_sha256,
         }
 
     @classmethod
@@ -697,20 +576,8 @@ class OperatorContextLane:
         return cls(
             page_path=_require_string(payload, "page_path"),
             page_status=_operator_context_page_status(payload.get("page_status")),
-            cards=tuple(
-                WorkbenchOperatorContextCard.from_json_payload(item)
-                for item in _require_list(payload, "cards")
-            ),
-            active_card_ids=_string_tuple(
-                payload.get("active_card_ids"),
-                "active_card_ids",
-            ),
-            budget_chars=_require_non_negative_int(payload, "budget_chars"),
-            used_chars=_require_non_negative_int(payload, "used_chars"),
-            omission_receipts=tuple(
-                WorkbenchOmissionReceipt.from_json_payload(item)
-                for item in _optional_list(payload, "omission_receipts")
-            ),
+            content_md=_require_raw_string(payload, "content_md"),
+            content_sha256=_require_string(payload, "content_sha256"),
         )
 
 
@@ -1166,16 +1033,14 @@ def build_analysis_workbench(
     context_packet_id: str,
     evidence_records: tuple[EvidenceLedgerRecord, ...],
     target_pages: tuple[PageReadResult, ...] = (),
+    operator_context: OperatorContextSnapshot | None = None,
     claim_card_ids: tuple[str, ...] = (),
     market_context: MarketContextSnapshot | None = None,
     memory_read_policy: str = "",
     runtime_scope: Literal["live", "replay"] = "live",
     run_id: str = "",
     unit_formation_lane: UnitFormationLane | None = None,
-) -> tuple[
-    AnalysisWorkbench,
-    tuple[WorkbenchCompilerReadReceipt | OperatorContextCompilerReadReceipt, ...],
-]:
+) -> tuple[AnalysisWorkbench, tuple[WorkbenchCompilerReadReceipt, ...]]:
     business_at = _normalize_datetime(business_at)
     evidence_lane = _build_evidence_lane(evidence_records, business_at=business_at)
     memory_impact_lane, memory_receipts = _build_memory_impact_lane(
@@ -1188,14 +1053,9 @@ def build_analysis_workbench(
         runtime_scope=runtime_scope,
         run_id=run_id,
     )
-    operator_context_lane, operator_context_receipts = _build_operator_context_lane(
+    operator_context_lane = _build_operator_context_lane(
         target_key=target_key,
-        business_at=business_at,
-        context_packet_id=context_packet_id,
-        target_pages=target_pages,
-        memory_read_policy=memory_read_policy,
-        runtime_scope=runtime_scope,
-        run_id=run_id,
+        operator_context=operator_context,
     )
     market_lane = _build_market_lane(
         target_key=target_key,
@@ -1226,7 +1086,7 @@ def build_analysis_workbench(
         method_lane=_build_method_lane(),
         market_setup_lane=market_setup_lane,
         unit_formation_lane=unit_formation_lane,
-    ), (*memory_receipts, *operator_context_receipts)
+    ), memory_receipts
 
 
 def hash_analysis_workbench_payload(workbench: AnalysisWorkbench) -> str:
@@ -1381,97 +1241,25 @@ def _build_memory_impact_lane(
 def _build_operator_context_lane(
     *,
     target_key: str,
-    business_at: datetime,
-    context_packet_id: str,
-    target_pages: tuple[PageReadResult, ...],
-    memory_read_policy: str,
-    runtime_scope: Literal["live", "replay"],
-    run_id: str,
-) -> tuple[OperatorContextLane, tuple[OperatorContextCompilerReadReceipt, ...]]:
+    operator_context: OperatorContextSnapshot | None,
+) -> OperatorContextLane:
     page_path = f"targets/{target_key}/operator.md"
-    pages_by_path = {page.page_path.replace("\\", "/"): page for page in target_pages}
-    page = pages_by_path.get(page_path)
-    if page is None:
-        return _empty_operator_context_lane(
-            page_path=page_path,
-            status="missing",
-        ), ()
-    if not page.content_md.strip():
-        return _empty_operator_context_lane(
-            page_path=page_path,
-            status="empty",
-        ), ()
-
-    try:
-        source_cards = parse_operator_context_page(
-            page.content_md,
-            target_key=target_key,
+    if operator_context is None:
+        return OperatorContextLane(page_path, "missing", "", "")
+    if operator_context.target_key != target_key:
+        raise AnalysisWorkbenchError(
+            "operator context target_key must match the Analysis Workbench target_key."
         )
-    except OperatorContextContractError as exc:
-        raise AnalysisWorkbenchError(f"operator.md is malformed: {exc}") from exc
-
-    included_cards: list[WorkbenchOperatorContextCard] = []
-    receipts: list[OperatorContextCompilerReadReceipt] = []
-    omissions: list[WorkbenchOmissionReceipt] = []
-    used_chars = 0
-
-    for source_card in sorted(source_cards, key=_operator_context_card_sort_key):
-        omission_reason = _operator_context_card_omission_reason(
-            source_card,
+    page_path = operator_context.page_path
+    if not operator_context.content_md.strip():
+        return OperatorContextLane(
+            page_path, "empty", "", operator_context.content_sha256
         )
-        if omission_reason is not None:
-            omissions.append(
-                WorkbenchOmissionReceipt(
-                    lane="operator_context",
-                    budget_chars=MAX_OPERATOR_CONTEXT_LANE_CHARS,
-                    used_chars=used_chars,
-                    omitted_ref=source_card.card_id,
-                    reason=omission_reason,
-                    available_via="read_section",
-                )
-            )
-            continue
-
-        candidate_card, candidate_receipt = _operator_context_workbench_card(
-            target_key=target_key,
-            business_at=business_at,
-            context_packet_id=context_packet_id,
-            page_path=page_path,
-            source_card=source_card,
-            memory_read_policy=memory_read_policy,
-            runtime_scope=runtime_scope,
-            run_id=run_id,
-        )
-        card_chars = _json_char_count(candidate_card.to_json_payload())
-        if used_chars + card_chars > MAX_OPERATOR_CONTEXT_LANE_CHARS:
-            omissions.append(
-                WorkbenchOmissionReceipt(
-                    lane="operator_context",
-                    budget_chars=MAX_OPERATOR_CONTEXT_LANE_CHARS,
-                    used_chars=used_chars,
-                    omitted_ref=source_card.card_id,
-                    reason="lane_budget_exceeded",
-                    available_via="read_section",
-                )
-            )
-            continue
-        included_cards.append(candidate_card)
-        receipts.append(candidate_receipt)
-        used_chars += card_chars
-
-    return (
-        OperatorContextLane(
-            page_path=page_path,
-            page_status="available",
-            cards=tuple(included_cards),
-            active_card_ids=tuple(
-                card.card_id for card in included_cards if card.status == "active"
-            ),
-            budget_chars=MAX_OPERATOR_CONTEXT_LANE_CHARS,
-            used_chars=used_chars,
-            omission_receipts=tuple(omissions),
-        ),
-        tuple(receipts),
+    return OperatorContextLane(
+        page_path=page_path,
+        page_status="available",
+        content_md=operator_context.content_md,
+        content_sha256=operator_context.content_sha256,
     )
 
 
@@ -1916,90 +1704,6 @@ def _memory_card_for_section(
     return card, receipt
 
 
-def _empty_operator_context_lane(
-    *,
-    page_path: str,
-    status: OperatorContextPageStatus,
-) -> OperatorContextLane:
-    return OperatorContextLane(
-        page_path=page_path,
-        page_status=status,
-        cards=(),
-        active_card_ids=(),
-        budget_chars=MAX_OPERATOR_CONTEXT_LANE_CHARS,
-        used_chars=0,
-        omission_receipts=(),
-    )
-
-
-def _operator_context_card_omission_reason(
-    card: OperatorContextCard,
-) -> str | None:
-    if card.is_retired:
-        return "retired_operator_context_card"
-    return None
-
-
-def _operator_context_workbench_card(
-    *,
-    target_key: str,
-    business_at: datetime,
-    context_packet_id: str,
-    page_path: str,
-    source_card: OperatorContextCard,
-    memory_read_policy: str,
-    runtime_scope: Literal["live", "replay"],
-    run_id: str,
-) -> tuple[WorkbenchOperatorContextCard, OperatorContextCompilerReadReceipt]:
-    excerpt = source_card.body[:OPERATOR_CONTEXT_CARD_EXCERPT_CHARS]
-    content_sha = sha256(source_card.body.encode("utf-8")).hexdigest()
-    excerpt_sha = sha256(excerpt.encode("utf-8")).hexdigest()
-    receipt_id = _operator_context_compiler_receipt_id(
-        context_packet_id=context_packet_id,
-        card_id=source_card.card_id,
-        page_path=page_path,
-        section_name=source_card.section_name,
-        content_sha256=content_sha,
-        excerpt_sha256=excerpt_sha,
-    )
-    card = WorkbenchOperatorContextCard(
-        card_id=source_card.card_id,
-        section_name=source_card.section_name,
-        status="active",
-        excerpt=excerpt,
-        content_sha256=content_sha,
-        excerpt_sha256=excerpt_sha,
-        char_count=len(source_card.body),
-        excerpt_truncated=len(source_card.body) > len(excerpt),
-        full_section_available_via="read_section",
-        compiler_read_receipt_id=receipt_id,
-    )
-    receipt = OperatorContextCompilerReadReceipt(
-        receipt_id=receipt_id,
-        context_packet_id=context_packet_id,
-        stage="analysis",
-        target_key=target_key,
-        business_at=business_at,
-        runtime_scope=runtime_scope,
-        run_id=run_id if runtime_scope == "replay" else "",
-        page_path=page_path,
-        section_name=source_card.section_name,
-        content_sha256=content_sha,
-        excerpt_sha256=excerpt_sha,
-        excerpt_char_count=len(excerpt),
-        excerpt_truncated=card.excerpt_truncated,
-        read_policy=memory_read_policy,
-        read_run_id=run_id if runtime_scope == "replay" else "",
-    )
-    return card, receipt
-
-
-def _operator_context_card_sort_key(
-    card: OperatorContextCard,
-) -> tuple[str, str]:
-    return card.section_name, card.card_id
-
-
 def _evidence_card(
     record: EvidenceLedgerRecord,
     *,
@@ -2092,22 +1796,6 @@ def _find_memory_section(content_md: str, *, section_name: str) -> dict[str, obj
         return None
 
 
-def _find_operator_context_section(
-    content_md: str,
-    *,
-    section_name: str,
-) -> dict[str, object] | None:
-    try:
-        return find_markdown_section(
-            content_md,
-            heading=section_name,
-            heading_level=2,
-            excerpt_char_limit=OPERATOR_CONTEXT_CARD_EXCERPT_CHARS,
-        )
-    except MarkdownContextError:
-        return None
-
-
 def _memory_card_id(*, page_path: str, section_name: str) -> str:
     return f"{page_path}:{section_name}"
 
@@ -2136,34 +1824,6 @@ def _compiler_receipt_id(
         ).encode("utf-8")
     ).hexdigest()
     return f"workbench-compiler-memory-read:{digest}"
-
-
-def _operator_context_compiler_receipt_id(
-    *,
-    context_packet_id: str,
-    card_id: str,
-    page_path: str,
-    section_name: str,
-    content_sha256: str,
-    excerpt_sha256: str,
-) -> str:
-    digest = sha256(
-        json.dumps(
-            {
-                "context_packet_id": context_packet_id,
-                "card_id": card_id,
-                "page_path": page_path,
-                "section_name": section_name,
-                "content_sha256": content_sha256,
-                "excerpt_sha256": excerpt_sha256,
-                "compiler_policy_version": WORKBENCH_COMPILER_POLICY_VERSION,
-            },
-            ensure_ascii=False,
-            sort_keys=True,
-            separators=(",", ":"),
-        ).encode("utf-8")
-    ).hexdigest()
-    return f"operator-context-compiler-read:{digest}"
 
 
 def _safe_event_type(record: EvidenceLedgerRecord) -> str:
@@ -2251,14 +1911,6 @@ def _operator_context_page_status(value: object) -> OperatorContextPageStatus:
     if value in {"available", "missing", "empty"}:
         return value  # type: ignore[return-value]
     raise AnalysisWorkbenchError("operator context page status is invalid.")
-
-
-def _workbench_operator_context_card_status(
-    value: object,
-) -> WorkbenchOperatorContextCardStatus:
-    if value == "active":
-        return value  # type: ignore[return-value]
-    raise AnalysisWorkbenchError("operator context card status is invalid.")
 
 
 def _validate_market_payload_is_low_commitment(payload: object) -> None:
@@ -2483,9 +2135,7 @@ __all__ = [
     "MAX_MARKET_LANE_CHARS",
     "MAX_MEMORY_IMPACT_LANE_CHARS",
     "MAX_METHOD_LANE_CHARS",
-    "MAX_OPERATOR_CONTEXT_LANE_CHARS",
     "MEMORY_SECTION_EXCERPT_CHARS",
-    "OPERATOR_CONTEXT_CARD_EXCERPT_CHARS",
     "WORKBENCH_COMPILER_POLICY_VERSION",
     "AnalysisWorkbench",
     "AnalysisWorkbenchError",
@@ -2498,14 +2148,12 @@ __all__ = [
     "MarketRecapReconciliation",
     "MemoryImpactLane",
     "MethodLane",
-    "OperatorContextCompilerReadReceipt",
     "OperatorContextLane",
     "OperatorSourceMetadata",
     "WorkbenchCompilerReadReceipt",
     "WorkbenchEvidenceCard",
     "WorkbenchMemoryCard",
     "WorkbenchOmissionReceipt",
-    "WorkbenchOperatorContextCard",
     "WorkbenchSourceExcerpt",
     "build_analysis_workbench",
     "hash_analysis_workbench_payload",

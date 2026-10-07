@@ -145,7 +145,7 @@ def calculate_cumulative_equity_series(
 
         while (
             event_index < len(ordered_events)
-            and ordered_events[event_index].effective_at <= bar.start_at
+            and ordered_events[event_index].effective_at < bar.end_at
         ):
             event = ordered_events[event_index]
             event_price = (
@@ -189,9 +189,9 @@ def _normalize_events(events: tuple[TargetWeightEvent, ...]) -> tuple[TargetWeig
         if not isinstance(event, TargetWeightEvent):
             raise PositionPerformanceError("events must contain TargetWeightEvent values.")
         by_effective_at[event.effective_at] = event
-    return tuple(
-        event for _, event in sorted(by_effective_at.items(), key=lambda item: item[0])
-    )
+    return tuple(event for _, event in sorted(by_effective_at.items(), key=lambda item: item[0]))
+
+
 __all__ = [
     "PositionPerformanceError",
     "StrategyLinePoint",

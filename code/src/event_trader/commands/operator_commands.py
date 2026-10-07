@@ -32,18 +32,20 @@ from event_trader.ingest.admission import (
     shape_admission_outputs,
     validate_admission_request,
 )
+from event_trader.operator_context import operator_context_path, replace_operator_context
 from event_trader.research_memory import (
     FileBackedIndexLogWriter,
     ReceiptedResearchMemoryPageWriter,
     ResearchMemoryWriteAttribution,
 )
-from event_trader.runtime.source_publisher import RuntimeRawSourcePublisher
 from event_trader.runtime.bootstrap import LiveRuntimeHost
+from event_trader.runtime.source_publisher import RuntimeRawSourcePublisher
 from event_trader.storage import WorkspaceLayout
 from event_trader.web_search_runtime import release_live_web_search_materials
 
 type OperatorInjectionMode = Literal["evidence", "wiki"]
 type OperatorWikiWriteMode = Literal[
+    "replace_operator_context",
     "update_index",
     "append_log_entry",
     "update_page_section",
@@ -53,6 +55,7 @@ type OperatorWikiWriteMode = Literal[
 
 _OPERATOR_WIKI_WRITE_MODES = frozenset(
     {
+        "replace_operator_context",
         "update_index",
         "append_log_entry",
         "update_page_section",
@@ -338,7 +341,7 @@ def inject_authoritative_wiki(
     write_mode: OperatorWikiWriteMode,
     content_md: str,
     layout: WorkspaceLayout,
-    authoritative_write_intent: bool,
+    authoritative_write_intent: bool = False,
     page_path: str | None = None,
     section_name: str | None = None,
     operator_command_id: str | None = None,
@@ -397,8 +400,27 @@ def _execute_operator_wiki_write(
     operator_command_id: str | None,
     business_at: datetime | None,
 ) -> tuple[str, Path]:
-    _ensure_authoritative_wiki_intent(authoritative_write_intent)
+    if write_mode == "replace_operator_context":
+        _ensure_wrapper_write_inputs(
+            write_mode=write_mode,
+            page_path=page_path,
+            section_name=section_name,
+        )
+        if scope.scope_kind != "target" or scope.target_key is None:
+            raise ResearchMemoryContractError(
+                "replace_operator_context requires a target-scoped scope_key."
+            )
+        replace_operator_context(
+            layout=layout,
+            target_key=scope.target_key,
+            content_md=content_md,
+        )
+        return (
+            f"targets/{scope.target_key}/operator.md",
+            operator_context_path(layout=layout, target_key=scope.target_key),
+        )
 
+    _ensure_authoritative_wiki_intent(authoritative_write_intent)
     wrapper = FileBackedIndexLogWriter(layout)
     committed_at = datetime.now(UTC)
 
@@ -687,9 +709,7 @@ def _ensure_page_path_matches_scope(*, page_ref: PageRef, scope: ResearchScope) 
 def _ensure_operator_wiki_page_allowed(*, page_ref: PageRef) -> None:
     if page_ref.page_kind == "operator":
         raise ResearchMemoryContractError(
-            "targets/<target>/operator.md must be updated through "
-            "OperatorContextWriter (use it for operator.md writes instead of "
-            "generic authoritative wiki injection)."
+            "operator.md only accepts the replace_operator_context write mode."
         )
     if page_ref.page_kind == "review":
         raise ResearchMemoryContractError(

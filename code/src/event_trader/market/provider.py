@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import tempfile
+from collections.abc import Mapping
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from threading import RLock
@@ -15,7 +16,11 @@ from urllib.parse import urlencode, urlparse
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
-from event_trader.config import KernelConfig
+from event_trader.config import (
+    KernelConfig,
+    MarketDataProviderConfig,
+    ValidationMarketDataConfig,
+)
 from event_trader.contracts.view_state_change import (
     ExchangeSessionScope,
     MarketDataBar,
@@ -33,7 +38,6 @@ from event_trader.market.contracts import (
 from event_trader.market.local_archive_provider import (
     build_local_archive_market_data_provider,
 )
-from event_trader.market.store import FileBackedMarketDataStore, MarketDataStoreError
 from event_trader.validation.market_data import ApiStocksMarketDataPort
 
 _BC_PRIVATE_STOCK_BARS_PER_REQUEST = 120
@@ -47,8 +51,40 @@ _FUTU_TIMEZONE_BY_CODE_PREFIX = {
     "SH": "Asia/Shanghai",
     "SZ": "Asia/Shanghai",
 }
-_FUTU_RAW_PRICE_CODE_PREFIXES = frozenset({"SH", "SZ"})
 _FUTU_APPDATA_FALLBACK_DIRNAME = "event_trader_futu_appdata"
+_BINANCE_SPOT_KLINES_ROUTE = "/api/v3/klines"
+_BINANCE_SPOT_KLINES_PER_REQUEST = 1_000
+_BINANCE_SPOT_KLINE_INTERVALS = {
+    "1m": timedelta(minutes=1),
+    "3m": timedelta(minutes=3),
+    "5m": timedelta(minutes=5),
+    "15m": timedelta(minutes=15),
+    "30m": timedelta(minutes=30),
+    "1h": timedelta(hours=1),
+    "2h": timedelta(hours=2),
+    "4h": timedelta(hours=4),
+    "6h": timedelta(hours=6),
+    "8h": timedelta(hours=8),
+    "12h": timedelta(hours=12),
+    "1d": timedelta(days=1),
+    "3d": timedelta(days=3),
+}
+_HYPERLIQUID_INFO_ROUTE = "/info"
+_HYPERLIQUID_CANDLES_PER_REQUEST = 500
+_HYPERLIQUID_CANDLE_INTERVALS = {
+    "1m": timedelta(minutes=1),
+    "3m": timedelta(minutes=3),
+    "5m": timedelta(minutes=5),
+    "15m": timedelta(minutes=15),
+    "30m": timedelta(minutes=30),
+    "1h": timedelta(hours=1),
+    "2h": timedelta(hours=2),
+    "4h": timedelta(hours=4),
+    "8h": timedelta(hours=8),
+    "12h": timedelta(hours=12),
+    "1d": timedelta(days=1),
+    "3d": timedelta(days=3),
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -635,6 +671,323 @@ class BcPrivateMarketDataProvider:
         return payload
 
 
+class BinanceSpotMarketDataProvider:
+    """Binance Spot REST-backed provider for completed UTC crypto OHLCV bars."""
+
+    def __init__(self, config: KernelConfig) -> None:
+        if config.validation is None:
+            raise ValueError("validation config is required for Binance Spot market data.")
+        market_data_config = config.validation.market_data
+        if market_data_config.provider != "binance_spot":
+            raise ValueError(
+                "Binance Spot provider requires validation.market_data.provider=binance_spot."
+            )
+        self._base_url = market_data_config.base_url.rstrip("/")
+        self._timeout_seconds = market_data_config.timeout_seconds
+        self._source_metadata: dict[str, object] = {}
+
+    def read_series(
+        self,
+        mapping: MarketMapping,
+        *,
+        start_at: datetime,
+        end_at: datetime,
+    ) -> MarketDataSeries:
+        normalized_start = _ensure_utc(start_at, field_name="start_at")
+        normalized_end = _ensure_utc(end_at, field_name="end_at")
+        if normalized_start >= normalized_end:
+            raise ValueError("invalid window: start_at must be earlier than end_at.")
+        if mapping.market_session != "continuous" or mapping.exchange is not None:
+            raise ValueError(
+                "binance_spot bars require a continuous market mapping without exchange."
+            )
+        interval, bar_delta = _binance_spot_kline_interval(mapping.bar_granularity)
+        symbol = mapping.market_symbol.strip().upper()
+        if not symbol:
+            raise ValueError("binance_spot market_symbol must not be empty.")
+
+        bars_by_key: dict[tuple[datetime, datetime], MarketDataBar] = {}
+        cursor = normalized_start
+        request_count = 0
+        while cursor < normalized_end:
+            request_count += 1
+            rows = self._fetch_klines(
+                symbol=symbol,
+                interval=interval,
+                start_at=cursor,
+                end_at=normalized_end,
+            )
+            if not rows:
+                break
+            previous_cursor = cursor
+            for index, row in enumerate(rows):
+                bar = _parse_binance_spot_kline(
+                    row,
+                    bar_delta=bar_delta,
+                    symbol=symbol,
+                    item_index=index,
+                )
+                if bar.end_at > normalized_start and bar.end_at <= normalized_end:
+                    bars_by_key[(bar.start_at, bar.end_at)] = bar
+                if bar.start_at >= cursor:
+                    cursor = bar.start_at + bar_delta
+            if cursor <= previous_cursor:
+                raise ValueError(
+                    f"Binance Spot K-line response did not advance for symbol {symbol!r}."
+                )
+            if len(rows) < _BINANCE_SPOT_KLINES_PER_REQUEST:
+                break
+
+        bars = tuple(
+            bar
+            for _, bar in sorted(
+                bars_by_key.items(),
+                key=lambda item: (item[0][0], item[0][1]),
+            )
+        )
+        self._source_metadata.update(
+            {
+                "provider": "binance_spot",
+                "remote_fallback": True,
+                "requested_symbol": mapping.market_symbol,
+                "binance_symbol": symbol,
+                "interval": interval,
+                "request_count": request_count,
+                "returned_bar_count": len(bars),
+                "timeout_seconds": self._timeout_seconds,
+                "timezone": "UTC",
+                "timestamp_policy": "completed_interval_end",
+                "market_session": mapping.market_session,
+                "adjustment_policy": "raw",
+            }
+        )
+        if not bars:
+            raise ValueError(f"empty Binance Spot bars for symbol {symbol!r}.")
+        try:
+            return MarketDataSeries(bars=bars)
+        except ViewStateChangeContractError as exc:
+            raise ValueError(
+                f"invalid Binance Spot bar series for symbol {symbol!r}: {exc}"
+            ) from exc
+
+    def pop_source_metadata(self) -> dict[str, object]:
+        metadata = dict(self._source_metadata)
+        self._source_metadata.clear()
+        return metadata
+
+    def _fetch_klines(
+        self,
+        *,
+        symbol: str,
+        interval: str,
+        start_at: datetime,
+        end_at: datetime,
+    ) -> list[object]:
+        query = urlencode(
+            {
+                "symbol": symbol,
+                "interval": interval,
+                "startTime": _epoch_milliseconds(start_at),
+                "endTime": _epoch_milliseconds(end_at) - 1,
+                "limit": _BINANCE_SPOT_KLINES_PER_REQUEST,
+            }
+        )
+        request = Request(
+            url=f"{self._base_url}{_BINANCE_SPOT_KLINES_ROUTE}?{query}",
+            headers={"Accept": "application/json"},
+        )
+        with urlopen(request, timeout=self._timeout_seconds) as response:
+            payload_bytes = response.read()
+        try:
+            payload = json.loads(payload_bytes.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ValueError("Binance Spot K-line response must be valid UTF-8 JSON.") from exc
+        if not isinstance(payload, list):
+            raise ValueError("Binance Spot K-line response must be a JSON array.")
+        return payload
+
+
+class HyperliquidPerpMarketDataProvider:
+    """Hyperliquid perpetual REST-backed provider for completed UTC OHLCV bars."""
+
+    def __init__(self, config: KernelConfig) -> None:
+        market_data_config = _market_data_provider_config(
+            config,
+            provider_name="hyperliquid_perp",
+        )
+        self._base_url = market_data_config.base_url.rstrip("/")
+        self._timeout_seconds = market_data_config.timeout_seconds
+        self._source_metadata: dict[str, object] = {}
+
+    def read_series(
+        self,
+        mapping: MarketMapping,
+        *,
+        start_at: datetime,
+        end_at: datetime,
+    ) -> MarketDataSeries:
+        normalized_start = _ensure_utc(start_at, field_name="start_at")
+        normalized_end = _ensure_utc(end_at, field_name="end_at")
+        if normalized_start >= normalized_end:
+            raise ValueError("invalid window: start_at must be earlier than end_at.")
+        if mapping.market_session != "continuous" or mapping.exchange is not None:
+            raise ValueError(
+                "hyperliquid_perp bars require a continuous market mapping without exchange."
+            )
+        interval, bar_delta = _hyperliquid_candle_interval(mapping.bar_granularity)
+        coin = _hyperliquid_perp_coin(mapping.market_symbol)
+        bars_by_key: dict[tuple[datetime, datetime], MarketDataBar] = {}
+        cursor = normalized_start
+        request_count = 0
+        while cursor < normalized_end:
+            request_count += 1
+            rows = self._fetch_candles(
+                coin=coin,
+                interval=interval,
+                start_at=cursor,
+                end_at=normalized_end,
+            )
+            if not rows:
+                break
+            previous_cursor = cursor
+            for index, row in enumerate(rows):
+                bar = _parse_hyperliquid_candle(
+                    row,
+                    bar_delta=bar_delta,
+                    coin=coin,
+                    item_index=index,
+                )
+                if bar.end_at > normalized_start and bar.end_at <= normalized_end:
+                    bars_by_key[(bar.start_at, bar.end_at)] = bar
+                if bar.start_at >= cursor:
+                    cursor = bar.start_at + bar_delta
+            if cursor <= previous_cursor:
+                raise ValueError(
+                    "Hyperliquid candle response did not advance for "
+                    f"coin {coin!r}."
+                )
+            if len(rows) < _HYPERLIQUID_CANDLES_PER_REQUEST:
+                break
+
+        bars = tuple(
+            bar
+            for _, bar in sorted(
+                bars_by_key.items(),
+                key=lambda item: (item[0][0], item[0][1]),
+            )
+        )
+        self._source_metadata.update(
+            {
+                "provider": "hyperliquid_perp",
+                "remote_fallback": True,
+                "requested_symbol": mapping.market_symbol,
+                "hyperliquid_coin": coin,
+                "interval": interval,
+                "request_count": request_count,
+                "returned_bar_count": len(bars),
+                "timeout_seconds": self._timeout_seconds,
+                "timezone": "UTC",
+                "timestamp_policy": "completed_interval_end",
+                "market_session": "continuous",
+                "adjustment_policy": "raw",
+            }
+        )
+        return MarketDataSeries(bars=bars)
+
+    def pop_source_metadata(self) -> dict[str, object]:
+        metadata = dict(self._source_metadata)
+        self._source_metadata.clear()
+        return metadata
+
+    def _fetch_candles(
+        self,
+        *,
+        coin: str,
+        interval: str,
+        start_at: datetime,
+        end_at: datetime,
+    ) -> list[object]:
+        payload = {
+            "type": "candleSnapshot",
+            "req": {
+                "coin": coin,
+                "interval": interval,
+                "startTime": _epoch_milliseconds(start_at),
+                "endTime": _epoch_milliseconds(end_at),
+            },
+        }
+        request = Request(
+            url=f"{self._base_url}{_HYPERLIQUID_INFO_ROUTE}",
+            data=json.dumps(payload, separators=(",", ":")).encode("utf-8"),
+            headers={"Accept": "application/json", "Content-Type": "application/json"},
+            method="POST",
+        )
+        with urlopen(request, timeout=self._timeout_seconds) as response:
+            payload_bytes = response.read()
+        try:
+            response_payload = json.loads(payload_bytes.decode("utf-8"))
+        except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+            raise ValueError("Hyperliquid candle response must be valid UTF-8 JSON.") from exc
+        if not isinstance(response_payload, list):
+            raise ValueError("Hyperliquid candle response must be a JSON array.")
+        return response_payload
+
+
+class SubscriptionRoutedMarketBarsProvider:
+    """Route each configured live subscription to its declared provider."""
+
+    def __init__(
+        self,
+        *,
+        providers: Mapping[str, MarketBarsProvider],
+        provider_names: Mapping[tuple[str, str], str],
+        default_provider_name: str,
+    ) -> None:
+        self._providers = dict(providers)
+        self._provider_names = {
+            (target_key, symbol.upper()): provider_name
+            for (target_key, symbol), provider_name in provider_names.items()
+        }
+        self._default_provider_name = default_provider_name
+        self._source_metadata: dict[str, object] = {}
+        self._lock = RLock()
+
+    def read_series(
+        self,
+        mapping: MarketMapping,
+        *,
+        start_at: datetime,
+        end_at: datetime,
+    ) -> MarketDataSeries:
+        provider_name = self._provider_names.get(
+            (mapping.target_key, mapping.market_symbol.upper()),
+            self._default_provider_name,
+        )
+        provider = self._providers.get(provider_name)
+        if provider is None:
+            raise ValueError(f"No market-bars provider is configured for {provider_name!r}.")
+        with self._lock:
+            series = provider.read_series(mapping, start_at=start_at, end_at=end_at)
+            consume = getattr(provider, "pop_source_metadata", None)
+            metadata = consume() if callable(consume) else {}
+            self._source_metadata = (
+                dict(metadata) if isinstance(metadata, dict) else {"provider": provider_name}
+            )
+        return series
+
+    def pop_source_metadata(self) -> dict[str, object]:
+        with self._lock:
+            metadata = dict(self._source_metadata)
+            self._source_metadata.clear()
+            return metadata
+
+    def close(self) -> None:
+        for provider in self._providers.values():
+            close = getattr(provider, "close", None)
+            if callable(close):
+                close()
+
+
 class FutuOpenApiMarketDataProvider:
     """Futu OpenD-backed stock/ETF bar provider."""
 
@@ -644,11 +997,10 @@ class FutuOpenApiMarketDataProvider:
         *,
         futu_module: Any | None = None,
     ) -> None:
-        if config.validation is None:
-            raise ValueError("validation config is required for Futu market data.")
-        market_data_config = config.validation.market_data
-        if market_data_config.provider != "futu_openapi":
-            raise ValueError("Futu provider requires validation.market_data.provider=futu_openapi.")
+        market_data_config = _market_data_provider_config(
+            config,
+            provider_name="futu_openapi",
+        )
         host, port = _parse_futu_openapi_endpoint(market_data_config.base_url)
         self._host = host
         self._port = port
@@ -680,11 +1032,7 @@ class FutuOpenApiMarketDataProvider:
             bar_granularity=mapping.bar_granularity,
             futu_code=futu_code,
         )
-        autype, adjustment_policy = _futu_history_autype(
-            futu,
-            mapping=mapping,
-            futu_code=futu_code,
-        )
+        autype, adjustment_policy = _futu_history_autype(futu)
         request_start, request_end = _futu_history_dates(
             start_at=normalized_start,
             end_at=normalized_end,
@@ -786,237 +1134,30 @@ class FutuOpenApiMarketDataProvider:
                 raise
 
 
-class CachedReplayMarketDataProvider:
-    """Replay-local provider backed only by prefetched market observations."""
-
-    def __init__(self, store: FileBackedMarketDataStore) -> None:
-        self._store = store
-        self._source_metadata: dict[str, object] = {
-            "provider": "cached_replay_market_data",
-            "remote_fallback": False,
-        }
-
-    def read_series(
-        self,
-        mapping: MarketMapping,
-        *,
-        start_at: datetime,
-        end_at: datetime,
-    ) -> MarketDataSeries:
-        series, metadata = self.read_series_with_metadata(
-            mapping,
-            start_at=start_at,
-            end_at=end_at,
-        )
-        self._source_metadata.update(metadata)
-        return series
-
-    def read_series_with_metadata(
-        self,
-        mapping: MarketMapping,
-        *,
-        start_at: datetime,
-        end_at: datetime,
-    ) -> tuple[MarketDataSeries, dict[str, object]]:
-        try:
-            series = self._store.read_bars(
-                symbol=mapping.market_symbol,
-                granularity=mapping.bar_granularity,
-                start_at=start_at,
-                end_at=end_at,
-            )
-        except MarketDataStoreError as exc:
-            raise ValueError(f"missing prefetched market bars: {exc}") from exc
-        manifest = self._store.read_manifest()
-        metadata = {
-            "provider": "cached_replay_market_data",
-            "remote_fallback": False,
-            "cached_symbol": mapping.market_symbol,
-            "cached_bar_count": len(series.bars),
-            "cached_store_root": self._store.root.as_posix(),
-        }
-        timezone_name = manifest.source_metadata.get(f"bars_{mapping.market_symbol}_timezone")
-        if isinstance(timezone_name, str) and timezone_name.strip():
-            metadata["cached_timezone"] = timezone_name
-        return series, metadata
-
-    def read_option_chain(
-        self,
-        *,
-        underlying_symbol: str,
-        as_of_at: datetime,
-        underlying_price: float,
-        policy: OptionSelectionPolicy,
-    ) -> tuple[OptionContractSnapshot, ...]:
-        _ = (as_of_at, underlying_price, policy)
-        return self.read_option_chain_metadata(
-            underlying_symbol=underlying_symbol,
-            as_of_at=as_of_at,
-            underlying_price=underlying_price,
-            policy=policy,
-        )
-
-    def read_option_chain_metadata(
-        self,
-        *,
-        underlying_symbol: str,
-        as_of_at: datetime,
-        underlying_price: float,
-        policy: OptionSelectionPolicy,
-    ) -> tuple[OptionContractSnapshot, ...]:
-        _ = (as_of_at, underlying_price, policy)
-        rows = self._store.read_option_chain_metadata(
-            underlying_symbol=underlying_symbol,
-        )
-        self._source_metadata.update(
-            {
-                "provider": "cached_replay_market_data",
-                "remote_fallback": False,
-                "option_chain_metadata_cached_count": len(rows),
-            }
-        )
-        return rows
-
-    def read_latest_option_trades(
-        self,
-        *,
-        contracts: tuple[OptionContractSnapshot, ...],
-        as_of_at: datetime,
-        policy: OptionSelectionPolicy,
-    ) -> tuple[OptionTradeObservation, ...]:
-        _ = policy
-        if not contracts:
-            return ()
-        symbols = tuple(contract.contract_symbol for contract in contracts)
-        rows = self._store.read_option_trades(
-            contract_symbols=symbols,
-            start_at=datetime.min.replace(tzinfo=UTC),
-            end_at=as_of_at,
-        )
-        latest_by_symbol: dict[str, OptionTradeObservation] = {}
-        for trade in rows:
-            existing = latest_by_symbol.get(trade.contract_symbol)
-            if existing is None or trade.observed_at > existing.observed_at:
-                latest_by_symbol[trade.contract_symbol] = trade
-        return tuple(
-            latest_by_symbol[symbol]
-            for symbol in symbols
-            if symbol in latest_by_symbol
-        )
-
-    def read_latest_option_quotes(
-        self,
-        *,
-        contracts: tuple[OptionContractSnapshot, ...],
-        as_of_at: datetime,
-        policy: OptionSelectionPolicy,
-    ) -> tuple[OptionContractSnapshot, ...]:
-        _ = policy
-        if not contracts:
-            return ()
-        symbols = frozenset(contract.contract_symbol for contract in contracts)
-        return tuple(
-            row
-            for row in self._store.read_option_chain_metadata(
-                underlying_symbol=contracts[0].underlying_symbol,
-            )
-            if (
-                row.contract_symbol in symbols
-                and row.latest_quote_at is not None
-                and row.latest_quote_at <= as_of_at
-            )
-        )
-
-    def read_option_latest_trades(
-        self,
-        *,
-        contracts: tuple[OptionContractSnapshot, ...],
-        as_of_at: datetime,
-        policy: OptionSelectionPolicy,
-    ) -> tuple[OptionTradeObservation, ...]:
-        return self.read_latest_option_trades(
-            contracts=contracts,
-            as_of_at=as_of_at,
-            policy=policy,
-        )
-
-    def read_option_latest_quotes(
-        self,
-        *,
-        contracts: tuple[OptionContractSnapshot, ...],
-        as_of_at: datetime,
-        policy: OptionSelectionPolicy,
-    ) -> tuple[OptionContractSnapshot, ...]:
-        return self.read_latest_option_quotes(
-            contracts=contracts,
-            as_of_at=as_of_at,
-            policy=policy,
-        )
-
-    def read_option_trades(
-        self,
-        *,
-        contracts: tuple[OptionContractSnapshot, ...],
-        start_at: datetime,
-        end_at: datetime,
-        policy: OptionSelectionPolicy,
-    ) -> tuple[OptionTradeObservation, ...]:
-        _ = policy
-        rows = self._store.read_option_trades(
-            contract_symbols=tuple(contract.contract_symbol for contract in contracts),
-            start_at=start_at,
-            end_at=end_at,
-        )
-        self._source_metadata.update(
-            {
-                "provider": "cached_replay_market_data",
-                "remote_fallback": False,
-                "option_trades_cached_count": len(rows),
-            }
-        )
-        return rows
-
-    def read_option_bars(
-        self,
-        *,
-        contracts: tuple[OptionContractSnapshot, ...],
-        start_at: datetime,
-        end_at: datetime,
-        policy: OptionSelectionPolicy,
-    ) -> tuple[OptionBarObservation, ...]:
-        _ = policy
-        rows = self._store.read_option_bars(
-            contract_symbols=tuple(contract.contract_symbol for contract in contracts),
-            start_at=start_at,
-            end_at=end_at,
-        )
-        self._source_metadata.update(
-            {
-                "provider": "cached_replay_market_data",
-                "remote_fallback": False,
-                "option_bars_cached_count": len(rows),
-            }
-        )
-        return rows
-
-    def pop_source_metadata(self) -> dict[str, object]:
-        metadata = dict(self._source_metadata)
-        self._source_metadata = {
-            "provider": "cached_replay_market_data",
-            "remote_fallback": False,
-        }
-        return metadata
-
-
 def build_default_market_bars_provider(config: KernelConfig) -> MarketBarsProvider | None:
     """Build the shared market-bars provider from existing validation config."""
     if config.validation is None:
         return None
-    if config.validation.market_data.provider == "bc_private_v1":
-        return BcPrivateMarketDataProvider(config)
-    if config.validation.market_data.provider == "futu_openapi":
-        return FutuOpenApiMarketDataProvider(config)
-    return ApiStocksMarketDataPort(config.validation.market_data)
+    default_provider_name = config.validation.market_data.provider
+    provider_names = _live_subscription_provider_names(config)
+    distinct_provider_names = {default_provider_name, *provider_names.values()}
+    if not distinct_provider_names or distinct_provider_names == {default_provider_name}:
+        return _build_market_bars_provider_for_name(
+            config,
+            provider_name=default_provider_name,
+        )
+    providers = {
+        provider_name: _build_market_bars_provider_for_name(
+            config,
+            provider_name=provider_name,
+        )
+        for provider_name in sorted(distinct_provider_names)
+    }
+    return SubscriptionRoutedMarketBarsProvider(
+        providers=providers,
+        provider_names=provider_names,
+        default_provider_name=default_provider_name,
+    )
 
 
 def build_market_bars_provider(
@@ -1027,21 +1168,71 @@ def build_market_bars_provider(
     """Build one supported replay/live market-bars provider by concrete name."""
     if provider_name == "local_archive":
         return build_local_archive_market_data_provider(config)
+    return _build_market_bars_provider_for_name(config, provider_name=provider_name)
+
+
+def _build_market_bars_provider_for_name(
+    config: KernelConfig,
+    *,
+    provider_name: str,
+) -> MarketBarsProvider:
     configured_provider = (
         None if config.validation is None else config.validation.market_data.provider
     )
+    if provider_name == "hyperliquid_perp":
+        return HyperliquidPerpMarketDataProvider(config)
+    if provider_name == "futu_openapi":
+        return FutuOpenApiMarketDataProvider(config)
     if provider_name != configured_provider:
         raise ValueError(
             "market-data provider is not available from current validation.market_data config: "
             f"{provider_name!r}"
         )
-    provider = build_default_market_bars_provider(config)
-    if provider is None:
+    if provider_name == "bc_private_v1":
+        return BcPrivateMarketDataProvider(config)
+    if provider_name == "binance_spot":
+        return BinanceSpotMarketDataProvider(config)
+    if config.validation is None:
+        raise ValueError("market-data provider requires validation.market_data config.")
+    return ApiStocksMarketDataPort(config.validation.market_data)
+
+
+def _market_data_provider_config(
+    config: KernelConfig,
+    *,
+    provider_name: str,
+) -> ValidationMarketDataConfig | MarketDataProviderConfig:
+    if config.validation is None:
+        raise ValueError("validation config is required for market data.")
+    primary = config.validation.market_data
+    if primary.provider == provider_name:
+        return primary
+    supplemental = next(
+        (
+            connection
+            for name, connection in primary.supplemental_providers.items()
+            if name == provider_name
+        ),
+        None,
+    )
+    if supplemental is None:
         raise ValueError(
-            "market-data provider requires validation.market_data config "
-            "or an explicit provider override."
+            "market-data provider is not configured in validation.market_data: "
+            f"{provider_name!r}"
         )
-    return provider
+    return supplemental
+
+
+def _live_subscription_provider_names(config: KernelConfig) -> dict[tuple[str, str], str]:
+    live = config.live
+    market_data = None if live is None else live.market_data
+    if market_data is None or not market_data.enabled:
+        return {}
+    return {
+        (target.target_key, subscription.symbol): subscription.provider
+        for target in market_data.targets
+        for subscription in target.subscriptions
+    }
 
 
 def market_mapping_from_profile(
@@ -1220,16 +1411,15 @@ def _futu_history_timezone_name(*, mapping: MarketMapping, futu_code: str) -> st
         ) from exc
 
 
-def _futu_history_autype(
-    futu: Any,
-    *,
-    mapping: MarketMapping,
-    futu_code: str,
-) -> tuple[Any, str]:
-    _ = mapping
-    if _futu_code_prefix(futu_code) in _FUTU_RAW_PRICE_CODE_PREFIXES:
-        return futu.AuType.NONE, "raw"
-    return futu.AuType.QFQ, "qfq"
+def _futu_history_autype(futu: Any) -> tuple[Any, str]:
+    """Acquire provider bars on their raw basis.
+
+    Adjustment is a target-level policy applied explicitly by consumers that
+    configure one.  Requesting Futu QFQ data here silently turns every U.S.
+    ETF into an adjusted input, including raw targets such as SOXX.
+    """
+
+    return futu.AuType.NONE, "raw"
 
 
 def _futu_history_dates(
@@ -1271,6 +1461,131 @@ def _ensure_utc(value: datetime, *, field_name: str) -> datetime:
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError(f"{field_name} must be timezone-aware.")
     return value.astimezone(UTC)
+
+
+def _binance_spot_kline_interval(raw_value: str) -> tuple[str, timedelta]:
+    normalized = raw_value.strip().lower()
+    if normalized.endswith("min") and normalized[:-3].isdigit():
+        normalized = f"{normalized[:-3]}m"
+    bar_delta = _BINANCE_SPOT_KLINE_INTERVALS.get(normalized)
+    if bar_delta is None:
+        supported = ", ".join(_BINANCE_SPOT_KLINE_INTERVALS)
+        raise ValueError(
+            "binance_spot bar_granularity must be one of the official Binance Spot "
+            f"K-line intervals: {supported}."
+        )
+    return normalized, bar_delta
+
+
+def _hyperliquid_candle_interval(raw_value: str) -> tuple[str, timedelta]:
+    normalized = raw_value.strip().lower()
+    if normalized.endswith("min") and normalized[:-3].isdigit():
+        normalized = f"{normalized[:-3]}m"
+    bar_delta = _HYPERLIQUID_CANDLE_INTERVALS.get(normalized)
+    if bar_delta is None:
+        supported = ", ".join(_HYPERLIQUID_CANDLE_INTERVALS)
+        raise ValueError(
+            "hyperliquid_perp bar_granularity must be one of the official "
+            f"Hyperliquid candle intervals: {supported}."
+        )
+    return normalized, bar_delta
+
+
+def _hyperliquid_perp_coin(raw_value: str) -> str:
+    normalized = raw_value.strip()
+    if not normalized:
+        raise ValueError("hyperliquid_perp market_symbol must not be empty.")
+    prefix, separator, coin = normalized.partition(":")
+    if not separator:
+        return normalized.upper()
+    if not prefix or not coin:
+        raise ValueError(
+            "hyperliquid_perp HIP-3 symbols must use the '<dex>:<coin>' form."
+        )
+    return f"{prefix.lower()}:{coin.upper()}"
+
+
+def _epoch_milliseconds(value: datetime) -> int:
+    normalized = _ensure_utc(value, field_name="timestamp")
+    return int(normalized.timestamp() * 1_000)
+
+
+def _parse_binance_spot_kline(
+    row: object,
+    *,
+    bar_delta: timedelta,
+    symbol: str,
+    item_index: int,
+) -> MarketDataBar:
+    if not isinstance(row, list) or len(row) < 6:
+        raise ValueError(
+            f"Binance Spot K-line {item_index} for symbol {symbol!r} must contain "
+            "at least six values."
+        )
+    open_time = row[0]
+    if not isinstance(open_time, int):
+        raise ValueError(
+            f"Binance Spot K-line {item_index} for symbol {symbol!r} has invalid open time."
+        )
+    try:
+        start_at = datetime.fromtimestamp(open_time / 1_000, tz=UTC)
+        return MarketDataBar(
+            start_at=start_at,
+            end_at=start_at + bar_delta,
+            open_price=float(row[1]),
+            high_price=float(row[2]),
+            low_price=float(row[3]),
+            close_price=float(row[4]),
+            volume=float(row[5]),
+        )
+    except (TypeError, ValueError, OverflowError, OSError, ViewStateChangeContractError) as exc:
+        raise ValueError(
+            f"Binance Spot K-line {item_index} for symbol {symbol!r} is invalid: {exc}"
+        ) from exc
+
+
+def _parse_hyperliquid_candle(
+    row: object,
+    *,
+    bar_delta: timedelta,
+    coin: str,
+    item_index: int,
+) -> MarketDataBar:
+    if not isinstance(row, dict):
+        raise ValueError(
+            f"Hyperliquid candle {item_index} for coin {coin!r} must be a JSON object."
+        )
+    open_time = row.get("t")
+    close_time = row.get("T")
+    if not isinstance(open_time, int) or not isinstance(close_time, int):
+        raise ValueError(
+            f"Hyperliquid candle {item_index} for coin {coin!r} has invalid timestamps."
+        )
+    try:
+        start_at = datetime.fromtimestamp(open_time / 1_000, tz=UTC)
+        end_at = datetime.fromtimestamp((close_time + 1) / 1_000, tz=UTC)
+        if end_at != start_at + bar_delta:
+            raise ValueError("close timestamp does not match the requested interval")
+        return MarketDataBar(
+            start_at=start_at,
+            end_at=end_at,
+            open_price=float(row["o"]),
+            high_price=float(row["h"]),
+            low_price=float(row["l"]),
+            close_price=float(row["c"]),
+            volume=float(row["v"]),
+        )
+    except (
+        KeyError,
+        TypeError,
+        ValueError,
+        OverflowError,
+        OSError,
+        ViewStateChangeContractError,
+    ) as exc:
+        raise ValueError(
+            f"Hyperliquid candle {item_index} for coin {coin!r} is invalid: {exc}"
+        ) from exc
 
 
 def _parse_option_chain_payload(
@@ -1690,8 +2005,9 @@ def _parse_option_bar_delta(raw_value: str):
 
 __all__ = [
     "BcPrivateMarketDataProvider",
-    "CachedReplayMarketDataProvider",
+    "BinanceSpotMarketDataProvider",
     "FutuOpenApiMarketDataProvider",
+    "HyperliquidPerpMarketDataProvider",
     "MarketBarsProvider",
     "MarketDataProvider",
     "MarketOptionsProvider",

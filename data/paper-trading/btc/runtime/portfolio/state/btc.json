@@ -1,0 +1,9 @@
+{
+  "decision_episode_id": "decision-episode:pm-review:c29ac92b2f8112e6a2d1b990",
+  "source_execution_record_id": "execution-record:52d251dd698fe4022f87e09053684df0",
+  "source_pm_decision_id": "pm-decision:593e7403a2c87569873ebef051c41409",
+  "state": "weak_long",
+  "target_key": "btc",
+  "target_weight": 0.5,
+  "updated_at": "2026-09-03T15:00:00+00:00"
+}

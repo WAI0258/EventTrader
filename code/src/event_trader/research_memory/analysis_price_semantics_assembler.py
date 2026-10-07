@@ -8,16 +8,10 @@ from event_trader.contracts.analysis_assessment import AnalysisAssessment
 from event_trader.contracts.analysis_price_semantics import AnalysisPriceSemantics
 from event_trader.market.contracts import CausalPivot, MarketContextSnapshot
 from event_trader.research_memory.analysis_price_basis import (
-    canonicalize_price_level_role,
-    is_proxy_instrument_basis,
-    is_semantically_active_price_level,
     canonicalize_analysis_assessment_price_bases,
+    canonicalize_instrument_basis,
     narrowed_active_price_levels,
 )
-
-
-class AnalysisPriceSemanticsAssemblyError(ValueError):
-    """Raised when runtime market facts cannot deterministically assemble semantics."""
 
 
 def enrich_assessment_with_analysis_price_semantics(
@@ -35,7 +29,10 @@ def enrich_assessment_with_analysis_price_semantics(
     if range_path.latest_price is None:
         return assessment
 
-    instrument_basis = _instrument_basis_for_semantics(assessment=assessment)
+    instrument_basis = _instrument_basis_for_semantics(
+        assessment=assessment,
+        active_instrument_basis=market_context.tradable_proxy_symbol,
+    )
     if instrument_basis is None:
         return assessment
     active_levels = narrowed_active_price_levels(
@@ -74,44 +71,11 @@ def enrich_assessment_with_analysis_price_semantics(
 def _instrument_basis_for_semantics(
     *,
     assessment: AnalysisAssessment,
+    active_instrument_basis: str,
 ) -> str | None:
-    canonical_levels = tuple(
-        canonicalize_price_level_role(level) for level in assessment.price_level_roles
-    )
-    if not canonical_levels:
+    if not assessment.price_level_roles:
         return None
-    active_non_proxy_bases = sorted(
-        {
-            level.instrument_basis
-            for level in canonical_levels
-            if is_semantically_active_price_level(level)
-            and not is_proxy_instrument_basis(level.instrument_basis)
-        }
-    )
-    if len(active_non_proxy_bases) > 1:
-        raise AnalysisPriceSemanticsAssemblyError(
-            "analysis_price_semantics requires one unique non-proxy instrument_basis "
-            "across semantically active price levels; found "
-            f"{active_non_proxy_bases!r}."
-        )
-    if len(active_non_proxy_bases) == 1:
-        return active_non_proxy_bases[0]
-    all_non_proxy_bases = sorted(
-        {
-            level.instrument_basis
-            for level in canonical_levels
-            if not is_proxy_instrument_basis(level.instrument_basis)
-        }
-    )
-    if not all_non_proxy_bases:
-        return None
-    if len(all_non_proxy_bases) == 1:
-        return all_non_proxy_bases[0]
-    raise AnalysisPriceSemanticsAssemblyError(
-        "analysis_price_semantics requires one unique non-proxy instrument_basis "
-        "across price_level_roles when no semantically active target basis is "
-        f"available; found {all_non_proxy_bases!r}."
-    )
+    return canonicalize_instrument_basis(active_instrument_basis)
 
 
 def _latest_confirmed_pivot_price(
@@ -143,6 +107,5 @@ def _replace_analysis_price_semantics(
 
 
 __all__ = [
-    "AnalysisPriceSemanticsAssemblyError",
     "enrich_assessment_with_analysis_price_semantics",
 ]

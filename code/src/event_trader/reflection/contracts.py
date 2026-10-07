@@ -1,4 +1,4 @@
-﻿"""Typed reflection contracts outside the checker path.
+"""Typed reflection contracts outside the checker path.
 
 Reflection is a separate review module, not a second analysis path and not a
 checker-path concern. These contracts keep the seam narrow enough for future
@@ -156,13 +156,9 @@ class ReflectionContextPacket:
 
     def __post_init__(self) -> None:
         if not isinstance(self.anchor, ReviewAnchorIdentity):
-            raise ReflectionContractError(
-                "anchor must be a ReviewAnchorIdentity instance."
-            )
+            raise ReflectionContractError("anchor must be a ReviewAnchorIdentity instance.")
         if not isinstance(self.coverage, ReviewCoverage):
-            raise ReflectionContractError(
-                "coverage must be a ReviewCoverage instance."
-            )
+            raise ReflectionContractError("coverage must be a ReviewCoverage instance.")
         if not isinstance(self.outcome_context, OutcomeContextPacket):
             raise ReflectionContractError(
                 "outcome_context must be an OutcomeContextPacket instance."
@@ -293,6 +289,60 @@ type ReflectionWatchlistVerdict = Literal[
     "missing",
     "unclear",
 ]
+type ReflectionPriceRelation = Literal["below", "within", "above"]
+type ReflectionPriceTriggerKind = Literal["refresh", "invalidation"]
+type ReflectionPriceTriggerStatus = Literal["met", "not_met", "not_evaluable"]
+
+
+@dataclass(frozen=True, slots=True)
+class ReflectionPriceRelationAssessment:
+    """Agent-reported relation to one project-owned active price level."""
+
+    level_id: str
+    relation: ReflectionPriceRelation
+
+    def __post_init__(self) -> None:
+        object.__setattr__(
+            self,
+            "level_id",
+            normalize_content(
+                self.level_id,
+                field_name="level_id",
+                error_type=ReflectionContractError,
+            ),
+        )
+        if self.relation not in {"below", "within", "above"}:
+            raise ReflectionContractError("price relation must be 'below', 'within', or 'above'.")
+
+
+@dataclass(frozen=True, slots=True)
+class ReflectionPriceTriggerAssessment:
+    """Agent-reported state of one project-owned completed-close trigger."""
+
+    level_id: str
+    trigger_kind: ReflectionPriceTriggerKind
+    trigger_id: str
+    status: ReflectionPriceTriggerStatus
+
+    def __post_init__(self) -> None:
+        for field_name in ("level_id", "trigger_id"):
+            object.__setattr__(
+                self,
+                field_name,
+                normalize_content(
+                    getattr(self, field_name),
+                    field_name=field_name,
+                    error_type=ReflectionContractError,
+                ),
+            )
+        if self.trigger_kind not in {"refresh", "invalidation"}:
+            raise ReflectionContractError(
+                "price trigger kind must be 'refresh' or 'invalidation'."
+            )
+        if self.status not in {"met", "not_met", "not_evaluable"}:
+            raise ReflectionContractError(
+                "price trigger status must be 'met', 'not_met', or 'not_evaluable'."
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -392,9 +442,7 @@ class ReflectionTradeAssessment:
                 ),
             )
         if self.verdict == "not_taken" and self.return_pct is not None:
-            raise ReflectionContractError(
-                "return_pct must be None when verdict='not_taken'."
-            )
+            raise ReflectionContractError("return_pct must be None when verdict='not_taken'.")
 
 
 @dataclass(frozen=True, slots=True)
@@ -421,6 +469,8 @@ class ReflectionWatchlistAssessment:
 
     verdict: ReflectionWatchlistVerdict
     summary_md: str
+    price_relations: tuple[ReflectionPriceRelationAssessment, ...] = ()
+    price_triggers: tuple[ReflectionPriceTriggerAssessment, ...] = ()
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -437,6 +487,33 @@ class ReflectionWatchlistAssessment:
                 error_type=ReflectionContractError,
             ),
         )
+        if not isinstance(self.price_relations, tuple):
+            raise ReflectionContractError("price_relations must be a tuple.")
+        seen_level_ids: set[str] = set()
+        for relation in self.price_relations:
+            if not isinstance(relation, ReflectionPriceRelationAssessment):
+                raise ReflectionContractError(
+                    "price_relations must contain ReflectionPriceRelationAssessment values."
+                )
+            if relation.level_id in seen_level_ids:
+                raise ReflectionContractError(
+                    "price_relations must not contain duplicate level_id values."
+                )
+            seen_level_ids.add(relation.level_id)
+        if not isinstance(self.price_triggers, tuple):
+            raise ReflectionContractError("price_triggers must be a tuple.")
+        seen_triggers: set[tuple[str, ReflectionPriceTriggerKind, str]] = set()
+        for trigger in self.price_triggers:
+            if not isinstance(trigger, ReflectionPriceTriggerAssessment):
+                raise ReflectionContractError(
+                    "price_triggers must contain ReflectionPriceTriggerAssessment values."
+                )
+            identity = (trigger.level_id, trigger.trigger_kind, trigger.trigger_id)
+            if identity in seen_triggers:
+                raise ReflectionContractError(
+                    "price_triggers must not contain duplicate trigger identities."
+                )
+            seen_triggers.add(identity)
 
 
 @dataclass(frozen=True, slots=True)
@@ -499,13 +576,9 @@ class ReflectionEvaluationResult:
 
     def __post_init__(self) -> None:
         if not isinstance(self.anchor, ReviewAnchorIdentity):
-            raise ReflectionContractError(
-                "anchor must be a ReviewAnchorIdentity instance."
-            )
+            raise ReflectionContractError("anchor must be a ReviewAnchorIdentity instance.")
         if not isinstance(self.coverage, ReviewCoverage):
-            raise ReflectionContractError(
-                "coverage must be a ReviewCoverage instance."
-            )
+            raise ReflectionContractError("coverage must be a ReviewCoverage instance.")
         object.__setattr__(
             self,
             "assessed_horizons",
@@ -595,9 +668,7 @@ class TargetReflectionEvaluationResult:
             ),
         )
         if not isinstance(self.coverage, ReviewCoverage):
-            raise ReflectionContractError(
-                "coverage must be a ReviewCoverage instance."
-            )
+            raise ReflectionContractError("coverage must be a ReviewCoverage instance.")
         object.__setattr__(
             self,
             "assessed_horizons",
@@ -752,9 +823,7 @@ class OpenPositionEvaluationResult:
                 "trade_assessment must be a ReflectionTradeAssessment instance."
             )
         if self.trade_assessment.verdict != "open":
-            raise ReflectionContractError(
-                "open-position trade_assessment.verdict must be 'open'."
-            )
+            raise ReflectionContractError("open-position trade_assessment.verdict must be 'open'.")
         if not isinstance(self.exposure_assessment, ReflectionExposureAssessment):
             raise ReflectionContractError(
                 "exposure_assessment must be a ReflectionExposureAssessment instance."
@@ -792,9 +861,7 @@ type _MarketContextUsageQualityOwner = (
 def _normalize_anchor_target_key(scope_key: str, target_key: str | None) -> str | None:
     if scope_key == "shared":
         if target_key is not None:
-            raise ReflectionContractError(
-                "target_key must be None when scope_key is 'shared'."
-            )
+            raise ReflectionContractError("target_key must be None when scope_key is 'shared'.")
         return None
 
     expected_target_key = scope_key.partition(":")[2]
@@ -816,23 +883,17 @@ def _expected_log_page_path(scope_key: str, *, target_key: str | None) -> str:
     if scope_key == "shared":
         return "shared/log.md"
     if target_key is None:
-        raise ReflectionContractError(
-            "target_key is required for target-scoped review anchors."
-        )
+        raise ReflectionContractError("target_key is required for target-scoped review anchors.")
     return f"targets/{target_key}/log.md"
 
 
 def _validate_positive_hours(value: object, *, field_name: str) -> float:
     if isinstance(value, bool) or not isinstance(value, int | float):
-        raise ReflectionContractError(
-            f"{field_name} must be a positive number of hours."
-        )
+        raise ReflectionContractError(f"{field_name} must be a positive number of hours.")
 
     normalized = float(value)
     if normalized <= 0:
-        raise ReflectionContractError(
-            f"{field_name} must be greater than zero hours."
-        )
+        raise ReflectionContractError(f"{field_name} must be greater than zero hours.")
     return normalized
 
 
@@ -861,30 +922,22 @@ def _normalize_horizons_hours(value: tuple[float, ...]) -> tuple[float, ...]:
 
 def _normalize_missing_dependencies(value: tuple[str, ...]) -> tuple[str, ...]:
     if not isinstance(value, tuple):
-        raise ReflectionContractError(
-            "missing_dependencies must be a tuple of dependency names."
-        )
+        raise ReflectionContractError("missing_dependencies must be a tuple of dependency names.")
 
     normalized: list[str] = []
     seen: set[str] = set()
     for dependency in value:
         if not isinstance(dependency, str):
-            raise ReflectionContractError(
-                "missing_dependencies must contain only strings."
-            )
+            raise ReflectionContractError("missing_dependencies must contain only strings.")
         clean = dependency.strip()
         if not clean:
-            raise ReflectionContractError(
-                "missing_dependencies must not contain blank values."
-            )
+            raise ReflectionContractError("missing_dependencies must not contain blank values.")
         if clean != dependency:
             raise ReflectionContractError(
                 "missing_dependencies must not include leading or trailing whitespace."
             )
         if clean in seen:
-            raise ReflectionContractError(
-                "missing_dependencies must not contain duplicates."
-            )
+            raise ReflectionContractError("missing_dependencies must not contain duplicates.")
         seen.add(clean)
         normalized.append(clean)
 
@@ -905,9 +958,7 @@ def _validate_context_packet_members(
             f"{packet_name}.anchor must be a ReviewAnchorIdentity instance."
         )
     if not isinstance(coverage, ReviewCoverage):
-        raise ReflectionContractError(
-            f"{packet_name}.coverage must be a ReviewCoverage instance."
-        )
+        raise ReflectionContractError(f"{packet_name}.coverage must be a ReviewCoverage instance.")
     object.__setattr__(
         owner,
         "observed_at",
@@ -965,8 +1016,7 @@ def _normalize_usage_quality_label(
         if normalized == allowed_label:
             return allowed_label
     raise ReflectionContractError(
-        "usage_quality_label must be one of: "
-        f"{', '.join(MARKET_CONTEXT_USAGE_QUALITY_LABELS)}."
+        f"usage_quality_label must be one of: {', '.join(MARKET_CONTEXT_USAGE_QUALITY_LABELS)}."
     )
 
 
@@ -992,17 +1042,13 @@ def _normalize_usage_quality_error_labels(
     value: object,
 ) -> tuple[MarketContextUsageQualityLabel, ...]:
     if not isinstance(value, tuple):
-        raise ReflectionContractError(
-            "market_context_error_labels must be a tuple of strings."
-        )
+        raise ReflectionContractError("market_context_error_labels must be a tuple of strings.")
     normalized: list[MarketContextUsageQualityLabel] = []
     seen: set[MarketContextUsageQualityLabel] = set()
     for item in value:
         label = _normalize_usage_quality_label(item)
         if label is None:
-            raise ReflectionContractError(
-                "market_context_error_labels must not contain None."
-            )
+            raise ReflectionContractError("market_context_error_labels must not contain None.")
         if label in seen:
             raise ReflectionContractError(
                 "market_context_error_labels must not contain duplicate labels."
@@ -1144,9 +1190,7 @@ def _normalize_anchor_id(value: str) -> str:
     if not anchor_id:
         raise ReflectionContractError("anchor_id must not be blank.")
     if anchor_id != value:
-        raise ReflectionContractError(
-            "anchor_id must not include leading or trailing whitespace."
-        )
+        raise ReflectionContractError("anchor_id must not include leading or trailing whitespace.")
     log_page_path, separator, entry_key = anchor_id.partition("#")
     if separator != "#" or not log_page_path or not entry_key:
         raise ReflectionContractError(
@@ -1168,9 +1212,7 @@ def _normalize_episode_id(value: str) -> str:
     if not episode_id:
         raise ReflectionContractError("episode_id must not be blank.")
     if episode_id != value:
-        raise ReflectionContractError(
-            "episode_id must not include leading or trailing whitespace."
-        )
+        raise ReflectionContractError("episode_id must not include leading or trailing whitespace.")
     return episode_id
 
 
@@ -1185,6 +1227,11 @@ __all__ = [
     "ReflectionContextPacket",
     "ReflectionContractError",
     "ReflectionExposureAssessment",
+    "ReflectionPriceRelation",
+    "ReflectionPriceRelationAssessment",
+    "ReflectionPriceTriggerAssessment",
+    "ReflectionPriceTriggerKind",
+    "ReflectionPriceTriggerStatus",
     "ReflectionRunReceipt",
     "ReflectionWatchlistAssessment",
     "ReviewAnchorIdentity",
@@ -1193,5 +1240,3 @@ __all__ = [
     "OpenPositionEvaluationResult",
     "TradeContextPacket",
 ]
-
-

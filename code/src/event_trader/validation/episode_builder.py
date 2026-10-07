@@ -133,6 +133,52 @@ def build_episodes(state_changes: Sequence[ViewStateChange]) -> EpisodeBuildResu
             if action == "noop":
                 continue
 
+            if action == "rollover_view":
+                if open_episode is None or open_segment is None:
+                    raise ValidationEpisodeBuilderError(
+                        "rollover_view requires open episode/segment."
+                    )
+                if state_change.direction == "flat":
+                    raise ValidationEpisodeBuilderError(
+                        "rollover_view requires a directional state_change."
+                    )
+                completed_segments.append(
+                    _close_segment(
+                        segment=open_segment,
+                        closed_at=state_change.effective_at,
+                        closed_by_state_change_id=state_change.state_change_id,
+                        close_reason="basis_handover",
+                    )
+                )
+                completed_episodes.append(
+                    _close_episode(
+                        episode=open_episode,
+                        closed_at=state_change.effective_at,
+                        closed_by_state_change_id=state_change.state_change_id,
+                        closed_by_event_ids=state_change.source_event_ids,
+                        close_reason="basis_handover",
+                    )
+                )
+                episode_counter += 1
+                open_episode = ViewEpisode(
+                    episode_id=f"{target_key}:episode:{episode_counter}",
+                    target_key=target_key,
+                    direction=state_change.direction,
+                    opened_at=state_change.effective_at,
+                    opened_by_state_change_id=state_change.state_change_id,
+                    opened_by_event_ids=state_change.source_event_ids,
+                )
+                segment_counter += 1
+                open_segment = PositionSegment(
+                    segment_id=f"{target_key}:segment:{segment_counter}",
+                    episode_id=open_episode.episode_id,
+                    target_key=target_key,
+                    target_weight=state_change.target_weight,
+                    opened_at=state_change.effective_at,
+                    opened_by_state_change_id=state_change.state_change_id,
+                )
+                continue
+
             if action == "resize_segment":
                 if open_episode is None or open_segment is None:
                     raise ValidationEpisodeBuilderError(

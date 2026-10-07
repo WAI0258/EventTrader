@@ -9,6 +9,7 @@ description = "Project-owned kernel bootstrap for the event-trader runtime."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "jsonschema>=4.26.0",
     "mcp>=1.0.0",
     "nautilus_trader>=1.229.0",
     "pandas-market-calendars>=5.3.2",
@@ -17,6 +18,9 @@ dependencies = [
 [project.optional-dependencies]
 futu = [
     "futu-api>=9.4.5408,<11",
+]
+mirothinker = [
+    "miroflow-agent",
 ]
 
 [project.scripts]
@@ -58,3 +62,7 @@ explicit_package_bases = true
 show_error_codes = true
 pretty = true
 files = ["src", "tests"]
+
+[tool.uv.sources]
+miroflow-agent = { path = "vendor/mirothinker/apps/miroflow-agent", editable = true }
+miroflow-tools = { path = "vendor/mirothinker/libs/miroflow-tools", editable = true }

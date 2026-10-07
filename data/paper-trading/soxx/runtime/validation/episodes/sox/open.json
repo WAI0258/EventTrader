@@ -1,0 +1,45 @@
+{
+  "episode": {
+    "direction": "short",
+    "episode_id": "sox:episode:7",
+    "opened_at": "2026-09-14T20:30:00+00:00",
+    "opened_by_event_ids": [
+      "8c357d77a6d69ac0c0980e4a"
+    ],
+    "opened_by_state_change_id": "state-change:pm-execution:c8ea3ea2788984dfa3c42f824dbab72d",
+    "target_key": "sox"
+  },
+  "generated_at": "2026-10-07T09:18:55.698030+00:00",
+  "reflection_triggers": [],
+  "segments": [
+    {
+      "episode_id": "sox:episode:7",
+      "opened_at": "2026-09-14T20:30:00+00:00",
+      "opened_by_state_change_id": "state-change:pm-execution:c8ea3ea2788984dfa3c42f824dbab72d",
+      "segment_id": "sox:segment:9",
+      "target_key": "sox",
+      "target_weight": -0.5
+    }
+  ],
+  "state_changes": [
+    {
+      "conviction": "weak",
+      "direction": "short",
+      "effective_at": "2026-09-14T20:30:00+00:00",
+      "execution_record_id": "execution-record:f49ab49fdcdd354cac3e876bcb01178f",
+      "instrument_basis": null,
+      "pm_decision_id": "pm-decision:ed372888ea35e9f8b41efed61a6a1584",
+      "predecessor_instrument_basis": null,
+      "rationale_md": "Text omitted from numerical sample.",
+      "source_event_ids": [
+        "8c357d77a6d69ac0c0980e4a"
+      ],
+      "source_kind": "pm_execution_sidecar",
+      "state": "weak_short",
+      "state_change_id": "state-change:pm-execution:c8ea3ea2788984dfa3c42f824dbab72d",
+      "target_key": "sox",
+      "target_weight": -0.5,
+      "used_lesson_ids": []
+    }
+  ]
+}

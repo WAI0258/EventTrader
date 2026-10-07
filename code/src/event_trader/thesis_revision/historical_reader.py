@@ -11,7 +11,6 @@ from event_trader.contracts.research_memory import (
     PageRef,
     ResearchMemoryContractError,
     WikiMatch,
-    resolve_page_path,
     resolve_page_ref,
     target_page_template,
 )
@@ -29,7 +28,6 @@ _SUPPORTED_CANONICAL_PAGE_NAMES = (
     "risks.md",
     "watchlist.md",
     "timeline.md",
-    "operator.md",
 )
 _THESIS_REVISION_PAGE_NAMES = (
     "thesis.md",
@@ -69,8 +67,6 @@ class HistoricalThesisSnapshotReader:
     def read_page(self, page_path: str) -> PageReadResult:
         page_ref = resolve_page_ref(page_path)
         page_name = _supported_page_name(page_ref)
-        if page_name == "operator.md":
-            return self._read_operator_page(page_ref)
         if page_name == "index.md":
             return PageReadResult(
                 page_path=page_ref.page_path,
@@ -139,30 +135,6 @@ class HistoricalThesisSnapshotReader:
         )
         self._selected_revisions[target_key] = persisted
         return persisted
-
-    def _read_operator_page(self, page_ref: PageRef) -> PageReadResult:
-        try:
-            content_md = resolve_page_path(self._layout, page_ref.page_path).read_text(
-                encoding="utf-8",
-            )
-        except FileNotFoundError:
-            return PageReadResult(
-                page_path=page_ref.page_path,
-                content_md=target_page_template("operator.md"),
-                snapshot_source="bootstrap_template",
-            )
-        except OSError as exc:
-            raise HistoricalThesisSnapshotReaderError(
-                f"failed to read historical operator page {page_ref.page_path!r}: {exc}"
-            ) from exc
-        if content_md == target_page_template("operator.md"):
-            return PageReadResult(
-                page_path=page_ref.page_path,
-                content_md=content_md,
-                snapshot_source="bootstrap_template",
-            )
-        return PageReadResult(page_path=page_ref.page_path, content_md=content_md)
-
 
 def render_historical_thesis_page(*, page_path: str, revision: ThesisRevision) -> str:
     """Rebuild one canonical thesis page from stored section snapshots only."""

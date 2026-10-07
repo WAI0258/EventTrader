@@ -25,6 +25,10 @@ from event_trader.feeds.market_news_backfill import (
 )
 from event_trader.feeds.models import ReplayIngressInput, ReplaySourceShape
 from event_trader.feeds.payload_mappers import replay_adapter_for
+from event_trader.feeds.search_implementation import (
+    SearchImplementationConfig,
+    build_search_collection_runner,
+)
 from event_trader.feeds.web_search_backfill import (
     ArchivedWebSearchWindowReceipt,
     HistoricalWebSearchBackfillReceipt,
@@ -32,19 +36,12 @@ from event_trader.feeds.web_search_backfill import (
     collect_archived_web_search_window_once,
 )
 from event_trader.ingest.admission import derive_admission_event_id
-from event_trader.integrations import (
-    MiroThinkerSearchRuntimeConfig,
-    build_mirothinker_search_collection_runner,
-)
 from event_trader.live_catchup_identity import (
     live_catchup_chain_run_key,
     live_catchup_replay_run_id,
     matches_live_catchup_chain_run_key,
 )
-from event_trader.live_market_data_runtime import (
-    build_live_market_data_store,
-    prepare_live_market_data,
-)
+from event_trader.live_market_data_runtime import prepare_live_market_data
 from event_trader.live_runtime import (
     _build_web_search_cadence_profile,
 )
@@ -54,6 +51,19 @@ from event_trader.live_source_checkpoint import (
     live_source_checkpoint_path,
     read_live_source_checkpoint,
 )
+from event_trader.market.context_builder import (
+    _macro_request_start_at,
+    _request_start_at,
+)
+from event_trader.market.contracts import MarketContextProfile
+from event_trader.market.provider import MarketBarsProvider
+from event_trader.market.shared_store import (
+    MarketSeriesIdentity,
+    SharedMarketDataError,
+    SharedMarketDataProvider,
+    SharedMarketDataStore,
+    shared_market_data_root,
+)
 from event_trader.migrations.pm_review_workspace import (
     PMReviewWorkspaceMigrationError,
     prepare_pm_review_workspace,
@@ -62,6 +72,7 @@ from event_trader.operator.repair.live_catchup_runtime import (
     LiveCatchupRuntimeRepairError,
     repair_live_catchup_runtime,
 )
+from event_trader.operator.repair.runtime_analysis import plan_analysis_recovery
 from event_trader.operator.repair.source_archive import (
     SourceArchiveCleanupError,
     cleanup_live_catchup_source_archive,
@@ -80,12 +91,22 @@ from event_trader.replay.checkpoint import (
     append_replay_checkpoint,
     read_persisted_replay_checkpoints,
 )
+from event_trader.replay.slow_path_failure import (
+    ReplaySlowPathFailureError,
+    ReplaySlowPathFailureGuard,
+    advance_replay_deferred_until,
+    resume_replay_runtime_backlog,
+)
 from event_trader.replay.timestamps import replay_ts_event
+from event_trader.source_archive.web_search import (
+    read_historical_web_search_records,
+)
 from event_trader.storage import WorkspaceLayout
 from event_trader.web_search_schedule import plan_live_web_search_due_windows
 from event_trader.workspace import WorkspaceBootstrapError, bootstrap_workspace
 
 LiveCatchupChannel = Literal["web_search", "market_news"]
+WebSearchCatchupMode = Literal["acquire", "archive_only"]
 Clock = Callable[[], datetime]
 Emitter = Callable[[str], None]
 _DEFAULT_START_TIMEZONE = "America/New_York"
@@ -105,6 +126,7 @@ class LiveCatchupReceipt:
     start_at: datetime
     end_at: datetime
     channels: tuple[LiveCatchupChannel, ...]
+    web_search_mode: WebSearchCatchupMode
     record_counts: dict[str, int]
     released_count: int
     checkpoint_paths: tuple[Path, ...]
@@ -135,7 +157,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="python -m event_trader.tools.live_catchup",
         description=(
             "Run historical catch-up for one live target from an operator start "
-            "date to current UTC."
+            "date to an explicit or current UTC boundary."
         ),
     )
     parser.add_argument("--config", required=True, help="Committed live kernel TOML config.")
@@ -150,6 +172,21 @@ def build_parser() -> argparse.ArgumentParser:
         help=(
             "Timezone for --start-date midnight. Defaults to the live source "
             "cadence timezone, then America/New_York."
+        ),
+    )
+    parser.add_argument(
+        "--end-at",
+        help=(
+            "Inclusive timezone-aware ISO8601 catch-up boundary. Defaults to current UTC."
+        ),
+    )
+    parser.add_argument(
+        "--web-search-mode",
+        choices=("acquire", "archive_only"),
+        default="acquire",
+        help=(
+            "Acquire missing web-search slices or require and reuse only the existing "
+            "archive without invoking a search implementation."
         ),
     )
     parser.add_argument(
@@ -228,6 +265,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             target_key=args.target_key,
             start_date=args.start_date,
             start_timezone=args.start_timezone,
+            end_at=_parse_operator_end_at(args.end_at),
+            web_search_mode=cast(WebSearchCatchupMode, args.web_search_mode),
             resume_live=bool(args.resume_live),
             emit=print,
         )
@@ -325,6 +364,8 @@ def run_live_catchup(
     target_key: str,
     start_date: str,
     start_timezone: str | None = None,
+    end_at: datetime | None = None,
+    web_search_mode: WebSearchCatchupMode = "acquire",
     resume_live: bool,
     emit: Emitter,
     now: Clock = lambda: datetime.now(UTC),
@@ -333,8 +374,11 @@ def run_live_catchup(
     if not callable(emit):
         raise LiveCatchupError("emit must be callable.")
     validated_target_key = validate_target_key(target_key, error_type=LiveCatchupError)
-    end_at = _validate_utc_now(now())
-
+    observed_now = _validate_utc_now(now())
+    resolved_end_at = observed_now if end_at is None else _validate_utc_now(end_at)
+    if resolved_end_at > observed_now:
+        raise LiveCatchupError("end-at must not be later than current UTC.")
+    resolved_web_search_mode = _validate_web_search_mode(web_search_mode)
     resolved_config_path = Path(config_path).expanduser().resolve(strict=False)
     config = load_kernel_config(resolved_config_path)
     if config.mode != "live":
@@ -349,7 +393,7 @@ def run_live_catchup(
             config=config,
             layout=layout,
             target_key=validated_target_key,
-            migrated_at=end_at,
+            migrated_at=resolved_end_at,
             emit=emit,
         )
 
@@ -372,76 +416,107 @@ def run_live_catchup(
         start_date,
         timezone_name=resolved_start_timezone,
     )
-    if end_at < start_at:
+    if resolved_end_at < start_at:
         raise LiveCatchupError("start-date resolves after the current UTC catch-up end.")
 
-    deps.preflight_replay(
-        config_path=resolved_config_path,
-        config=config,
-        layout=layout,
-        target_key=validated_target_key,
-        start_at=start_at,
-        end_at=end_at,
-        emit=emit,
+    shared_market_provider, market_data_store_root, market_data_snapshot_id = (
+        _prepare_replay_market_data(
+            config=config,
+            layout=layout,
+            target_key=validated_target_key,
+            start_at=start_at,
+            end_at=resolved_end_at,
+            emit=emit,
+        )
     )
+    try:
+        deps.preflight_replay(
+            config_path=resolved_config_path,
+            config=config,
+            layout=layout,
+            target_key=validated_target_key,
+            start_at=start_at,
+            end_at=resolved_end_at,
+            emit=emit,
+            market_data_store_root=market_data_store_root,
+            market_data_snapshot_id=market_data_snapshot_id,
+        )
+    except Exception:
+        _close_market_data_provider(shared_market_provider)
+        raise
 
     record_counts: dict[str, int] = {}
     checkpoint_paths: list[Path] = []
     emit(
         "live catch-up: acquiring historical sources "
         f"target_key={validated_target_key} "
-        f"window={start_at.isoformat()}..{end_at.isoformat()} "
+        f"window={start_at.isoformat()}..{resolved_end_at.isoformat()} "
+        f"web_search_mode={resolved_web_search_mode} "
         f"channels={','.join(channels)}"
     )
     if "web_search" in channels:
-        web_acquisition = _acquire_web_search(
-            config=config,
-            layout=layout,
-            target_key=validated_target_key,
-            start_at=start_at,
-            end_at=end_at,
-            acquire=deps.acquire_web_search,
-        )
-        historical_count = (
-            0
-            if web_acquisition.historical_receipt is None
-            else len(web_acquisition.historical_receipt.write_receipts)
-        )
-        today_count = sum(
-            len(receipt.write_receipts)
-            for receipt in web_acquisition.today_window_receipts
-        )
-        record_counts["web_search"] = historical_count + today_count
-        if web_acquisition.checkpoint_path is not None:
-            checkpoint_paths.append(web_acquisition.checkpoint_path)
+        if resolved_web_search_mode == "archive_only":
+            record_counts["web_search"] = _verify_archived_web_search(
+                config=config,
+                layout=layout,
+                target_key=validated_target_key,
+                start_at=start_at,
+                end_at=resolved_end_at,
+            )
+        else:
+            web_acquisition = _acquire_web_search(
+                config=config,
+                layout=layout,
+                target_key=validated_target_key,
+                start_at=start_at,
+                end_at=resolved_end_at,
+                acquire=deps.acquire_web_search,
+            )
+            historical_count = (
+                0
+                if web_acquisition.historical_receipt is None
+                else len(web_acquisition.historical_receipt.write_receipts)
+            )
+            today_count = sum(
+                len(receipt.write_receipts)
+                for receipt in web_acquisition.today_window_receipts
+            )
+            record_counts["web_search"] = historical_count + today_count
+            if web_acquisition.checkpoint_path is not None:
+                checkpoint_paths.append(web_acquisition.checkpoint_path)
     if "market_news" in channels:
         market_receipt = _acquire_market_news(
             config=config,
             layout=layout,
             target_key=validated_target_key,
             start_at=start_at,
-            end_at=end_at,
+            end_at=resolved_end_at,
             acquire=deps.acquire_market_news,
         )
         record_counts["market_news"] = len(market_receipt.write_receipts)
 
-    released_count = deps.release_replay(
-        config_path=resolved_config_path,
-        config=config,
-        layout=layout,
-        target_key=validated_target_key,
-        start_at=start_at,
-        end_at=end_at,
-        channels=channels,
-        emit=emit,
-    )
+    try:
+        released_count = deps.release_replay(
+            config_path=resolved_config_path,
+            config=config,
+            layout=layout,
+            target_key=validated_target_key,
+            start_at=start_at,
+            end_at=resolved_end_at,
+            channels=channels,
+            emit=emit,
+            market_data_store_root=market_data_store_root,
+            market_data_snapshot_id=market_data_snapshot_id,
+        )
+    finally:
+        _close_market_data_provider(shared_market_provider)
 
     checkpoint_paths.extend(
         _sync_live_source_bookkeeping_checkpoints(
             layout=layout,
             target_key=validated_target_key,
             channels=channels,
-            end_at=end_at,
+            end_at=resolved_end_at,
         )
     )
     manifest_path = _write_manifest(
@@ -450,8 +525,9 @@ def run_live_catchup(
         start_date=start_date,
         start_timezone=resolved_start_timezone,
         start_at=start_at,
-        end_at=end_at,
+        end_at=resolved_end_at,
         channels=channels,
+        web_search_mode=resolved_web_search_mode,
         record_counts=record_counts,
         released_count=released_count,
         checkpoint_paths=tuple(dict.fromkeys(checkpoint_paths)),
@@ -464,8 +540,9 @@ def run_live_catchup(
         start_date=start_date,
         start_timezone=resolved_start_timezone,
         start_at=start_at,
-        end_at=end_at,
+        end_at=resolved_end_at,
         channels=channels,
+        web_search_mode=resolved_web_search_mode,
         record_counts=record_counts,
         released_count=released_count,
         checkpoint_paths=tuple(dict.fromkeys(checkpoint_paths)),
@@ -779,6 +856,31 @@ def _validate_timezone_name(value: str) -> str:
     return normalized
 
 
+def _parse_operator_end_at(value: str | None) -> datetime | None:
+    if value is None:
+        return None
+    if not isinstance(value, str) or not value.strip():
+        raise LiveCatchupError("end-at must be a non-blank ISO8601 timestamp.")
+    try:
+        parsed = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise LiveCatchupError(
+            "end-at must be a valid timezone-aware ISO8601 timestamp."
+        ) from exc
+    return _validate_utc_now(parsed)
+
+
+def _validate_web_search_mode(value: object) -> WebSearchCatchupMode:
+    if not isinstance(value, str):
+        raise LiveCatchupError("web-search mode must be a string.")
+    normalized = value.strip().lower()
+    if normalized not in {"acquire", "archive_only"}:
+        raise LiveCatchupError(
+            "web-search mode must be either 'acquire' or 'archive_only'."
+        )
+    return cast(WebSearchCatchupMode, normalized)
+
+
 def _current_local_day_start_utc(*, timezone_name: str, timestamp: datetime) -> datetime:
     timezone = ZoneInfo(_validate_timezone_name(timezone_name))
     local_timestamp = timestamp.astimezone(timezone)
@@ -813,41 +915,17 @@ def _acquire_web_search(
         target_key=target_key,
         channel="web_search",
     )
-    runner_config = MiroThinkerSearchRuntimeConfig(
-        vendor_root=web_config.vendor_root,
-        workspace_root=layout.root,
-        log_dir=web_config.log_dir,
-        llm_provider=web_config.llm_provider,
-        llm_model_name=web_config.llm_model_name,
-        llm_api_key=web_config.llm_api_key,
-        llm_base_url=web_config.llm_base_url,
-        llm_max_context_length=web_config.llm_max_context_length,
-        llm_reasoning_effort=web_config.llm_reasoning_effort,
-        serper_api_key=web_config.serper_api_key,
-        serper_base_url=web_config.serper_base_url,
-        jina_api_key=web_config.jina_api_key,
-        jina_base_url=web_config.jina_base_url,
-        summary_llm_api_key=web_config.summary_llm_api_key,
-        summary_llm_base_url=web_config.summary_llm_base_url,
-        summary_llm_model_name=web_config.summary_llm_model_name,
-        native_web_search_api_key=web_config.native_web_search_api_key,
-        native_web_search_base_url=web_config.native_web_search_base_url,
-        native_web_search_model=web_config.native_web_search_model,
-        native_web_search_tool_type=web_config.native_web_search_tool_type,
-        anthropic_web_search_api_key=web_config.anthropic_web_search_api_key,
-        anthropic_web_search_base_url=web_config.anthropic_web_search_base_url,
-        anthropic_web_search_model=web_config.anthropic_web_search_model,
-        anthropic_web_search_tool_type=web_config.anthropic_web_search_tool_type,
-        anthropic_web_search_max_uses=web_config.anthropic_web_search_max_uses,
-        anthropic_web_search_version=web_config.anthropic_web_search_version,
-        acquisition_tool_names=web_config.acquisition_tool_names,
-    )
     checkpoint = read_live_source_checkpoint(
         layout,
         target_key=target_key,
         channel="web_search",
     )
-    run_search_agent = build_mirothinker_search_collection_runner(config=runner_config)
+    run_search_agent = build_search_collection_runner(
+        config=SearchImplementationConfig.from_live_config(
+            web_config,
+            workspace_root=layout.root,
+        )
+    )
     historical_receipt: HistoricalWebSearchBackfillReceipt | None = None
     today_window_receipts: list[ArchivedWebSearchWindowReceipt] = []
     checkpoint_path: Path | None = None
@@ -913,6 +991,76 @@ def _acquire_web_search(
     )
 
 
+def _verify_archived_web_search(
+    *,
+    config: KernelConfig,
+    layout: WorkspaceLayout,
+    target_key: str,
+    start_at: datetime,
+    end_at: datetime,
+) -> int:
+    web_config = config.live.web_search if config.live is not None else None
+    catchup_config = (
+        config.live_catchup.web_search if config.live_catchup is not None else None
+    )
+    if web_config is None:
+        raise LiveCatchupError(
+            "[live.web_search] is required for archive-only web-search catch-up."
+        )
+    if catchup_config is None:
+        raise LiveCatchupError(
+            "[live_catchup.web_search] is required for archive-only slice verification."
+        )
+    target_config = _single_target(
+        web_config.targets,
+        target_key=target_key,
+        channel="web_search",
+    )
+    try:
+        verification = backfill_historical_web_search(
+            layout=layout,
+            target_key=target_key,
+            search_intent=target_config.search_intent,
+            prompt_profile_id=target_config.prompt_profile_id,
+            control_language=target_config.control_language,
+            retrieval_languages=target_config.retrieval_languages,
+            window_start=start_at,
+            window_end=end_at,
+            slice_hours=catchup_config.max_slice_hours,
+            run_search_agent=_archive_only_search_forbidden,
+        )
+        records = read_historical_web_search_records(
+            layout,
+            target_key=target_key,
+            start_at=start_at,
+            end_at=end_at,
+        )
+    except LiveCatchupError:
+        raise
+    except Exception as exc:
+        raise LiveCatchupError(
+            f"archive-only web-search verification failed: {exc}"
+        ) from exc
+    if len(verification.resume_skipped_slices) != len(verification.slices):
+        raise LiveCatchupError(
+            "archive-only web-search verification did not prove every expected slice complete."
+        )
+    if verification.write_receipts:
+        raise LiveCatchupError(
+            "archive-only web-search verification unexpectedly wrote source records."
+        )
+    return len(records)
+
+
+def _archive_only_search_forbidden(**kwargs: object) -> NoReturn:
+    query = kwargs.get("query")
+    query_summary = query if isinstance(query, str) else "unknown"
+    raise LiveCatchupError(
+        "archive-only web-search catch-up is missing a required completed slice; "
+        f"network acquisition is forbidden. query={query_summary!r}"
+    )
+
+
 def _acquire_market_news(
     *,
     config: KernelConfig,
@@ -965,6 +1113,8 @@ def _preflight_replay_runtime_from_live_config(
     start_at: datetime,
     end_at: datetime,
     emit: Emitter,
+    market_data_store_root: Path | None = None,
+    market_data_snapshot_id: str | None = None,
 ) -> None:
     temp_replay_config = _write_temp_replay_config(
         original_config_path=config_path,
@@ -973,11 +1123,26 @@ def _preflight_replay_runtime_from_live_config(
         end_at=end_at,
     )
     composed = None
-    market_data_provider, market_data_store_root = _prepare_replay_market_data(
-        config=config,
-        layout=layout,
-        emit=emit,
-    )
+    if market_data_snapshot_id is None:
+        (
+            market_data_provider,
+            market_data_store_root,
+            market_data_snapshot_id,
+        ) = _prepare_replay_market_data(
+            config=config,
+            layout=layout,
+            target_key=target_key,
+            start_at=start_at,
+            end_at=end_at,
+            emit=emit,
+        )
+    else:
+        market_data_provider = _snapshot_market_data_provider(
+            config=config,
+            target_key=target_key,
+            market_data_store_root=market_data_store_root,
+            market_data_snapshot_id=market_data_snapshot_id,
+        )
     try:
         composed = compose_kernel(
             temp_replay_config,
@@ -986,6 +1151,7 @@ def _preflight_replay_runtime_from_live_config(
             evaluate_review=_unexpected_shared_review,
             market_data_provider_override=market_data_provider,
             market_data_store_root=market_data_store_root,
+            market_data_snapshot_id=market_data_snapshot_id,
             replay_market_mapping=_market_mapping_from_config(
                 config=config,
                 target_key=target_key,
@@ -1005,7 +1171,9 @@ def _preflight_replay_runtime_from_live_config(
                 print(f"Replay preflight cleanup failed: {exc}", file=sys.stderr)
         if market_data_provider is not None:
             try:
-                market_data_provider.close()
+                close_market_data = getattr(market_data_provider, "close", None)
+                if callable(close_market_data):
+                    close_market_data()
             except Exception as exc:  # pragma: no cover - cleanup guard
                 print(f"Replay preflight market-data cleanup failed: {exc}", file=sys.stderr)
         try:
@@ -1024,6 +1192,8 @@ def _release_replay_from_live_config(
     end_at: datetime,
     channels: tuple[LiveCatchupChannel, ...],
     emit: Emitter,
+    market_data_store_root: Path | None = None,
+    market_data_snapshot_id: str | None = None,
 ) -> int:
     build_input = ReplayBuildInput(
         target_key=target_key,
@@ -1056,11 +1226,26 @@ def _release_replay_from_live_config(
     market_data_provider = None
     try:
         market_mapping = _market_mapping_from_config(config=config, target_key=target_key)
-        market_data_provider, market_data_store_root = _prepare_replay_market_data(
-            config=config,
-            layout=layout,
-            emit=emit,
-        )
+        if market_data_snapshot_id is None:
+            (
+                market_data_provider,
+                market_data_store_root,
+                market_data_snapshot_id,
+            ) = _prepare_replay_market_data(
+                config=config,
+                layout=layout,
+                target_key=target_key,
+                start_at=start_at,
+                end_at=end_at,
+                emit=emit,
+            )
+        else:
+            market_data_provider = _snapshot_market_data_provider(
+                config=config,
+                target_key=target_key,
+                market_data_store_root=market_data_store_root,
+                market_data_snapshot_id=market_data_snapshot_id,
+            )
         composed = compose_kernel(
             temp_replay_config,
             emit=emit,
@@ -1068,6 +1253,7 @@ def _release_replay_from_live_config(
             evaluate_review=_unexpected_shared_review,
             market_data_provider_override=market_data_provider,
             market_data_store_root=market_data_store_root,
+            market_data_snapshot_id=market_data_snapshot_id,
             replay_market_mapping=market_mapping,
             replay_run_id=live_catchup_replay_run_id(
                 target_key=target_key,
@@ -1076,6 +1262,7 @@ def _release_replay_from_live_config(
             pm_review_preflight_target_keys=(target_key,),
         )
         replay_runtime = composed.require_replay_runtime()
+        failure_guard = ReplaySlowPathFailureGuard(layout=layout)
         released_count = _run_replay_rows(
             replay_runtime=replay_runtime,
             layout=layout,
@@ -1083,8 +1270,14 @@ def _release_replay_from_live_config(
             rows=rows,
             start_at=start_at,
             end_at=end_at,
+            failure_guard=failure_guard,
         )
         replay_runtime.finalize_pipeline()
+        _raise_live_catchup_slow_path_failure(
+            failure_guard=failure_guard,
+            replay_at=end_at,
+            context="finalize_pipeline",
+        )
         return released_count
     finally:
         if composed is not None:
@@ -1094,7 +1287,9 @@ def _release_replay_from_live_config(
                 print(f"Replay cleanup failed: {exc}", file=sys.stderr)
         if market_data_provider is not None:
             try:
-                market_data_provider.close()
+                close_market_data = getattr(market_data_provider, "close", None)
+                if callable(close_market_data):
+                    close_market_data()
             except Exception as exc:  # pragma: no cover - cleanup guard
                 print(f"Replay market-data cleanup failed: {exc}", file=sys.stderr)
         try:
@@ -1107,19 +1302,199 @@ def _prepare_replay_market_data(
     *,
     config: KernelConfig,
     layout: WorkspaceLayout,
+    target_key: str,
+    start_at: datetime,
+    end_at: datetime,
     emit: Emitter,
-) -> tuple[object | None, Path | None]:
+) -> tuple[MarketBarsProvider | None, Path | None, str | None]:
     live_config = getattr(config, "live", None)
     if live_config is None or getattr(live_config, "market_data", None) is None:
-        return None, None
-    market_data_provider, _warmup_receipt = prepare_live_market_data(
+        return None, None, None
+    if not live_config.market_data.enabled:
+        return None, None, None
+    remote_provider, _warmup_receipt = prepare_live_market_data(
         config=config,
         layout=layout,
+        as_of_at=end_at,
         emit=emit,
     )
-    if market_data_provider is None:
-        return None, None
-    return market_data_provider, build_live_market_data_store(layout).root
+    try:
+        return _prepare_replay_market_data_from_remote(
+            config=config,
+            target_key=target_key,
+            start_at=start_at,
+            end_at=end_at,
+            remote_provider=remote_provider,
+            emit=emit,
+        )
+    finally:
+        # The returned provider is pinned and must not retain the live Futu
+        # connection.  Close it here on both success and every failure path.
+        _close_market_data_provider(remote_provider)
+
+
+def _prepare_replay_market_data_from_remote(
+    *,
+    config: KernelConfig,
+    target_key: str,
+    start_at: datetime,
+    end_at: datetime,
+    remote_provider: MarketBarsProvider | None,
+    emit: Emitter,
+) -> tuple[MarketBarsProvider | None, Path | None, str | None]:
+    live_config = getattr(config, "live", None)
+    if live_config is None or getattr(live_config, "market_data", None) is None:
+        return None, None, None
+    market_data_config = live_config.market_data
+    if not market_data_config.enabled:
+        return None, None, None
+    store = SharedMarketDataStore(shared_market_data_root(config))
+    target_configs = tuple(
+        target for target in market_data_config.targets if target.target_key == target_key
+    )
+    if len(target_configs) != 1:
+        raise LiveCatchupError(
+            "live catch-up requires exactly one live market-data target for "
+            f"target_key={target_key!r}."
+        )
+    reads: list[tuple[MarketSeriesIdentity, datetime, datetime]] = []
+    warmup_config = getattr(market_data_config, "warmup", None)
+    for subscription in target_configs[0].subscriptions:
+        mapping = MarketMapping(
+            target_key=target_key,
+            market_symbol=subscription.symbol,
+            market_session=subscription.market_session,
+            exchange=subscription.exchange,
+            bar_granularity=subscription.bar_granularity,
+            exchange_session_scope=subscription.exchange_session_scope,
+        )
+        identity = MarketSeriesIdentity.from_mapping(
+            mapping,
+            provider=subscription.provider,
+            adjustment_policy=subscription.adjustment_policy or "raw",
+        )
+        if warmup_config is None:
+            context_start_at = start_at
+        elif (
+            config.market_context is not None
+            and config.market_context.enabled
+            and target_key in config.market_context.target_profiles
+        ):
+            profile = MarketContextProfile.from_config(
+                target_key=target_key,
+                profile_config=config.market_context.target_profiles[target_key],
+            )
+            if subscription.symbol.upper() == profile.tradable_proxy_symbol.upper():
+                context_start_at = _request_start_at(
+                    profile=profile,
+                    as_of_at=start_at,
+                    market_session=mapping.market_session,
+                )
+            elif profile.macro_cross_asset is not None:
+                context_start_at = _macro_request_start_at(
+                    profile=profile,
+                    as_of_at=start_at,
+                    market_session=mapping.market_session,
+                )
+            else:
+                context_start_at = start_at
+        else:
+            context_start_at = start_at
+        try:
+            covered = store.covers_window(
+                identity,
+                start_at=context_start_at,
+                end_at=end_at,
+            )
+            if not covered and remote_provider is not None:
+                synchronize = getattr(remote_provider, "synchronize", None)
+                if callable(synchronize):
+                    synchronize(mapping, start_at=context_start_at, end_at=end_at)
+                else:
+                    remote_provider.read_series(
+                        mapping,
+                        start_at=context_start_at,
+                        end_at=end_at,
+                    )
+                covered = store.covers_window(
+                    identity,
+                    start_at=context_start_at,
+                    end_at=end_at,
+                )
+            if not covered:
+                raise SharedMarketDataError(
+                    f"shared market data is missing {subscription.symbol} in "
+                    f"{start_at.isoformat()}..{end_at.isoformat()}"
+                )
+        except (SharedMarketDataError, ValueError) as exc:
+            raise LiveCatchupError(str(exc)) from exc
+        reads.append((identity, context_start_at, end_at))
+    snapshot = store.create_snapshot(
+        mode="live_catchup",
+        reads=reads,
+        metadata={
+            "target_key": target_key,
+            "window_start": start_at.isoformat(),
+            "window_end": end_at.isoformat(),
+            "context_window_start": min(
+                context_start.isoformat() for _identity, context_start, _end in reads
+            ),
+        },
+    )
+    provider = SharedMarketDataProvider(
+        store=store,
+        provider_name=(
+            target_configs[0].subscriptions[0].provider
+            if target_configs[0].subscriptions
+            else "unknown"
+        ),
+        snapshot_id=snapshot.snapshot_id,
+        provider_names={
+            (target_key, subscription.symbol): subscription.provider
+            for subscription in target_configs[0].subscriptions
+        },
+    )
+    emit(
+        "live catch-up market-data: pinned shared snapshot "
+        f"snapshot_id={snapshot.snapshot_id}"
+    )
+    return provider, store.root, snapshot.snapshot_id
+
+
+def _snapshot_market_data_provider(
+    *,
+    config: KernelConfig,
+    target_key: str,
+    market_data_store_root: Path | None,
+    market_data_snapshot_id: str,
+) -> SharedMarketDataProvider:
+    """Reopen one already-pinned snapshot for preflight or release."""
+    store = SharedMarketDataStore(
+        market_data_store_root or shared_market_data_root(config)
+    )
+    market_data = config.live.market_data if config.live is not None else None
+    target = None if market_data is None else next(
+        (item for item in market_data.targets if item.target_key == target_key),
+        None,
+    )
+    provider_names = {} if target is None else {
+        (target_key, subscription.symbol): subscription.provider
+        for subscription in target.subscriptions
+    }
+    return SharedMarketDataProvider(
+        store=store,
+        provider_name="shared_market_data",
+        snapshot_id=market_data_snapshot_id,
+        provider_names=provider_names,
+    )
+
+
+def _close_market_data_provider(provider: object | None) -> None:
+    if provider is None:
+        return
+    close = getattr(provider, "close", None)
+    if callable(close):
+        close()
 
 
 @dataclass(frozen=True, slots=True)
@@ -1159,13 +1534,15 @@ def _run_replay_rows(
     rows: tuple[_ReplayRow, ...],
     start_at: datetime,
     end_at: datetime,
+    failure_guard: ReplaySlowPathFailureGuard,
 ) -> int:
     run_key = live_catchup_chain_run_key(target_key=target_key)
-    repair_report = repair_live_catchup_runtime(
+    repair_report = _plan_repair_after_resuming_analysis_backlog(
+        replay_runtime=replay_runtime,
         layout=layout,
         target_key=target_key,
         start_at=start_at,
-        apply=False,
+        failure_guard=failure_guard,
     )
     if repair_report.status == "blocked":
         reasons = "; ".join(blocker.reason for blocker in repair_report.blockers)
@@ -1196,9 +1573,12 @@ def _run_replay_rows(
         existing_checkpoint = latest_checkpoints.get(event_id)
         if existing_checkpoint is not None:
             if existing_checkpoint.status == "completed":
-                replay_runtime.advance_deferred_until(
+                _advance_live_catchup_deferred_until(
+                    replay_runtime=replay_runtime,
                     replay_at=replay_at,
                     include_boundary=True,
+                    failure_guard=failure_guard,
+                    context="completed_checkpoint",
                 )
                 continue
             raise LiveCatchupError(
@@ -1206,9 +1586,12 @@ def _run_replay_rows(
                 f"resuming: event_id={event_id} status={existing_checkpoint.status} "
                 f"stage={existing_checkpoint.stage}"
             )
-        replay_runtime.advance_deferred_until(
+        _advance_live_catchup_deferred_until(
+            replay_runtime=replay_runtime,
             replay_at=replay_at,
             include_boundary=False,
+            failure_guard=failure_guard,
+            context="advance_before_event",
         )
         append_replay_checkpoint(
             layout,
@@ -1233,9 +1616,12 @@ def _run_replay_rows(
                 labels=list(row.labels),
                 ts_init=replay_at,
             )
-            replay_runtime.advance_deferred_until(
+            _advance_live_catchup_deferred_until(
+                replay_runtime=replay_runtime,
                 replay_at=replay_at,
                 include_boundary=True,
+                failure_guard=failure_guard,
+                context="event_boundary",
             )
         except Exception as exc:
             append_replay_checkpoint(
@@ -1282,11 +1668,183 @@ def _run_replay_rows(
             recorded_at=datetime.now(UTC),
         )
         released_count += 1
-    replay_runtime.advance_deferred_until(
+    _advance_live_catchup_deferred_until(
+        replay_runtime=replay_runtime,
         replay_at=end_at,
         include_boundary=True,
+        failure_guard=failure_guard,
+        context="advance_after_window",
     )
     return released_count
+
+
+def _plan_repair_after_resuming_analysis_backlog(
+    *,
+    replay_runtime,
+    layout: WorkspaceLayout,
+    target_key: str,
+    start_at: datetime,
+    failure_guard: ReplaySlowPathFailureGuard,
+):
+    """Give durable analysis work one production retry before generic repair."""
+    repair_report = repair_live_catchup_runtime(
+        layout=layout,
+        target_key=target_key,
+        start_at=start_at,
+        apply=False,
+    )
+    plan = repair_report.plan
+    has_analysis_truth_blocker = (
+        repair_report.status == "blocked"
+        and plan is not None
+        and any(item.stage == "analysis_truth" for item in plan.blocked_artifacts)
+    )
+    if not has_analysis_truth_blocker or repair_report.repair_replay_at is None:
+        return repair_report
+
+    _resume_live_catchup_runtime_backlog(
+        replay_runtime=replay_runtime,
+        replay_at=repair_report.repair_replay_at,
+        failure_guard=failure_guard,
+        context="resume_analysis_backlog",
+    )
+    repair_report = repair_live_catchup_runtime(
+        layout=layout,
+        target_key=target_key,
+        start_at=start_at,
+        apply=False,
+    )
+    if _complete_checkpoint_for_recovered_analysis(
+        repair_report=repair_report,
+        layout=layout,
+        target_key=target_key,
+    ):
+        return repair_live_catchup_runtime(
+            layout=layout,
+            target_key=target_key,
+            start_at=start_at,
+            apply=False,
+        )
+    return repair_report
+
+
+def _advance_live_catchup_deferred_until(
+    *,
+    replay_runtime,
+    replay_at: datetime,
+    include_boundary: bool,
+    failure_guard: ReplaySlowPathFailureGuard,
+    context: str,
+) -> None:
+    try:
+        advance_replay_deferred_until(
+            replay_runtime=replay_runtime,
+            replay_at=replay_at,
+            include_boundary=include_boundary,
+            failure_guard=failure_guard,
+            context=context,
+        )
+    except ReplaySlowPathFailureError as exc:
+        raise LiveCatchupError(str(exc)) from exc
+
+
+def _resume_live_catchup_runtime_backlog(
+    *,
+    replay_runtime,
+    replay_at: datetime,
+    failure_guard: ReplaySlowPathFailureGuard,
+    context: str,
+) -> None:
+    try:
+        resume_replay_runtime_backlog(
+            replay_runtime=replay_runtime,
+            replay_at=replay_at,
+            failure_guard=failure_guard,
+            context=context,
+        )
+    except ReplaySlowPathFailureError as exc:
+        raise LiveCatchupError(str(exc)) from exc
+
+
+def _raise_live_catchup_slow_path_failure(
+    *,
+    failure_guard: ReplaySlowPathFailureGuard,
+    replay_at: datetime,
+    context: str,
+) -> None:
+    try:
+        failure_guard.raise_if_new_failure(replay_at=replay_at, context=context)
+    except ReplaySlowPathFailureError as exc:
+        raise LiveCatchupError(str(exc)) from exc
+
+
+def _complete_checkpoint_for_recovered_analysis(
+    *,
+    repair_report,
+    layout: WorkspaceLayout,
+    target_key: str,
+) -> bool:
+    plan = repair_report.plan
+    if (
+        repair_report.status != "blocked"
+        or repair_report.repair_replay_at is None
+        or plan is None
+        or {item.stage for item in plan.blocked_artifacts} != {"analysis_truth"}
+    ):
+        return False
+
+    run_key = live_catchup_chain_run_key(target_key=target_key)
+    latest_checkpoints = _read_reusable_live_catchup_checkpoints(
+        layout=layout,
+        target_key=target_key,
+        run_key=run_key,
+    )
+    candidates = tuple(
+        checkpoint
+        for checkpoint in latest_checkpoints.values()
+        if checkpoint.stage == "live_catchup_replay"
+        and checkpoint.status in {"started", "failed"}
+        and checkpoint.replay_at == repair_report.repair_replay_at
+    )
+    if not candidates:
+        return False
+
+    for checkpoint in candidates:
+        recovery = plan_analysis_recovery(
+            layout=layout,
+            target_key=target_key,
+            event_id=checkpoint.event_id,
+        )
+        if recovery.decision_count != 1:
+            return False
+        decision = recovery.decisions[0]
+        if (
+            decision.event_id != checkpoint.event_id
+            or decision.planned_action != "no_action"
+            or decision.completion_state != "complete"
+            or decision.commit_status != "complete"
+            or decision.rerun_allowed
+        ):
+            return False
+
+    recorded_at = datetime.now(UTC)
+    for checkpoint in candidates:
+        append_replay_checkpoint(
+            layout,
+            ReplayEventCheckpoint(
+                run_key=checkpoint.run_key,
+                target_key=checkpoint.target_key,
+                event_id=checkpoint.event_id,
+                replay_at=checkpoint.replay_at,
+                source_kind=checkpoint.source_kind,
+                source_ref=checkpoint.source_ref,
+                stage=checkpoint.stage,
+                status="completed",
+                error=None,
+                recorded_at=recorded_at,
+            ),
+        )
+    return True
 
 
 def _derive_replay_event_id(
@@ -1352,6 +1910,7 @@ def _write_manifest(
     start_at: datetime,
     end_at: datetime,
     channels: tuple[LiveCatchupChannel, ...],
+    web_search_mode: WebSearchCatchupMode,
     record_counts: dict[str, int],
     released_count: int,
     checkpoint_paths: tuple[Path, ...],
@@ -1370,6 +1929,7 @@ def _write_manifest(
         "resolved_start_at_utc": start_at.isoformat(),
         "end_at": end_at.isoformat(),
         "channels": list(channels),
+        "web_search_mode": web_search_mode,
         "record_counts": record_counts,
         "released_count": released_count,
         "checkpoint_paths": [str(path) for path in checkpoint_paths],

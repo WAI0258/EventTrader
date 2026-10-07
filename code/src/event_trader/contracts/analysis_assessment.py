@@ -395,12 +395,9 @@ def _normalize_analysis_assessment_payload(
         if value != "none"
     )
     if not has_candidate_flag:
-        normalized_payload["pm_candidate_review_required"] = (
-            _legacy_entry_role_requires_candidate_trigger(payload)
-            or any(
-                reason in _LEGACY_PM_REVIEW_CANDIDATE_TRIGGER_REASONS
-                for reason in review_reasons
-            )
+        normalized_payload["pm_candidate_review_required"] = any(
+            reason in _LEGACY_PM_REVIEW_CANDIDATE_TRIGGER_REASONS
+            for reason in review_reasons
         )
     if not has_current_exposure_flag:
         normalized_payload["pm_current_exposure_review_required"] = any(
@@ -408,16 +405,6 @@ def _normalize_analysis_assessment_payload(
             for reason in review_reasons
         )
     return normalized_payload
-
-
-def _legacy_entry_role_requires_candidate_trigger(payload: Mapping[str, object]) -> bool:
-    price_level_roles = payload.get("price_level_roles")
-    if not isinstance(price_level_roles, list):
-        return False
-    return any(
-        isinstance(level, Mapping) and level.get("role_if_flat") == "entry"
-        for level in price_level_roles
-    )
 
 
 def _validate_non_blank(value: object, field_name: str) -> str:
@@ -437,6 +424,13 @@ def _format_price_level_role_contract_error(
     payload: Mapping[str, object],
     error: PriceLevelRoleContractError,
 ) -> str:
+    error_message = str(error)
+    for field_name in price_level_role_required_fields():
+        if error_message.startswith(f"{field_name} "):
+            return (
+                f"analysis_assessment.price_level_roles[{index}]."
+                f"{error_message}"
+            )
     compact_payload = json.dumps(
         dict(payload),
         ensure_ascii=False,
@@ -558,12 +552,6 @@ def _validate_bool(value: object, field_name: str) -> bool:
 
 
 def _validate_pm_trigger_consistency(assessment: AnalysisAssessment) -> None:
-    if any(level.role_if_flat == "entry" for level in assessment.price_level_roles):
-        if assessment.pm_candidate_review_required is not True:
-            raise AnalysisAssessmentContractError(
-                "pm_candidate_review_required must be true when any "
-                "price_level_roles role_if_flat is 'entry'."
-            )
     if any(reason in _PM_REVIEW_ESCALATION_REASONS for reason in assessment.pm_review_reasons):
         if not (
             assessment.pm_candidate_review_required

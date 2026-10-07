@@ -24,16 +24,6 @@ from event_trader.execution import (
     ExecutionRecordStore,
     PaperExecutionEngine,
 )
-from event_trader.integrations.mirothinker_pm_review import (
-    REQUIRED_PM_REVIEW_TOOL_NAMES,
-    MiroThinkerPMReviewResult,
-    MiroThinkerPMReviewRuntimeConfig,
-    MiroThinkerPMReviewStructuralRuntimeError,
-    PMReviewTaskRunner,
-    build_production_mirothinker_pm_review_task_runner,
-    resolve_current_position_entry_execution,
-    run_pm_review_request,
-)
 from event_trader.market.adjustments import MarketDataAdjustmentPolicy
 from event_trader.market.provider import MarketBarsProvider
 from event_trader.market.target_series import read_visible_target_bars
@@ -42,7 +32,9 @@ from event_trader.migrations import (
     validate_pm_review_workspace_ready,
 )
 from event_trader.migrations.cutover_baseline import DEFAULT_CUTOVER_MIGRATION_ID
+from event_trader.pm_review.agent import run_pm_review_request
 from event_trader.pm_review.contracts import (
+    PMPortfolioRiskSnapshot,
     PMReviewDispatchConsideration,
     PMReviewFailureRecord,
     PMReviewRequest,
@@ -50,6 +42,17 @@ from event_trader.pm_review.contracts import (
     derive_pm_review_dispatch_consideration_id,
     derive_pm_review_failure_id,
     is_terminal_pm_review_policy_skip_reason,
+)
+from event_trader.pm_review.errors import PMReviewStructuralRuntimeError
+from event_trader.pm_review.implementation import (
+    build_pm_review_task_runner as _build_pm_review_task_runner,
+)
+from event_trader.pm_review.implementation import (
+    pm_review_output_protocol_for_implementation,
+)
+from event_trader.pm_review.portfolio_risk import (
+    PMPortfolioRiskError,
+    build_pm_portfolio_risk_snapshot,
 )
 from event_trader.pm_review.position_review import (
     PMPositionReviewTriggerHit,
@@ -63,6 +66,7 @@ from event_trader.pm_review.position_review_gate import (
     derive_pm_position_review_gate_key,
     evaluate_pm_position_review_gate,
 )
+from event_trader.pm_review.result import PMReviewRunResult
 from event_trader.pm_review.store import (
     PMPositionReviewGateStore,
     PMPositionReviewTriggerStore,
@@ -71,6 +75,7 @@ from event_trader.pm_review.store import (
     PMReviewRequestStore,
     PMReviewToolReadReceiptStore,
 )
+from event_trader.pm_review.tools import REQUIRED_PM_REVIEW_TOOL_NAMES
 from event_trader.portfolio import (
     PMDecision,
     PMDecisionStore,
@@ -86,10 +91,19 @@ from event_trader.portfolio.pm_execution_flow import (
     PMExecutionFlowResult,
     execute_pm_decision,
 )
+from event_trader.reasoning.runtime import AgentRuntime
 from event_trader.runtime.pm_review_resolver import RuntimePMReviewResolution
 from event_trader.runtime.pm_review_worker import RuntimePMReviewExecutionResult
 from event_trader.storage import WorkspaceLayout
+from event_trader.validation.episode_artifacts import (
+    EpisodeArtifactStoreError,
+    read_target_episode_artifacts,
+)
 from event_trader.validation.market_mapping import resolve_market_mapping
+from event_trader.validation.state_change_store import (
+    StateChangeStoreError,
+    read_state_changes,
+)
 
 type RuntimeEmitter = Callable[[str], None]
 
@@ -101,7 +115,7 @@ class PMReviewOrchestrationResult:
     request: PMReviewRequest
     active_exposure: ActiveExposure
     analysis_assessment: AnalysisAssessment | None
-    pm_review_result: MiroThinkerPMReviewResult
+    pm_review_result: PMReviewRunResult
 
 
 @dataclass(frozen=True, slots=True)
@@ -233,7 +247,7 @@ class PMReviewDispatchResult:
 def process_pending_pm_review_request(
     *,
     layout: WorkspaceLayout,
-    task_runner: PMReviewTaskRunner,
+    task_runner: AgentRuntime,
     request: PMReviewRequest | None = None,
     target_key: str | None = None,
     request_id: str | None = None,
@@ -251,8 +265,8 @@ def process_pending_pm_review_request(
 
     if not isinstance(layout, WorkspaceLayout):
         raise CompositionError("layout must be a WorkspaceLayout instance.")
-    if not callable(task_runner):
-        raise CompositionError("task_runner must be callable.")
+    if not callable(getattr(task_runner, "run_once", None)):
+        raise CompositionError("task_runner must implement AgentRuntime.run_once.")
     active_request = _resolve_pm_review_request(
         layout=layout,
         request=request,
@@ -300,11 +314,10 @@ def process_pending_pm_review_request(
             target_key=active_request.target_key
         )
     )
-    portfolio_risk_market_bars = build_pm_review_portfolio_risk_market_bars_for_request(
+    portfolio_risk_snapshot = build_pm_review_portfolio_risk_snapshot_for_request(
         layout=layout,
         request=active_request,
         active_exposure=active_exposure,
-        pm_decisions=pm_decisions,
         execution_records=execution_records,
         config=config,
         market_data_provider=market_data_provider,
@@ -319,11 +332,11 @@ def process_pending_pm_review_request(
         market_bars=tuple(market_bars),
         pm_review_requests=pm_review_requests,
         pm_decisions=pm_decisions,
-        execution_records=execution_records,
-        portfolio_risk_market_bars=portfolio_risk_market_bars,
+        portfolio_risk_snapshot=portfolio_risk_snapshot,
         assessment=assessment,
         available_tool_names=available_tool_names,
         execution_direction_mode=execution_direction_mode,
+        output_protocol=_pm_review_output_protocol(config),
         prompt_max_chars=_pm_review_prompt_max_chars(config),
         decision_available_at=decision_available_at,
     )
@@ -338,7 +351,7 @@ def process_pending_pm_review_request(
 def process_pending_pm_review_request_and_execute(
     *,
     layout: WorkspaceLayout,
-    task_runner: PMReviewTaskRunner,
+    task_runner: AgentRuntime,
     execution_engine: PaperExecutionEngine | None = None,
     request: PMReviewRequest | None = None,
     target_key: str | None = None,
@@ -384,6 +397,7 @@ def process_pending_pm_review_request_and_execute(
         layout=layout,
         decision=pm_decision,
         execution_engine=execution_engine,
+        execution_observed_at=decision_available_at,
     )
     return PMReviewExecutionOrchestrationResult(
         pm_review_orchestration=pm_review_orchestration,
@@ -422,47 +436,27 @@ def build_pm_review_execution_inputs(
     return PMReviewExecutionInputs(execution_engine=active_execution_engine)
 
 
-def build_pm_review_task_runner(*, config: KernelConfig) -> PMReviewTaskRunner:
-    """Build the production PMReview task runner from existing MiroThinker config."""
-
-    if not isinstance(config, KernelConfig):
-        raise CompositionError("config must be a KernelConfig instance.")
-    pm_review_agent = config.pm_review_agent
-    if pm_review_agent is None:
-        raise CompositionError(
-            "production PMReview runner requires [pm_review_agent] "
-            "MiroThinker config."
-        )
-    try:
-        return build_production_mirothinker_pm_review_task_runner(
-            config=MiroThinkerPMReviewRuntimeConfig(
-                vendor_root=pm_review_agent.vendor_root,
-                log_dir=pm_review_agent.log_dir,
-                llm_provider=pm_review_agent.llm_provider,
-                llm_model_name=pm_review_agent.llm_model_name,
-                llm_api_key=pm_review_agent.llm_api_key,
-                llm_base_url=pm_review_agent.llm_base_url,
-                llm_max_context_length=pm_review_agent.llm_max_context_length,
-                llm_reasoning_effort=pm_review_agent.llm_reasoning_effort,
-                wall_clock_timeout_seconds=pm_review_agent.wall_clock_timeout_seconds,
-            )
-        )
-    except Exception as exc:
-        raise CompositionError(
-            f"failed to build production PMReview runner: {exc}"
-        ) from exc
-
-
 def _pm_review_prompt_max_chars(config: KernelConfig | None) -> int | None:
     if config is None or config.pm_review_agent is None:
         return None
     return config.pm_review_agent.llm_max_context_length
 
 
+def _pm_review_output_protocol(config: KernelConfig | None):
+    if config is None or config.pm_review_agent is None:
+        raise CompositionError(
+            "PMReview execution requires [pm_review_agent] config to select its "
+            "output protocol."
+        )
+    return pm_review_output_protocol_for_implementation(
+        config.pm_review_agent.implementation
+    )
+
+
 def build_runtime_pm_review_executor(
     *,
     layout: WorkspaceLayout,
-    task_runner: PMReviewTaskRunner,
+    task_runner: AgentRuntime,
     config: KernelConfig | None = None,
     market_data_provider: MarketBarsProvider | None = None,
     execution_engine: PaperExecutionEngine | None = None,
@@ -476,8 +470,8 @@ def build_runtime_pm_review_executor(
 
     if not isinstance(layout, WorkspaceLayout):
         raise CompositionError("layout must be a WorkspaceLayout instance.")
-    if not callable(task_runner):
-        raise CompositionError("task_runner must be callable.")
+    if not callable(getattr(task_runner, "run_once", None)):
+        raise CompositionError("task_runner must implement AgentRuntime.run_once.")
     if config is not None and not isinstance(config, KernelConfig):
         raise CompositionError("config must be a KernelConfig instance when supplied.")
     if execution_engine is not None and not isinstance(execution_engine, PaperExecutionEngine):
@@ -514,7 +508,8 @@ def build_runtime_pm_review_executor(
         request = resolution.request
         decision_available_at = max(now(), request.business_at)
         market_bars: tuple[MarketDataBar, ...] = ()
-        if config is not None:
+        existing_execution_decision = resolution.pending_execution_decision
+        if config is not None and existing_execution_decision is None:
             market_bars = build_pm_review_visible_market_bars_for_requests(
                 layout=layout,
                 target_key=request.target_key,
@@ -532,7 +527,20 @@ def build_runtime_pm_review_executor(
                     target_key=request.target_key,
                 )
             )
-            if active_execution_engine is None:
+            execution_flow_result: PMExecutionFlowResult | None = None
+            if existing_execution_decision is not None:
+                if active_execution_engine is None:
+                    raise CompositionError(
+                        "runtime PMReview execution requires an execution engine."
+                    )
+                execution_flow_result = execute_pm_decision(
+                    layout=layout,
+                    decision=existing_execution_decision,
+                    execution_engine=active_execution_engine,
+                    execution_observed_at=decision_available_at,
+                )
+                pm_decision = existing_execution_decision
+            elif active_execution_engine is None:
                 orchestration = process_pending_pm_review_request(
                     layout=layout,
                     task_runner=task_runner,
@@ -567,6 +575,7 @@ def build_runtime_pm_review_executor(
                     .pm_review_result
                     .pm_decision
                 )
+                execution_flow_result = execution_orchestration.execution_flow_result
         except Exception as exc:
             classification_before = _classify_pm_review_request(
                 request=request,
@@ -608,6 +617,18 @@ def build_runtime_pm_review_executor(
                 failure_reason="pm_review_run_failed",
                 failure_error=str(exc).strip() or repr(exc),
             )
+        if (
+            execution_flow_result is not None
+            and execution_flow_result.execution_deferred is not None
+        ):
+            return RuntimePMReviewExecutionResult(
+                status="deferred",
+                pm_decision_ref=_pm_decision_record_ref(
+                    layout=layout,
+                    decision=pm_decision,
+                ),
+                retry_at=execution_flow_result.execution_deferred.retry_at,
+            )
         return RuntimePMReviewExecutionResult(
             status="completed",
             pm_decision_ref=_pm_decision_record_ref(
@@ -626,7 +647,7 @@ def dispatch_due_pm_reviews_for_target(
     target_key: str,
     run_until: datetime,
     policy: PMReviewRuntimePolicy,
-    task_runner: PMReviewTaskRunner,
+    task_runner: AgentRuntime,
     market_data_provider: MarketBarsProvider | None,
     emit: RuntimeEmitter,
     runtime_owned_analysis_pm_review: bool,
@@ -762,7 +783,7 @@ def build_pm_review_visible_market_bars_for_requests(
             market_mapping=mapping,
             start_at=requested_start,
             end_at=visibility_bound,
-            adjustment_policy=_pm_review_visible_adjustment_policy(
+            adjustment_policy=resolve_pm_review_visible_adjustment_policy(
                 config=config,
                 target_key=target_key,
                 market_symbol=mapping.market_symbol,
@@ -797,100 +818,96 @@ def build_pm_review_visible_market_bars_for_requests(
     return visible
 
 
-def build_pm_review_portfolio_risk_market_bars_for_request(
+def build_pm_review_portfolio_risk_snapshot_for_request(
     *,
     layout: WorkspaceLayout,
     request: PMReviewRequest,
     active_exposure: ActiveExposure,
-    pm_decisions: tuple[PMDecision, ...],
     execution_records: tuple[ExecutionRecord, ...],
     config: KernelConfig | None,
     market_data_provider: MarketBarsProvider | None = None,
     emit: RuntimeEmitter | None = None,
-) -> tuple[MarketDataBar, ...]:
+) -> PMPortfolioRiskSnapshot | None:
     if active_exposure.state == "flat":
-        return ()
+        return None
     if config is None:
-        _emit_pm_review_market_bars_message(
-            emit=emit,
-            target_key=request.target_key,
-            message="portfolio risk snapshot skipped: market config unavailable",
+        raise CompositionError(
+            "Non-flat PMReview requires market config for portfolio risk."
         )
-        return ()
     if not isinstance(config, KernelConfig):
         raise CompositionError("config must be a KernelConfig instance when supplied.")
     if market_data_provider is None:
-        _emit_pm_review_market_bars_message(
-            emit=emit,
-            target_key=request.target_key,
-            message="portfolio risk snapshot skipped: market data provider unavailable",
+        raise CompositionError(
+            "Non-flat PMReview requires a market data provider for portfolio risk."
         )
-        return ()
-    entry_execution = resolve_current_position_entry_execution(
-        actual_exposure=active_exposure,
-        pm_decisions=pm_decisions,
-        execution_records=execution_records,
-        business_at=request.business_at,
-    )
-    if entry_execution is None or entry_execution.executed_at is None:
-        _emit_pm_review_market_bars_message(
-            emit=emit,
-            target_key=request.target_key,
-            message="portfolio risk snapshot skipped: entry execution unavailable",
-        )
-        return ()
     try:
+        episode_state = read_target_episode_artifacts(layout, request.target_key)
+        open_segment = episode_state.open_segment
+        opening_state_change = None
+        if open_segment is not None:
+            opening_state_change = next(
+                (
+                    state_change
+                    for state_change in read_state_changes(layout, request.target_key)
+                    if state_change.state_change_id
+                    == open_segment.opened_by_state_change_id
+                ),
+                None,
+            )
         mapping = resolve_market_mapping(config, request.target_key)
+        adjustment_policy = resolve_pm_review_visible_adjustment_policy(
+            config=config,
+            target_key=request.target_key,
+            market_symbol=mapping.market_symbol,
+        )
+        if open_segment is None:
+            raise PMPortfolioRiskError(
+                "non-flat active exposure has no persisted open validation segment."
+            )
         visible = read_visible_target_bars(
             market_data=market_data_provider,
             market_mapping=mapping,
-            start_at=entry_execution.executed_at,
+            start_at=open_segment.opened_at,
             end_at=request.max_visible_market_time,
-            adjustment_policy=_pm_review_visible_adjustment_policy(
-                config=config,
-                target_key=request.target_key,
-                market_symbol=mapping.market_symbol,
-            ),
+            adjustment_policy=adjustment_policy,
         )
+        snapshot = build_pm_portfolio_risk_snapshot(
+            request=request,
+            actual_exposure=active_exposure,
+            open_episode=episode_state.open_episode,
+            open_segment=open_segment,
+            opening_state_change=opening_state_change,
+            market_mapping=mapping,
+            market_bars=visible,
+            execution_records=execution_records,
+            adjustment_policy=adjustment_policy,
+        )
+    except (EpisodeArtifactStoreError, StateChangeStoreError, PMPortfolioRiskError) as exc:
+        raise CompositionError(
+            f"Unable to build non-flat PMReview portfolio risk: {exc}"
+        ) from exc
     except Exception as exc:
-        if _is_no_prefetched_bars_in_requested_window(exc):
-            _emit_pm_review_market_bars_message(
-                emit=emit,
-                target_key=request.target_key,
-                message=(
-                    "portfolio risk snapshot skipped: no_market_observation "
-                    f"start={entry_execution.executed_at.isoformat()} "
-                    f"end={request.max_visible_market_time.isoformat()}"
-                ),
-            )
-            return ()
-        _emit_pm_review_market_bars_message(
-            emit=emit,
-            target_key=request.target_key,
-            message=f"portfolio risk snapshot market data read failed: {exc}",
+        raise CompositionError(
+            "Unable to read active-basis market data for non-flat PMReview portfolio risk: "
+            f"{exc}"
+        ) from exc
+    if snapshot is None:
+        raise CompositionError(
+            "Non-flat PMReview portfolio risk builder returned no snapshot."
         )
-        return ()
-    risk_bars = tuple(
-        sorted(
-            (
-                bar
-                for bar in visible
-                if entry_execution.executed_at <= bar.end_at <= request.max_visible_market_time
-            ),
-            key=lambda bar: (bar.start_at, bar.end_at),
-        )
-    )
     _emit_pm_review_market_bars_message(
         emit=emit,
         target_key=request.target_key,
         message=(
             "portfolio risk snapshot "
-            f"bars={len(risk_bars)} "
-            f"entry_at={entry_execution.executed_at.isoformat()} "
+            f"basis={snapshot.instrument_basis} "
+            f"segment_id={snapshot.segment_id} "
+            f"entry_source={snapshot.entry_source} "
+            f"entry_at={snapshot.entry_reference_at.isoformat()} "
             f"visibility_bound={request.max_visible_market_time.isoformat()}"
         ),
     )
-    return risk_bars
+    return snapshot
 
 
 def pm_review_runtime_policy_from_config(config: KernelConfig) -> PMReviewRuntimePolicy:
@@ -910,7 +927,7 @@ def validate_pm_review_runtime_preflight(
     config: KernelConfig,
     layout: WorkspaceLayout,
     target_keys: tuple[str, ...],
-    task_runner: PMReviewTaskRunner | None = None,
+    task_runner: AgentRuntime | None = None,
     migration_id: str = DEFAULT_CUTOVER_MIGRATION_ID,
 ) -> PMReviewRuntimePreflightReceipt:
     """Fail fast before replay/live uses enabled PMReview runtime routing."""
@@ -950,11 +967,11 @@ def validate_pm_review_runtime_preflight(
         workspace_checked = True
     if policy.auto_dispatch_after_analysis:
         if task_runner is None:
-            build_pm_review_task_runner(config=config)
+            _build_pm_review_task_runner(config=config)
             runner_checked = True
-        elif not callable(task_runner):
+        elif not callable(getattr(task_runner, "run_once", None)):
             raise CompositionError(
-                "PMReview runtime preflight requires a callable runner."
+                "PMReview runtime preflight requires AgentRuntime.run_once."
             )
         else:
             runner_checked = True
@@ -972,7 +989,7 @@ def dispatch_pending_pm_review_requests(
     layout: WorkspaceLayout,
     target_key: str,
     run_until: datetime,
-    task_runner: PMReviewTaskRunner,
+    task_runner: AgentRuntime,
     runtime_owned_analysis_pm_review: bool = False,
     execute_approved: bool = False,
     execution_engine: PaperExecutionEngine | None = None,
@@ -991,8 +1008,8 @@ def dispatch_pending_pm_review_requests(
         raise CompositionError("layout must be a WorkspaceLayout instance.")
     if not isinstance(run_until, datetime) or run_until.tzinfo is None:
         raise CompositionError("run_until must be a timezone-aware datetime.")
-    if not callable(task_runner):
-        raise CompositionError("task_runner must be callable.")
+    if not callable(getattr(task_runner, "run_once", None)):
+        raise CompositionError("task_runner must implement AgentRuntime.run_once.")
     request_records = tuple(
         persisted.record
         for persisted in PMReviewRequestStore(layout).read_records(target_key=target_key)
@@ -1109,6 +1126,7 @@ def dispatch_pending_pm_review_requests(
                             layout=layout,
                             pm_decision=pm_decision,
                             execution_engine=execution_engine,
+                            execution_observed_at=run_until,
                         ),
                     )
                 processed.append(result)
@@ -1128,6 +1146,7 @@ def dispatch_pending_pm_review_requests(
                     pm_decisions=existing_pm_decisions,
                     execution_records=existing_executions,
                     execution_engine=execution_engine,
+                    execution_observed_at=run_until,
                     migration_id=migration_id,
                 )
             except Exception as exc:
@@ -1489,7 +1508,7 @@ def _pm_decision_record_ref(
 
 
 def _pm_review_failure_retry_allowed(error: Exception) -> bool:
-    if isinstance(error, MiroThinkerPMReviewStructuralRuntimeError):
+    if isinstance(error, PMReviewStructuralRuntimeError):
         return False
     return True
 
@@ -1648,6 +1667,7 @@ def _materialize_trigger_driven_pm_review_requests(
             persisted.record
             for persisted in request_store.read_records(target_key=target_key)
         )
+        existing_request_ids = {request.request_id for request in existing_requests}
         existing_decisions = tuple(
             persisted.record
             for persisted in decision_store.read_records(target_key=target_key)
@@ -1722,13 +1742,17 @@ def _materialize_trigger_driven_pm_review_requests(
                     f"level_ids={list(candidate.trigger_hit.touched_level_ids)!r}"
                 )
                 continue
-            triggered_request = build_triggered_pm_review_request(
+            triggered_request = _build_unmaterialized_triggered_pm_review_request(
                 prior_request=prior_request,
                 source_decision=trigger_source_decision,
                 trigger_hit=candidate.trigger_hit,
                 source_event_ids=candidate.source_event_ids,
+                existing_request_ids=existing_request_ids,
             )
+            if triggered_request is None:
+                continue
             request_path = request_store.append(triggered_request)
+            existing_request_ids.add(triggered_request.request_id)
             if gate_decision is not None:
                 record = build_pm_position_review_gate_record(
                     decision=gate_decision,
@@ -1934,6 +1958,7 @@ def next_pm_position_review_trigger_at_before(
             persisted.record
             for persisted in request_store.read_records(target_key=target_key)
         )
+        existing_request_ids = {request.request_id for request in existing_requests}
         existing_decisions = tuple(
             persisted.record
             for persisted in decision_store.read_records(target_key=target_key)
@@ -1992,6 +2017,15 @@ def next_pm_position_review_trigger_at_before(
                 price_level_roles=assessment.price_level_roles,
             )
             if gate_decision is not None and gate_decision.outcome == "skipped":
+                continue
+            triggered_request = _build_unmaterialized_triggered_pm_review_request(
+                prior_request=prior_request,
+                source_decision=trigger_source_decision,
+                trigger_hit=candidate.trigger_hit,
+                source_event_ids=candidate.source_event_ids,
+                existing_request_ids=existing_request_ids,
+            )
+            if triggered_request is None:
                 continue
             candidate_times.append(candidate.trigger_hit.business_at)
             break
@@ -2132,6 +2166,27 @@ def _pending_trigger_driven_pm_review_exists(
     )
 
 
+def _build_unmaterialized_triggered_pm_review_request(
+    *,
+    prior_request: PMReviewRequest,
+    source_decision: PMDecision,
+    trigger_hit: PMPositionReviewTriggerHit,
+    source_event_ids: tuple[str, ...],
+    existing_request_ids: set[str],
+) -> PMReviewRequest | None:
+    """Build one trigger request only when its deterministic identity is new."""
+
+    triggered_request = build_triggered_pm_review_request(
+        prior_request=prior_request,
+        source_decision=source_decision,
+        trigger_hit=trigger_hit,
+        source_event_ids=source_event_ids,
+    )
+    if triggered_request.request_id in existing_request_ids:
+        return None
+    return triggered_request
+
+
 def _read_market_bars_for_position_review_triggers(
     *,
     config: KernelConfig,
@@ -2149,7 +2204,7 @@ def _read_market_bars_for_position_review_triggers(
             market_mapping=mapping,
             start_at=start_at,
             end_at=end_at,
-            adjustment_policy=_pm_review_visible_adjustment_policy(
+            adjustment_policy=resolve_pm_review_visible_adjustment_policy(
                 config=config,
                 target_key=target_key,
                 market_symbol=mapping.market_symbol,
@@ -2173,7 +2228,7 @@ def _read_market_bars_for_position_review_triggers(
     )
 
 
-def _pm_review_visible_adjustment_policy(
+def resolve_pm_review_visible_adjustment_policy(
     *,
     config: KernelConfig,
     target_key: str,
@@ -2305,6 +2360,7 @@ def _continue_pm_review_execution_from_existing_decision(
     pm_decisions: tuple[PMDecision, ...],
     execution_records: tuple[ExecutionRecord, ...],
     execution_engine: PaperExecutionEngine | None,
+    execution_observed_at: datetime,
     migration_id: str,
 ) -> PMReviewLifecycleRepairResult:
     pm_decision = _unique_pm_decision_for_request(
@@ -2331,6 +2387,7 @@ def _continue_pm_review_execution_from_existing_decision(
         layout=layout,
         pm_decision=pm_decision,
         execution_engine=execution_engine,
+        execution_observed_at=execution_observed_at,
     )
     updated_executions = execution_records
     if execution_result.execution_record is not None:
@@ -2357,6 +2414,7 @@ def _execute_existing_pm_review_decision(
     layout: WorkspaceLayout,
     pm_decision: PMDecision,
     execution_engine: PaperExecutionEngine | None,
+    execution_observed_at: datetime,
 ) -> PMExecutionFlowResult:
     _validate_pm_review_execution_inputs(execution_engine=execution_engine)
     if execution_engine is None:
@@ -2365,6 +2423,7 @@ def _execute_existing_pm_review_decision(
         layout=layout,
         decision=pm_decision,
         execution_engine=execution_engine,
+        execution_observed_at=execution_observed_at,
     )
 
 
@@ -2573,6 +2632,7 @@ def _empty_pm_execution_flow_result() -> PMExecutionFlowResult:
         pm_decision=None,
         execution_intent=None,
         execution_record=None,
+        execution_deferred=None,
         portfolio_state=None,
         view_state_change=None,
     )
@@ -2670,7 +2730,6 @@ __all__ = [
     "PMReviewRuntimePolicy",
     "PMReviewRuntimePreflightReceipt",
     "build_pm_review_execution_inputs",
-    "build_pm_review_task_runner",
     "build_pm_review_visible_market_bars_for_requests",
     "build_runtime_pm_review_executor",
     "dispatch_due_pm_reviews_for_target",

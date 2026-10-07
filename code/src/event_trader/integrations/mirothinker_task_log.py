@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import json
 import re
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
+from types import MappingProxyType
 from typing import cast
 
 
@@ -40,6 +41,35 @@ class MiroThinkerToolUseTrace:
     attempted_tool_names: tuple[str, ...]
     successful_tool_names: tuple[str, ...]
     failure_details: tuple[str, ...] = ()
+
+
+@dataclass(frozen=True, slots=True)
+class MiroThinkerRecordedToolExchange:
+    """One exact tool request and response preserved in a MiroThinker task log."""
+
+    tool_name: str
+    arguments: Mapping[str, object]
+    result_text: str
+    successful: bool
+    failure_detail: str | None = None
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.tool_name, str) or not self.tool_name.strip():
+            raise MiroThinkerTaskLogError("recorded tool_name must be non-blank.")
+        if not isinstance(self.arguments, Mapping):
+            raise MiroThinkerTaskLogError("recorded tool arguments must be an object.")
+        if not isinstance(self.result_text, str) or not self.result_text.strip():
+            raise MiroThinkerTaskLogError("recorded tool result_text must be non-blank.")
+        if not isinstance(self.successful, bool):
+            raise MiroThinkerTaskLogError("recorded tool successful must be boolean.")
+        if self.failure_detail is not None and (
+            not isinstance(self.failure_detail, str) or not self.failure_detail.strip()
+        ):
+            raise MiroThinkerTaskLogError(
+                "recorded tool failure_detail must be non-blank when provided."
+            )
+        object.__setattr__(self, "tool_name", self.tool_name.strip())
+        object.__setattr__(self, "arguments", MappingProxyType(dict(self.arguments)))
 
 
 def mirothinker_portable_run_id(logical_task_id: str) -> str:
@@ -128,6 +158,15 @@ def load_task_log_tool_use_trace(log_path: Path) -> MiroThinkerToolUseTrace:
     return extract_tool_use_trace(payload)
 
 
+def load_task_log_recorded_tool_exchanges(
+    log_path: Path,
+) -> tuple[MiroThinkerRecordedToolExchange, ...]:
+    """Load exact main-agent tool request/response pairs from one task log."""
+
+    payload = _load_task_log_payload(log_path)
+    return extract_recorded_tool_exchanges(payload)
+
+
 def extract_assistant_text_candidates(task_log_payload: object) -> tuple[str, ...]:
     """Extract assistant-authored text candidates from one decoded task log payload."""
     if not isinstance(task_log_payload, dict):
@@ -206,6 +245,45 @@ def extract_tool_use_trace(task_log_payload: object) -> MiroThinkerToolUseTrace:
         successful_tool_names=_unique_texts(successful_tool_names),
         failure_details=tuple(failure_details[:5]),
     )
+
+
+def extract_recorded_tool_exchanges(
+    task_log_payload: object,
+) -> tuple[MiroThinkerRecordedToolExchange, ...]:
+    """Extract complete tool exchanges without interpreting their business payloads."""
+
+    messages = _load_message_history(task_log_payload)
+    exchanges: list[MiroThinkerRecordedToolExchange] = []
+    for index, message in enumerate(messages):
+        if not isinstance(message, dict) or message.get("role") != "assistant":
+            continue
+        text = _message_text(message.get("content"))
+        tool_name = _extract_tool_name(text)
+        if tool_name is None:
+            continue
+        arguments = _extract_tool_arguments(text, tool_name=tool_name)
+        try:
+            result_text = _tool_result_after(
+                messages,
+                tool_index=index,
+                tool_name=tool_name,
+            )
+        except _MiroThinkerFinalSummaryAfterToolCall:
+            continue
+        successful, failure_detail, _ = _parse_tool_result_success(
+            result_text,
+            tool_name=tool_name,
+        )
+        exchanges.append(
+            MiroThinkerRecordedToolExchange(
+                tool_name=tool_name,
+                arguments=arguments,
+                result_text=result_text,
+                successful=successful,
+                failure_detail=failure_detail,
+            )
+        )
+    return tuple(exchanges)
 
 
 def extract_collection_tool_trace(
@@ -468,6 +546,26 @@ def _extract_tool_name(text: str) -> str | None:
     return tool_name
 
 
+def _extract_tool_arguments(text: str, *, tool_name: str) -> dict[str, object]:
+    match = re.search(r"<arguments>(.*?)</arguments>", text, flags=re.DOTALL)
+    if match is None:
+        raise MiroThinkerTaskLogError(
+            f"MiroThinker tool call is missing arguments: tool_name={tool_name}"
+        )
+    raw_arguments = match.group(1).strip()
+    try:
+        arguments = json.loads(raw_arguments)
+    except json.JSONDecodeError as exc:
+        raise MiroThinkerTaskLogError(
+            f"MiroThinker tool arguments are not JSON: tool_name={tool_name}"
+        ) from exc
+    if not isinstance(arguments, dict):
+        raise MiroThinkerTaskLogError(
+            f"MiroThinker tool arguments must be an object: tool_name={tool_name}"
+        )
+    return cast(dict[str, object], arguments)
+
+
 def _tool_result_after(
     messages: list[object],
     *,
@@ -548,9 +646,7 @@ def _decode_tool_result_payloads(
         payloads.append(cast(dict[str, object], payload))
         index = end
     if not payloads:
-        raise MiroThinkerTaskLogError(
-            f"MiroThinker tool result is not JSON: tool_name={tool_name}"
-        )
+        raise MiroThinkerTaskLogError(f"MiroThinker tool result is not JSON: tool_name={tool_name}")
     return tuple(payloads)
 
 
@@ -653,14 +749,17 @@ def _unique_texts(values: Iterable[str]) -> tuple[str, ...]:
 __all__ = [
     "MiroThinkerTaskLogError",
     "MiroThinkerCollectionToolTrace",
+    "MiroThinkerRecordedToolExchange",
     "MiroThinkerToolUseTrace",
     "extract_assistant_text_candidates",
     "extract_collection_tool_trace",
     "extract_collection_tool_trace_from_tool_result",
+    "extract_recorded_tool_exchanges",
     "extract_tool_use_trace",
     "load_latest_task_log_assistant_texts",
     "load_latest_task_log_collection_tool_trace",
     "load_latest_task_log_tool_use_trace",
     "load_task_log_assistant_texts",
+    "load_task_log_recorded_tool_exchanges",
     "load_task_log_tool_use_trace",
 ]

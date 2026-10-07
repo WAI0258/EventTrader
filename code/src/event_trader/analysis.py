@@ -30,12 +30,14 @@ from event_trader.contracts import (
 )
 from event_trader.contracts._validators import normalize_content, validate_target_key
 from event_trader.market.contracts import MarketContextSnapshot
+from event_trader.operator_context import OperatorContextSnapshot
 from event_trader.storage import WorkspaceLayout
 
 type EvidenceReader = Callable[[list[str]], list[EvidenceLedgerRecord]]
 type MarketContextBuilder = Callable[[str, datetime], MarketContextSnapshot | None]
 type ResearchMemoryReaderFactory = Callable[[datetime], ResearchMemoryReadPort]
 type TargetSeedPagePathsResolver = Callable[[str], tuple[str, ...]]
+type OperatorContextReader = Callable[[str], OperatorContextSnapshot]
 
 _TARGET_FIXED_PAGE_NAMES = (
     "index.md",
@@ -43,7 +45,6 @@ _TARGET_FIXED_PAGE_NAMES = (
     "timeline.md",
     "risks.md",
     "watchlist.md",
-    "operator.md",
     "log.md",
 )
 _TARGET_DESK_PAGE_NAMES = (
@@ -52,7 +53,6 @@ _TARGET_DESK_PAGE_NAMES = (
     "risks.md",
     "watchlist.md",
     "timeline.md",
-    "operator.md",
 )
 _HISTORICAL_TARGET_SEED_PAGE_NAMES = (
     "index.md",
@@ -60,7 +60,6 @@ _HISTORICAL_TARGET_SEED_PAGE_NAMES = (
     "risks.md",
     "watchlist.md",
     "timeline.md",
-    "operator.md",
 )
 _SHARED_FIXED_PAGE_PATHS = (
     "shared/index.md",
@@ -171,6 +170,7 @@ class AnalysisContext:
     attention_hint: AnalysisAttentionHint
     evidence_records: tuple[EvidenceLedgerRecord, ...]
     memory_context: AnalysisMemoryContext
+    operator_context: OperatorContextSnapshot
     receipt: AnalysisContextReceipt
     market_context: MarketContextSnapshot | None = None
     unit_formation_lane: UnitFormationLane | None = None
@@ -203,6 +203,14 @@ class AnalysisContext:
         if not isinstance(self.memory_context, AnalysisMemoryContext):
             raise AnalysisContextError(
                 "memory_context must be an AnalysisMemoryContext instance."
+            )
+        if not isinstance(self.operator_context, OperatorContextSnapshot):
+            raise AnalysisContextError(
+                "operator_context must be an OperatorContextSnapshot instance."
+            )
+        if self.operator_context.target_key != self.request.target_key:
+            raise AnalysisContextError(
+                "operator_context target_key must match the AnalysisRequest target_key."
             )
         if not isinstance(self.receipt, AnalysisContextReceipt):
             raise AnalysisContextError(
@@ -260,6 +268,7 @@ class AnalysisContextLoader:
         build_market_context: MarketContextBuilder | None = None,
         market_context_max_prompt_chars: int = 6_000,
         target_seed_page_paths: TargetSeedPagePathsResolver | None = None,
+        read_operator_context: OperatorContextReader | None = None,
     ) -> None:
         if not callable(read_evidence):
             raise AnalysisContextError("read_evidence must be callable.")
@@ -269,18 +278,24 @@ class AnalysisContextLoader:
             )
         if research_memory is not None:
             _validate_research_memory_reader(research_memory)
-            build_research_memory = lambda _business_at: research_memory
+
+            def build_research_memory(_business_at: datetime) -> ResearchMemoryReadPort:
+                return research_memory
+
         elif not callable(build_research_memory):
             raise AnalysisContextError("build_research_memory must be callable.")
         if target_seed_page_paths is None:
             target_seed_page_paths = current_target_seed_page_paths
         if not callable(target_seed_page_paths):
             raise AnalysisContextError("target_seed_page_paths must be callable.")
+        if not callable(read_operator_context):
+            raise AnalysisContextError("read_operator_context must be callable.")
 
         self._read_evidence = read_evidence
         self._build_research_memory = build_research_memory
         self._build_market_context = build_market_context
         self._target_seed_page_paths = target_seed_page_paths
+        self._read_operator_context = read_operator_context
         if (
             not isinstance(market_context_max_prompt_chars, int)
             or isinstance(market_context_max_prompt_chars, bool)
@@ -319,6 +334,11 @@ class AnalysisContextLoader:
             research_memory=research_memory,
             page_paths=self._target_seed_page_paths(request.target_key),
         )
+        operator_context = self._read_operator_context(request.target_key)
+        if not isinstance(operator_context, OperatorContextSnapshot):
+            raise AnalysisContextError(
+                "read_operator_context must return an OperatorContextSnapshot instance."
+            )
         shared_pages: tuple[PageReadResult, ...] = ()
         memory_context = AnalysisMemoryContext(
             target_pages=target_pages,
@@ -336,6 +356,7 @@ class AnalysisContextLoader:
             ),
             evidence_records=evidence_records,
             memory_context=memory_context,
+            operator_context=operator_context,
             receipt=AnalysisContextReceipt(
                 target_key=request.target_key,
                 evidence_count=len(evidence_records),

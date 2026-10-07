@@ -46,13 +46,7 @@ _ENTRY_PAGE_TEMPLATES: dict[str, str] = {
     "timeline.md": _fixed_target_entry_template("Timeline", "timeline.md"),
     "risks.md": _fixed_target_entry_template("Risks", "risks.md"),
     "watchlist.md": _fixed_target_entry_template("Watchlist", "watchlist.md"),
-    "operator.md": "\n".join(
-        (
-            "# Operator Context",
-            "",
-            "## Context",
-        )
-    ),
+    "operator.md": "",
     "index.md": "\n".join(
         (
             "# Index",

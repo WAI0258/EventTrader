@@ -542,6 +542,20 @@ class FileBackedAnalysisWorkQueue:
     def load_failures(self) -> tuple[AnalysisQueueFailure, ...]:
         return tuple(_read_failure(path) for path in sorted(self._failed_root.glob("*.json")))
 
+    def load_failed_items(self) -> tuple[AnalysisWorkItem, ...]:
+        """Load the original work items recorded by terminal failures."""
+        items: list[AnalysisWorkItem] = []
+        for path in sorted(self._failed_root.glob("*.json")):
+            payload = _require_dict(
+                json.loads(path.read_text(encoding="utf-8-sig")),
+                "AnalysisQueueFailure",
+            )
+            item_payload = payload.get("item")
+            if item_payload is None:
+                raise AnalysisQueueError(f"failed queue record is missing item: {path}")
+            items.append(AnalysisWorkItem.from_json_payload(item_payload))
+        return tuple(items)
+
     def _pending_path(self, idempotency_key: str) -> Path:
         return self._pending_root / f"{_idempotency_digest(idempotency_key)}.json"
 
@@ -637,7 +651,10 @@ def _read_work_item(path: Path) -> AnalysisWorkItem:
 
 
 def _read_completion(path: Path) -> AnalysisQueueCompletion:
-    payload = _require_dict(json.loads(path.read_text(encoding="utf-8-sig")), "AnalysisQueueCompletion")
+    payload = _require_dict(
+        json.loads(path.read_text(encoding="utf-8-sig")),
+        "AnalysisQueueCompletion",
+    )
     return AnalysisQueueCompletion(
         queue_name=_require_text(payload.get("queue_name"), "queue_name"),
         work_item_id=_require_text(payload.get("work_item_id"), "work_item_id"),
@@ -652,7 +669,10 @@ def _read_completion(path: Path) -> AnalysisQueueCompletion:
 
 
 def _read_failure(path: Path) -> AnalysisQueueFailure:
-    payload = _require_dict(json.loads(path.read_text(encoding="utf-8-sig")), "AnalysisQueueFailure")
+    payload = _require_dict(
+        json.loads(path.read_text(encoding="utf-8-sig")),
+        "AnalysisQueueFailure",
+    )
     return AnalysisQueueFailure(
         queue_name=_require_text(payload.get("queue_name"), "queue_name"),
         work_item_id=_require_text(payload.get("work_item_id"), "work_item_id"),

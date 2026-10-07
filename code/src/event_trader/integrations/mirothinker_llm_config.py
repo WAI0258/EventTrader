@@ -2,40 +2,11 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import Any
 
+from event_trader.reasoning.effort import normalize_agent_reasoning_effort
+
 _DEFAULT_MAX_CONTEXT_LENGTH = 65536
-_ALLOWED_REASONING_EFFORTS = (
-    "none",
-    "minimal",
-    "low",
-    "medium",
-    "high",
-    "xhigh",
-    "max",
-)
-
-
-def normalize_mirothinker_reasoning_effort(
-    value: object,
-    *,
-    field_name: str,
-    error_type: Callable[[str], Exception] = ValueError,
-) -> str | None:
-    if value is None:
-        return None
-    if not isinstance(value, str):
-        raise error_type(f"{field_name} must be a string.")
-    normalized = value.strip().lower()
-    if not normalized:
-        raise error_type(f"{field_name} must not be blank.")
-    if normalized not in _ALLOWED_REASONING_EFFORTS:
-        allowed = ", ".join(_ALLOWED_REASONING_EFFORTS)
-        raise error_type(f"{field_name} must be one of: {allowed}.")
-    if normalized == "none":
-        return None
-    return normalized
 
 
 def build_mirothinker_llm_config(
@@ -65,7 +36,7 @@ def build_mirothinker_llm_config(
         "base_url": base_url,
         "repetition_penalty": 1.0,
     }
-    normalized_reasoning_effort = normalize_mirothinker_reasoning_effort(
+    normalized_reasoning_effort = normalize_agent_reasoning_effort(
         reasoning_effort,
         field_name="reasoning_effort",
     )
@@ -74,4 +45,4 @@ def build_mirothinker_llm_config(
     return llm_config
 
 
-__all__ = ["build_mirothinker_llm_config", "normalize_mirothinker_reasoning_effort"]
+__all__ = ["build_mirothinker_llm_config"]

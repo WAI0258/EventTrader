@@ -1,0 +1,10 @@
+version = 1
+
+[[mount]]
+config = "../../code/config/kernel.console.soxx.toml"
+
+[[mount]]
+config = "../../code/config/kernel.console.iau.toml"
+
+[[mount]]
+config = "../../code/config/kernel.console.btc.toml"

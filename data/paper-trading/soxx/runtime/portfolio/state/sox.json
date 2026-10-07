@@ -1,0 +1,9 @@
+{
+  "decision_episode_id": "decision-episode:pm-review:ca83cb03864ef5259968ee7c",
+  "source_execution_record_id": "execution-record:f49ab49fdcdd354cac3e876bcb01178f",
+  "source_pm_decision_id": "pm-decision:ed372888ea35e9f8b41efed61a6a1584",
+  "state": "weak_short",
+  "target_key": "sox",
+  "target_weight": -0.5,
+  "updated_at": "2026-09-14T20:30:00+00:00"
+}

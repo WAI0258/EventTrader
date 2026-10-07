@@ -1,0 +1,110 @@
+{
+  "episode": {
+    "close_reason": "state_changed_to_flat",
+    "closed_at": "2026-08-20T15:30:00+00:00",
+    "closed_by_event_ids": [
+      "080f0f4d2dfa746b950e404b",
+      "366e375ce8481c8bfc604964",
+      "732d06195a541aa0843869f3",
+      "4615627577c20cb7efb845ba",
+      "b84b9a24f76ab1687e45d6be"
+    ],
+    "closed_by_state_change_id": "state-change:pm-execution:286f82c86e8c8e43efd13b255175243a",
+    "direction": "short",
+    "episode_id": "sox:episode:5",
+    "opened_at": "2026-08-18T20:00:00+00:00",
+    "opened_by_event_ids": [
+      "1bfd0209fdb59af14cbed168",
+      "9ca2e2ef974799fc1ef495ed",
+      "7a767b98e226f1ce3c58ea4d",
+      "c356cde3af75d7cc0b57d838",
+      "3bbed49a94e8c644b4c6efe5",
+      "42e627690f23b19d3f6f4c26",
+      "1918cb87ee90b31bdc4c61a4",
+      "68ed00126a58a8a7627c70c4"
+    ],
+    "opened_by_state_change_id": "state-change:pm-execution:02f366c8150c5cd03a385280d2d7e2f7",
+    "target_key": "sox"
+  },
+  "generated_at": "2026-10-07T09:18:55.698030+00:00",
+  "reflection_triggers": [
+    {
+      "close_reason": "state_changed_to_flat",
+      "closed_by_event_ids": [
+        "080f0f4d2dfa746b950e404b",
+        "366e375ce8481c8bfc604964",
+        "732d06195a541aa0843869f3",
+        "4615627577c20cb7efb845ba",
+        "b84b9a24f76ab1687e45d6be"
+      ],
+      "closed_by_state_change_id": "state-change:pm-execution:286f82c86e8c8e43efd13b255175243a",
+      "episode_id": "sox:episode:5",
+      "target_key": "sox",
+      "triggered_at": "2026-08-20T15:30:00+00:00"
+    }
+  ],
+  "segments": [
+    {
+      "close_reason": "view_closed",
+      "closed_at": "2026-08-20T15:30:00+00:00",
+      "closed_by_state_change_id": "state-change:pm-execution:286f82c86e8c8e43efd13b255175243a",
+      "episode_id": "sox:episode:5",
+      "opened_at": "2026-08-18T20:00:00+00:00",
+      "opened_by_state_change_id": "state-change:pm-execution:02f366c8150c5cd03a385280d2d7e2f7",
+      "segment_id": "sox:segment:7",
+      "target_key": "sox",
+      "target_weight": -0.5
+    }
+  ],
+  "state_changes": [
+    {
+      "conviction": "weak",
+      "direction": "short",
+      "effective_at": "2026-08-18T20:00:00+00:00",
+      "execution_record_id": "execution-record:74855073e5c5f5ef0128ebd5e6cd3972",
+      "instrument_basis": null,
+      "pm_decision_id": "pm-decision:45e1984e5fbaed1f8fe91d4d4457da8c",
+      "predecessor_instrument_basis": null,
+      "rationale_md": "Text omitted from numerical sample.",
+      "source_event_ids": [
+        "1bfd0209fdb59af14cbed168",
+        "9ca2e2ef974799fc1ef495ed",
+        "7a767b98e226f1ce3c58ea4d",
+        "c356cde3af75d7cc0b57d838",
+        "3bbed49a94e8c644b4c6efe5",
+        "42e627690f23b19d3f6f4c26",
+        "1918cb87ee90b31bdc4c61a4",
+        "68ed00126a58a8a7627c70c4"
+      ],
+      "source_kind": "pm_execution_sidecar",
+      "state": "weak_short",
+      "state_change_id": "state-change:pm-execution:02f366c8150c5cd03a385280d2d7e2f7",
+      "target_key": "sox",
+      "target_weight": -0.5,
+      "used_lesson_ids": []
+    },
+    {
+      "conviction": "none",
+      "direction": "flat",
+      "effective_at": "2026-08-20T15:30:00+00:00",
+      "execution_record_id": "execution-record:60b1ce2d96349cb477938790a2a96334",
+      "instrument_basis": null,
+      "pm_decision_id": "pm-decision:0cfcca0fba417c46b189edeb802f7adb",
+      "predecessor_instrument_basis": null,
+      "rationale_md": "Text omitted from numerical sample.",
+      "source_event_ids": [
+        "080f0f4d2dfa746b950e404b",
+        "366e375ce8481c8bfc604964",
+        "732d06195a541aa0843869f3",
+        "4615627577c20cb7efb845ba",
+        "b84b9a24f76ab1687e45d6be"
+      ],
+      "source_kind": "pm_execution_sidecar",
+      "state": "flat",
+      "state_change_id": "state-change:pm-execution:286f82c86e8c8e43efd13b255175243a",
+      "target_key": "sox",
+      "target_weight": 0.0,
+      "used_lesson_ids": []
+    }
+  ]
+}

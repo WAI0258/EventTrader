@@ -4,6 +4,7 @@ from .episode_artifacts import (
     EpisodeArtifactStoreError,
     closed_episode_artifact_path,
     open_episode_artifact_path,
+    read_target_episode_artifacts,
     refresh_episode_artifacts,
 )
 from .episode_builder import EpisodeBuildResult, ValidationEpisodeBuilderError, build_episodes
@@ -29,10 +30,12 @@ from .portfolio_feedback import (
 from .returns import (
     EpisodeReturn,
     HorizonBaseline,
+    MarkReturn,
     OpenEpisodeTerminalMark,
     SegmentReturn,
     ValidationReturnsError,
     ValidationReturnsResult,
+    calculate_mark_return,
     calculate_open_episode_terminal_mark,
     calculate_returns,
 )
@@ -69,6 +72,7 @@ __all__ = [
     "ExposureChange",
     "ExposurePathFact",
     "HorizonBaseline",
+    "MarkReturn",
     "OpenEpisodeTerminalMark",
     "PortfolioFacts",
     "PortfolioFeedbackConfig",
@@ -96,12 +100,14 @@ __all__ = [
     "build_default_portfolio_feedback_config",
     "build_portfolio_feedback_run_id",
     "build_portfolio_feedback_snapshot",
+    "calculate_mark_return",
     "calculate_open_episode_terminal_mark",
     "calculate_window_performance",
     "calculate_returns",
     "closed_episode_artifact_path",
     "load_target_episode_state",
     "open_episode_artifact_path",
+    "read_target_episode_artifacts",
     "read_state_changes",
     "refresh_episode_artifacts",
     "render_window_market_kline_svg",

@@ -1,0 +1,338 @@
+# Single-process live BTC thesis config.
+# BTC is the sole tradable target. Hyperliquid perpetual bars provide its
+# 24x7 price/volume data through Hyperliquid perpetuals.
+
+workspace_root = ".local/live-btc-workspace"
+mode = "live"
+heartbeat_interval_seconds = 60
+reflection_interval_hours = 6
+reflection_lookback_hours = 72
+reflection_horizons_hours = [6, 24, 72]
+
+[pm_review_runtime]
+auto_dispatch_after_analysis = true
+execute_pm_decisions = false
+require_workspace_ready = true
+position_review_gate_enabled = true
+position_review_cooldown_minutes = 240
+position_review_rearm_buffer_bps = 10.0
+
+[artifact_retention]
+analysis_debug_log_days = 90
+pm_review_debug_log_days = 90
+checker_debug_log_days = 60
+search_debug_log_days = 30
+reflection_debug_log_days = 90
+
+[analysis_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/live-btc-logs/analysis"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+wall_clock_timeout_seconds = 1200
+
+[checker_agent]
+implementation = "single_pass"
+log_dir = ".local/live-btc-logs/checker"
+llm_provider = "openai"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/v1"
+evidence_excerpt_chars = 4000
+section_excerpt_chars = 2000
+recent_timeline_items = 10
+max_pack_chars = 16000
+force_escalate_on_insufficient_coverage = true
+
+[pm_review_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/live-btc-logs/pm_review"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+wall_clock_timeout_seconds = 1200
+
+[reflection_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/live-btc-logs/reflection"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+
+[live]
+enabled_channels = ["web_search"]
+
+[live.web_search]
+implementation = "mirothinker"
+cadence_profile = "us_equity_active"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/live-btc-logs/search"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+acquisition_tool_names = ["search_and_scrape_webpage", "jina_scrape_llm_summary"]
+serper_api_key_env = "SERPER_API_KEY"
+serper_base_url = "https://google.serper.dev"
+jina_api_key_env = "JINA_API_KEY"
+jina_base_url = "https://r.jina.ai"
+summary_llm_api_key_env = "MINIMAX_API_KEY"
+summary_llm_base_url = "https://api.minimaxi.com/v1/chat/completions"
+summary_llm_model_name = "MiniMax-M2.7"
+
+[live.web_search.cadence_profiles.us_equity_active]
+timezone = "UTC"
+trading_day_local_times = ["00:15", "01:15", "02:15", "03:15", "04:15", "05:15", "06:15", "07:15", "08:15", "09:15", "10:15", "11:15", "12:15", "13:15", "14:15", "15:15", "16:15", "17:15", "18:15", "19:15", "20:15", "21:15", "22:15", "23:15"]
+closed_day_local_times = ["00:15", "01:15", "02:15", "03:15", "04:15", "05:15", "06:15", "07:15", "08:15", "09:15", "10:15", "11:15", "12:15", "13:15", "14:15", "15:15", "16:15", "17:15", "18:15", "19:15", "20:15", "21:15", "22:15", "23:15"]
+
+[[live.web_search.targets]]
+target_key = "btc"
+search_intent = "track material live developments that may affect the Bitcoin thesis through US Treasury issuance, auctions, refunding and yield moves; Federal Reserve policy and liquidity; real yields and the US dollar; broad equity and volatility risk; oil, inflation, gold and geopolitical stress; crypto market structure, ETF flows, stablecoin liquidity, regulation and major exchange or protocol disruptions"
+prompt_profile_id = "us_equity_historical_web_search_v1"
+control_language = "en"
+retrieval_languages = ["en"]
+
+[live_catchup.web_search]
+max_slice_hours = 16
+
+[live.market_data]
+enabled = true
+canonical_bar_granularity = "5min"
+
+[[live.market_data.targets]]
+target_key = "btc"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "BTC"
+provider = "hyperliquid_perp"
+purpose = "primary_tradable"
+market_session = "continuous"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "SPY"
+provider = "futu_openapi"
+purpose = "broad_market_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "VIXY"
+provider = "futu_openapi"
+purpose = "volatility_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "TLT"
+provider = "futu_openapi"
+purpose = "rates_duration_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "GLD"
+provider = "futu_openapi"
+purpose = "safe_haven_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "USO"
+provider = "futu_openapi"
+purpose = "oil_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "UUP"
+provider = "futu_openapi"
+purpose = "usd_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[live.market_data.warmup]
+enabled = true
+min_lookback_days = 14
+
+[validation.market_data]
+provider = "hyperliquid_perp"
+base_url = "https://api.hyperliquid.xyz"
+timeout_seconds = 10.0
+
+[validation.market_data.supplemental_providers.futu_openapi]
+base_url = "tcp://127.0.0.1:11111"
+timeout_seconds = 10.0
+
+[validation.market_mappings.btc]
+market_symbol = "BTC"
+market_session = "continuous"
+bar_granularity = "5min"
+
+[stream_routing]
+enabled = true
+policy_version = "btc_hyperliquid_perp_5min_live_ceau_v1"
+policy_status = "candidate"
+target_key = "btc"
+bar_granularity = "5min"
+processing_time_safety_emit_enabled = true
+processing_time_safety_emit_after_seconds = 2100
+
+[stream_routing.default_unit_policy]
+route_default = "no_action"
+
+[stream_routing.lane_policies.operator_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.risk_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.news_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.context_window]
+route_default = "accumulate"
+candidate_default_route = "accumulate"
+max_delay_bars = 6
+max_unit_chars = 12000
+unit_scope = "context_window"
+completeness_requirements = [
+  { purpose = "evidence_maturity", domain = "market_bars", required_for = ["market_reaction_mature"] },
+]
+
+[stream_routing.lane_policies.episode_append]
+route_default = "accumulate"
+candidate_default_route = "accumulate"
+max_delay_bars = 3
+max_unit_chars = 12000
+unit_scope = "context_window"
+
+[market_context]
+enabled = true
+max_prompt_chars = 6000
+
+[market_context.target_profiles.btc]
+tradable_proxy_symbol = "BTC"
+bar_granularity = "5min"
+enabled_components = ["price_volume", "technical", "macro_cross_asset"]
+
+[[market_context.target_profiles.btc.market_data_subscriptions]]
+symbol = "SPY"
+provider = "futu_openapi"
+purpose = "broad_market_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[market_context.target_profiles.btc.market_data_subscriptions]]
+symbol = "VIXY"
+provider = "futu_openapi"
+purpose = "volatility_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[market_context.target_profiles.btc.market_data_subscriptions]]
+symbol = "TLT"
+provider = "futu_openapi"
+purpose = "rates_duration_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[market_context.target_profiles.btc.market_data_subscriptions]]
+symbol = "GLD"
+provider = "futu_openapi"
+purpose = "safe_haven_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[market_context.target_profiles.btc.market_data_subscriptions]]
+symbol = "USO"
+provider = "futu_openapi"
+purpose = "oil_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[market_context.target_profiles.btc.market_data_subscriptions]]
+symbol = "UUP"
+provider = "futu_openapi"
+purpose = "usd_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[market_context.target_profiles.btc.price_volume]
+lookback_bars = 2016
+trailing_return_windows = ["1h", "4h", "1d", "5d"]
+
+[market_context.target_profiles.btc.market_path]
+enabled = true
+session = "continuous"
+range_lookback_calendar_days = 14
+range_lookback_sessions = 14
+range_lookback_daily_bars = 14
+atr_period = 14
+atr_multiple = 2.0
+pct_floor = 0.025
+min_leg_bars = 3
+large_move_pct = 0.08
+near_extreme_pct = 0.03
+
+[market_context.target_profiles.btc.technical]
+ema_periods = [136]
+ichimoku_enabled = true
+
+[market_context.target_profiles.btc.macro_cross_asset]
+enabled = true
+lookback_bars = 2016
+trailing_return_windows = ["1d", "5d"]
+
+[market_context.target_profiles.btc.macro_cross_asset.proxy_groups]
+broad_us_equities = ["SPY"]
+volatility_proxy = ["VIXY"]
+rates_duration = ["TLT"]
+safe_haven_gold = ["GLD"]
+oil_stress = ["USO"]
+usd = ["UUP"]
+
+[market_context.target_profiles.btc.macro_cross_asset.group_pressure_rules]
+broad_us_equities = "positive_supportive"
+volatility_proxy = "positive_headwind"
+rates_duration = "contextual"
+safe_haven_gold = "contextual"
+oil_stress = "contextual"
+usd = "positive_headwind"

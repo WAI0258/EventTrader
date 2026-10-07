@@ -10,6 +10,8 @@ from event_trader.analysis_assessment_store import AnalysisAssessmentStore
 from event_trader.contracts._validators import validate_target_key
 from event_trader.contracts.analysis_assessment import parse_analysis_assessment
 from event_trader.contracts.price_level_role import PriceLevelRole
+from event_trader.pm_console.decisions import build_pm_decisions_response, list_pm_decision_targets
+from event_trader.pm_console.episodes import list_episode_targets
 from event_trader.pm_console.schemas import (
     PMConsoleMarkdownSectionDTO,
     PMConsoleThesisPriceLevelDTO,
@@ -19,6 +21,7 @@ from event_trader.pm_console.schemas import (
     PMConsoleThesisRevisionSummaryDTO,
     PMConsoleThesisSectionDiffDTO,
 )
+from event_trader.pm_review.store import PMReviewRequestStore
 from event_trader.position_monitoring import list_position_monitoring_targets
 from event_trader.storage import WorkspaceLayout
 from event_trader.thesis_revision.contracts import ThesisRevisionSectionSnapshot
@@ -51,20 +54,55 @@ def list_thesis_revision_targets(layout: WorkspaceLayout) -> tuple[str, ...]:
     return tuple(targets)
 
 
+def list_operator_context_targets(layout: WorkspaceLayout) -> tuple[str, ...]:
+    """List targets with a canonical human-owned operator context page."""
+
+    root = layout.targets_root
+    if not root.is_dir():
+        return ()
+    targets: list[str] = []
+    for child in sorted(root.iterdir()):
+        if not child.is_dir() or not (child / "operator.md").is_file():
+            continue
+        try:
+            targets.append(validate_target_key(child.name, error_type=ValueError))
+        except ValueError:
+            continue
+    return tuple(targets)
+
+
 def map_pm_console_target_views(layout: WorkspaceLayout) -> dict[str, tuple[str, ...]]:
     """Map each PM Console target to the implemented read-only views."""
 
     position_targets = set(list_position_monitoring_targets(layout))
     thesis_targets = set(list_thesis_revision_targets(layout))
+    pm_targets = set(list_pm_decision_targets(layout))
+    operator_targets = set(list_operator_context_targets(layout))
+    episode_targets = set(list_episode_targets(layout))
     target_views: dict[str, tuple[str, ...]] = {}
-    for target_key in sorted(position_targets | thesis_targets):
-        implemented_views: list[str] = ["workbench"]
+    for target_key in sorted(
+        position_targets | thesis_targets | pm_targets | operator_targets | episode_targets
+    ):
+        implemented_views: list[str] = ["operator"]
+        if target_key in episode_targets:
+            implemented_views.append("episodes")
         if target_key in thesis_targets:
             implemented_views.append("thesis")
+        if target_key in pm_targets:
+            implemented_views.append("pm")
         if target_key in position_targets:
             implemented_views.append("position")
         target_views[target_key] = tuple(implemented_views)
     return target_views
+
+
+def default_pm_console_target_view(implemented_views: tuple[str, ...]) -> str:
+    """Choose the first implemented target detail view by PM priority."""
+
+    for view in ("position", "pm", "thesis", "episodes", "operator"):
+        if view in implemented_views:
+            return view
+    raise ValueError("implemented_views must include an implemented PM Console target view.")
 
 
 def list_pm_console_targets(layout: WorkspaceLayout) -> tuple[str, ...]:
@@ -227,6 +265,36 @@ def _detail(
             )
             for diff in revision.diffs_from_previous
         ),
+        linked_pm_decisions=_linked_pm_decisions(
+            layout=layout,
+            target_key=revision.target_key,
+            analysis_assessment_id=revision.analysis_assessment_id,
+        ),
+    )
+
+
+def _linked_pm_decisions(
+    *,
+    layout: WorkspaceLayout,
+    target_key: str,
+    analysis_assessment_id: str | None,
+):
+    if analysis_assessment_id is None:
+        return ()
+    request_ids = {
+        item.record.request_id
+        for item in PMReviewRequestStore(layout).read_records(target_key=target_key)
+        if item.record.source_assessment_id == analysis_assessment_id
+    }
+    if not request_ids:
+        return ()
+    return tuple(
+        decision
+        for decision in build_pm_decisions_response(
+            layout,
+            target_key=target_key,
+        ).decisions
+        if decision.pm_review_request_id in request_ids
     )
 
 
@@ -320,9 +388,11 @@ def _page_name(page_path: str) -> str:
 __all__ = [
     "build_thesis_revision_detail_response",
     "build_thesis_revisions_response",
+    "default_pm_console_target_view",
     "load_persisted_thesis_revision",
     "load_thesis_revision_section",
     "map_pm_console_target_views",
     "list_pm_console_targets",
+    "list_operator_context_targets",
     "list_thesis_revision_targets",
 ]

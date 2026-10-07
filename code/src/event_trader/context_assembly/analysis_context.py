@@ -26,6 +26,7 @@ from event_trader.learning_cards import (
     select_learning_cards,
 )
 from event_trader.market.contracts import MarketContextSnapshot
+from event_trader.operator_context import OperatorContextSnapshot
 from event_trader.research_memory import FileBackedClaimRegistry
 from event_trader.storage import WorkspaceLayout
 
@@ -40,6 +41,7 @@ def build_analysis_context_packet(
     source_kinds: tuple[str, ...] = (),
     evidence_records: tuple[EvidenceLedgerRecord, ...] = (),
     target_pages: tuple[PageReadResult, ...] = (),
+    operator_context: OperatorContextSnapshot,
     market_context: MarketContextSnapshot | None = None,
     memory_read_policy: str = CURRENT_MEMORY_READ_POLICY,
     claim_card_budget: int = 12,
@@ -85,11 +87,19 @@ def build_analysis_context_packet(
         read_policy=memory_read_policy,
         read_run_id=run_id if runtime_scope == "replay" else "",
     )
+    operator_context_receipt = _operator_context_read_receipt(
+        stage="analysis",
+        operator_context=operator_context,
+    )
     items = (
         *_evidence_items(evidence_records),
         *_page_items(
             pages=target_pages,
             scope=f"target:{target_key}",
+            business_at=business_at,
+        ),
+        _operator_context_item(
+            operator_context=operator_context,
             business_at=business_at,
         ),
         *_market_context_items(market_context),
@@ -108,6 +118,7 @@ def build_analysis_context_packet(
         context_packet_id=packet_id,
         evidence_records=evidence_records,
         target_pages=target_pages,
+        operator_context=operator_context,
         claim_card_ids=tuple(card.claim_id for card in claim_cards),
         market_context=market_context,
         memory_read_policy=memory_read_policy,
@@ -123,6 +134,7 @@ def build_analysis_context_packet(
         items=items,
         receipts=(
             *memory_read_receipts,
+            operator_context_receipt,
             *(
                 compiler_receipt.to_json_payload()
                 for compiler_receipt in compiler_memory_read_receipts
@@ -257,6 +269,25 @@ def _learning_card_items(
     )
 
 
+def _operator_context_item(
+    *,
+    operator_context: OperatorContextSnapshot,
+    business_at: datetime,
+) -> ContextItem:
+    return ContextItem(
+        surface_type="operator_context",
+        source_id=operator_context.page_path,
+        scope=f"target:{operator_context.target_key}",
+        business_time=business_at,
+        visible_time=business_at,
+        content_hash=operator_context.content_sha256,
+        selection_reason="runtime_operator_control",
+        budget_class="operator_context",
+        deep_read_allowed=True,
+        deep_read_happened=False,
+    )
+
+
 def _research_memory_read_receipts(
     *,
     stage: str,
@@ -285,6 +316,22 @@ def _research_memory_read_receipts(
         )
         for page in pages
     )
+
+
+def _operator_context_read_receipt(
+    *,
+    stage: str,
+    operator_context: OperatorContextSnapshot,
+) -> dict[str, object]:
+    return {
+        "receipt_type": "operator_context_read",
+        "stage": stage,
+        "target_key": operator_context.target_key,
+        "page_path": operator_context.page_path,
+        "content_sha256": operator_context.content_sha256,
+        "read_at": operator_context.read_at.isoformat(),
+        "read_policy": "analysis_start_operator_context_snapshot_v1",
+    }
 
 
 __all__ = [

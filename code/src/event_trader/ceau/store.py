@@ -120,6 +120,11 @@ class FileBackedCEAUStore:
                 if persisted.record.record_id == canonical_record.record_id:
                     if persisted.record_hash == payload_hash:
                         return path
+                    if _is_idempotent_analysis_lifecycle_retry(
+                        candidate=canonical_record,
+                        existing=persisted.record,
+                    ):
+                        return persisted.path
                     raise FileBackedCEAUStoreError(
                         "duplicate CEAU record_id has different payload: "
                         f"{canonical_record.record_id!r}"
@@ -619,6 +624,40 @@ def _watermark_projection_key(
 
 def _record_hash(record: _RecordType) -> str:
     return sha256(json_dumps(record.to_json_payload()).encode("utf-8")).hexdigest()
+
+
+def _is_idempotent_analysis_lifecycle_retry(
+    *,
+    candidate: _RecordType,
+    existing: _RecordType,
+) -> bool:
+    """Ignore retry-only wall-clock changes without relaxing outcome identity."""
+    lifecycle_types = (
+        CEAUAnalysisQueuedRecord,
+        CEAUAnalysisStartedRecord,
+        CEAUAnalysisFailedRecord,
+    )
+    if (
+        isinstance(candidate, lifecycle_types)
+        and type(candidate) is type(existing)
+        and candidate.analysis_unit_id == existing.analysis_unit_id
+    ):
+        return True
+    if not (
+        isinstance(candidate, CEAUAnalysisCompletedRecord)
+        and isinstance(existing, CEAUAnalysisCompletedRecord)
+        and candidate.analysis_unit_id == existing.analysis_unit_id
+    ):
+        return False
+    return (
+        candidate.pointer.analysis_outcome_record_id
+        == existing.pointer.analysis_outcome_record_id
+        and candidate.pointer.analysis_outcome_path
+        == existing.pointer.analysis_outcome_path
+        and candidate.pointer.analysis_outcome_sha256
+        == existing.pointer.analysis_outcome_sha256
+        and candidate.pointer.completed_status == existing.pointer.completed_status
+    )
 
 
 def _validate_layout(layout: WorkspaceLayout) -> None:

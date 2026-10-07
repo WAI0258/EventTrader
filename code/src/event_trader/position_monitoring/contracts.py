@@ -7,13 +7,13 @@ from dataclasses import dataclass
 from datetime import datetime
 from math import isfinite
 from pathlib import Path
-from typing import Literal, cast
+from typing import Literal
 
 from event_trader.contracts._validators import validate_target_key, validate_timestamp
 from event_trader.contracts.view_state_change import ViewState, canonical_view_state_target_weight
 
-PositionLineKey = Literal["pm_pipeline", "buy_hold", "analysis_direct_shadow"]
-PositionLineRole = Literal["actual", "baseline", "counterfactual"]
+PositionLineKey = Literal["pm_pipeline", "buy_hold", "analysis_direct"]
+PositionLineRole = Literal["actual", "baseline", "analysis"]
 PositionMarkerKind = Literal["pm_decision", "analysis_assessment"]
 PositionMarkerLane = Literal["pm", "analysis"]
 PositionMarkerShape = Literal["circle", "square", "arrowUp", "arrowDown"]
@@ -113,10 +113,10 @@ class PositionMonitoringLine:
     status: PositionMonitoringStatus
 
     def __post_init__(self) -> None:
-        if self.key not in {"pm_pipeline", "buy_hold", "analysis_direct_shadow"}:
+        if self.key not in {"pm_pipeline", "buy_hold", "analysis_direct"}:
             raise PositionMonitoringContractError("line key is invalid.")
         object.__setattr__(self, "label", _require_non_blank(self.label, "label"))
-        if self.role not in {"actual", "baseline", "counterfactual"}:
+        if self.role not in {"actual", "baseline", "analysis"}:
             raise PositionMonitoringContractError("line role is invalid.")
         if not isinstance(self.status, PositionMonitoringStatus):
             raise PositionMonitoringContractError("status must be a PositionMonitoringStatus.")
@@ -128,11 +128,11 @@ class PositionMonitoringPoint:
     price: float
     pm_pipeline_value: float | None
     buy_hold_value: float | None
-    analysis_direct_shadow_value: float | None
+    analysis_direct_value: float | None
     pm_target_weight: float | None
-    analysis_shadow_target_weight: float | None
+    analysis_direct_target_weight: float | None
     pm_state: ViewState | None
-    analysis_shadow_state: ViewState | None
+    analysis_direct_state: ViewState | None
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -148,9 +148,9 @@ class PositionMonitoringPoint:
         for field_name in (
             "pm_pipeline_value",
             "buy_hold_value",
-            "analysis_direct_shadow_value",
+            "analysis_direct_value",
             "pm_target_weight",
-            "analysis_shadow_target_weight",
+            "analysis_direct_target_weight",
         ):
             object.__setattr__(
                 self,
@@ -164,8 +164,11 @@ class PositionMonitoringPoint:
         )
         object.__setattr__(
             self,
-            "analysis_shadow_state",
-            _validate_optional_view_state(self.analysis_shadow_state, "analysis_shadow_state"),
+            "analysis_direct_state",
+            _validate_optional_view_state(
+                self.analysis_direct_state,
+                "analysis_direct_state",
+            ),
         )
         _validate_optional_state_weight_pair(
             state=self.pm_state,
@@ -174,10 +177,10 @@ class PositionMonitoringPoint:
             weight_field_name="pm_target_weight",
         )
         _validate_optional_state_weight_pair(
-            state=self.analysis_shadow_state,
-            weight=self.analysis_shadow_target_weight,
-            state_field_name="analysis_shadow_state",
-            weight_field_name="analysis_shadow_target_weight",
+            state=self.analysis_direct_state,
+            weight=self.analysis_direct_target_weight,
+            state_field_name="analysis_direct_state",
+            weight_field_name="analysis_direct_target_weight",
         )
 
 
@@ -197,6 +200,9 @@ class PositionMonitoringMarker:
     position: PositionMarkerPosition
     text: str
     source_id: str
+    pm_decision_id: str | None = None
+    execution_record_id: str | None = None
+    analysis_assessment_id: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "marker_id", _require_non_blank(self.marker_id, "marker_id"))
@@ -245,6 +251,35 @@ class PositionMonitoringMarker:
             raise PositionMonitoringContractError("position is invalid.")
         object.__setattr__(self, "text", _require_non_blank(self.text, "text"))
         object.__setattr__(self, "source_id", _require_non_blank(self.source_id, "source_id"))
+        object.__setattr__(
+            self,
+            "pm_decision_id",
+            _optional_non_blank(self.pm_decision_id, "pm_decision_id"),
+        )
+        object.__setattr__(
+            self,
+            "execution_record_id",
+            _optional_non_blank(self.execution_record_id, "execution_record_id"),
+        )
+        object.__setattr__(
+            self,
+            "analysis_assessment_id",
+            _optional_non_blank(self.analysis_assessment_id, "analysis_assessment_id"),
+        )
+        if self.kind == "pm_decision" and (
+            self.lane != "pm"
+            or self.pm_decision_id is None
+            or self.execution_record_id is None
+        ):
+            raise PositionMonitoringContractError(
+                "PM markers must include pm_decision_id and execution_record_id."
+            )
+        if self.kind == "analysis_assessment" and (
+            self.lane != "analysis" or self.analysis_assessment_id is None
+        ):
+            raise PositionMonitoringContractError(
+                "Analysis markers must include the analysis lane and assessment id."
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -350,40 +385,6 @@ class ExecutionSummary:
 
 
 @dataclass(frozen=True, slots=True)
-class AnalysisShadowSourceSummary:
-    assessment_id: str
-    business_at: datetime
-    as_if_flat_state: ViewState
-    target_weight: float
-
-    def __post_init__(self) -> None:
-        object.__setattr__(
-            self,
-            "assessment_id",
-            _require_non_blank(self.assessment_id, "assessment_id"),
-        )
-        object.__setattr__(
-            self,
-            "business_at",
-            validate_timestamp(
-                self.business_at,
-                field_name="business_at",
-                error_type=PositionMonitoringContractError,
-            ),
-        )
-        state = _validate_optional_view_state(self.as_if_flat_state, "as_if_flat_state")
-        if state is None:
-            raise PositionMonitoringContractError("as_if_flat_state must be set.")
-        object.__setattr__(self, "as_if_flat_state", state)
-        weight = _validate_finite_float(self.target_weight, "target_weight")
-        if weight != canonical_view_state_target_weight(state):
-            raise PositionMonitoringContractError(
-                "target_weight must match as_if_flat_state."
-            )
-        object.__setattr__(self, "target_weight", weight)
-
-
-@dataclass(frozen=True, slots=True)
 class PositionMonitoringAudit:
     source_paths: tuple[Path, ...]
     counts: Mapping[str, int]
@@ -432,7 +433,6 @@ class PositionMonitoringSnapshot:
     markers: tuple[PositionMonitoringMarker, ...] = ()
     latest_pm_decision: PMDecisionSummary | None = None
     latest_execution: ExecutionSummary | None = None
-    latest_analysis_shadow_source: AnalysisShadowSourceSummary | None = None
     notes: tuple[str, ...] = ()
     audit: PositionMonitoringAudit | None = None
 
@@ -516,13 +516,6 @@ class PositionMonitoringSnapshot:
             raise PositionMonitoringContractError(
                 "latest_execution must be an ExecutionSummary."
             )
-        if self.latest_analysis_shadow_source is not None and not isinstance(
-            self.latest_analysis_shadow_source,
-            AnalysisShadowSourceSummary,
-        ):
-            raise PositionMonitoringContractError(
-                "latest_analysis_shadow_source must be an AnalysisShadowSourceSummary."
-            )
         object.__setattr__(
             self,
             "notes",
@@ -556,7 +549,7 @@ def _validate_optional_view_state(value: object, field_name: str) -> ViewState |
         return None
     if value not in _VIEW_STATES:
         raise PositionMonitoringContractError(f"{field_name} is not a supported view state.")
-    return cast(ViewState, value)
+    return value
 
 
 def _validate_finite_float(value: object, field_name: str) -> float:
@@ -587,7 +580,6 @@ def _optional_non_blank(value: object, field_name: str) -> str | None:
 
 
 __all__ = [
-    "AnalysisShadowSourceSummary",
     "CurrentPortfolioStateSnapshot",
     "ExecutionSummary",
     "PMDecisionSummary",

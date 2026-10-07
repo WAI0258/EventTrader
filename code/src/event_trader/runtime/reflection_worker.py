@@ -15,6 +15,7 @@ from .reflection_outbox import (
 )
 from .reflection_queue import (
     FileBackedReflectionWorkQueue,
+    ReflectionQueueClaim,
     ReflectionQueueCompletion,
     ReflectionQueueFailure,
 )
@@ -92,7 +93,13 @@ class NautilusReflectionWorker:
         self._outbox = outbox
 
     def process_next(self) -> ReflectionWorkerProcessResult:
-        claim = self._queue.claim_next()
+        return self._process_claim(self._queue.claim_next())
+
+    def process_by_idempotency_key(self, idempotency_key: str) -> ReflectionWorkerProcessResult:
+        """Process only the pending item identified by one exact idempotency key."""
+        return self._process_claim(self._queue.claim_by_idempotency_key(idempotency_key))
+
+    def _process_claim(self, claim: ReflectionQueueClaim | None) -> ReflectionWorkerProcessResult:
         if claim is None:
             return ReflectionWorkerProcessResult(status="no_work")
         try:

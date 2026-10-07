@@ -5,13 +5,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
 
 from event_trader.artifact_retention import ArtifactRetentionError, prune_configured_artifacts
 from event_trader.composition import compose_kernel
 from event_trader.composition_error import CompositionError
-from event_trader.config import BootstrapConfigError, load_kernel_config
+from event_trader.config import BootstrapConfigError, KernelConfig, load_kernel_config
 from event_trader.integrations.analysis_structured_provider import (
     AnalysisStructuredProviderError,
     capability_result_to_jsonable,
@@ -20,7 +20,6 @@ from event_trader.integrations.analysis_structured_provider import (
 from event_trader.kernel import KernelLifecycleError, KernelRuntimeError
 from event_trader.live_market_data_runtime import (
     LiveMarketDataRuntimeError,
-    build_live_market_data_store,
     prepare_live_market_data,
 )
 from event_trader.live_runtime import (
@@ -30,8 +29,13 @@ from event_trader.live_runtime import (
     build_live_web_search_drivers,
     run_live_runtime_loop,
 )
-from event_trader.migrations import run_active_price_basis_cutover_from_config
+from event_trader.market.shared_store import shared_market_data_root
+from event_trader.migrations import (
+    prepare_pm_review_workspace,
+    run_active_price_basis_cutover_from_config,
+)
 from event_trader.pm_review.runtime import validate_pm_review_runtime_preflight
+from event_trader.storage import WorkspaceLayout
 from event_trader.workspace import WorkspaceBootstrapError, bootstrap_workspace
 
 
@@ -107,6 +111,13 @@ def main(argv: Sequence[str] | None = None) -> int:
                 f"targets={','.join(preflight_receipt.target_keys)}"
             )
             return 0
+        _ensure_pm_review_workspace_ready(
+            config=config,
+            layout=prepared_workspace.layout,
+            target_keys=pm_review_target_keys,
+            migrated_at=startup_at,
+            emit=print,
+        )
         _run_startup_active_price_basis_cutovers(
             config=config,
             layout=prepared_workspace.layout,
@@ -116,6 +127,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         market_data_provider, warmup_receipt = prepare_live_market_data(
             config=config,
             layout=prepared_workspace.layout,
+            as_of_at=startup_at,
             emit=print,
         )
         if warmup_receipt.enabled:
@@ -130,7 +142,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             emit=print,
             market_data_provider_override=market_data_provider,
             market_data_store_root=(
-                build_live_market_data_store(prepared_workspace.layout).root
+                shared_market_data_root(config)
                 if market_data_provider is not None
                 else None
             ),
@@ -256,7 +268,46 @@ def _run_startup_active_price_basis_cutovers(
                 f"successor_assessment_id={result.successor_assessment_id} "
                 f"old_basis_id={result.old_basis_id} "
                 f"new_basis_id={result.new_basis_id}"
-            )
+        )
+
+
+def _ensure_pm_review_workspace_ready(
+    *,
+    config: KernelConfig,
+    layout: WorkspaceLayout,
+    target_keys: tuple[str, ...],
+    migrated_at: datetime,
+    emit: Callable[[str], None],
+) -> None:
+    try:
+        validate_pm_review_runtime_preflight(
+            config=config,
+            layout=layout,
+            target_keys=target_keys,
+        )
+        return
+    except CompositionError as exc:
+        if not _is_fresh_pm_review_workspace_error(exc):
+            raise
+    prepare_pm_review_workspace(
+        layout=layout,
+        target_keys=target_keys,
+        migrated_at=migrated_at,
+    )
+    emit("pm review workspace auto-prepared: targets=" + ",".join(target_keys))
+    validate_pm_review_runtime_preflight(
+        config=config,
+        layout=layout,
+        target_keys=target_keys,
+    )
+
+
+def _is_fresh_pm_review_workspace_error(exc: CompositionError) -> bool:
+    message = str(exc)
+    return (
+        "runtime schema marker is missing" in message
+        or "cutover baseline portfolio state is missing" in message
+    )
 
 
 if __name__ == "__main__":

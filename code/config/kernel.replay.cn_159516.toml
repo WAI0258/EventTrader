@@ -1,0 +1,213 @@
+workspace_root = ".local/replay-cn-159516-workspace"
+mode = "replay"
+heartbeat_interval_seconds = 0.05
+reflection_interval_hours = 24
+reflection_lookback_hours = 168
+reflection_horizons_hours = [24, 72, 168]
+
+[pm_review_runtime]
+auto_dispatch_after_analysis = true
+execute_pm_decisions = true
+require_workspace_ready = true
+
+[analysis_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/mirothinker-analysis-logs"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+
+[checker_agent]
+implementation = "single_pass"
+log_dir = ".local/mirothinker-checker-logs"
+llm_provider = "openai"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/v1"
+evidence_excerpt_chars = 4000
+section_excerpt_chars = 2000
+recent_timeline_items = 10
+max_pack_chars = 16000
+force_escalate_on_insufficient_coverage = true
+
+[pm_review_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/mirothinker-pm-review-logs"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+
+[reflection_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/mirothinker-reflection-logs"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+
+[validation.market_data]
+provider = "futu_openapi"
+base_url = "tcp://127.0.0.1:11111"
+timeout_seconds = 10.0
+local_archive_root = "data/local_archives/cn_159516"
+
+[validation.market_mappings.cn_159516]
+market_symbol = "SZ.159516"
+market_session = "exchange_session"
+exchange = "SZSE"
+exchange_session_scope = "regular"
+bar_granularity = "1h"
+execution_direction_mode = "long_only"
+adjustment_policy = "forward_adjusted_realized"
+
+[stream_routing]
+enabled = true
+policy_version = "cn_159516_1h_ceau_candidate_v0"
+policy_status = "candidate"
+target_key = "cn_159516"
+bar_granularity = "1h"
+processing_time_safety_emit_enabled = false
+
+[stream_routing.default_unit_policy]
+route_default = "no_action"
+
+[stream_routing.lane_policies.operator_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.risk_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.news_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.context_window]
+route_default = "accumulate"
+candidate_default_route = "accumulate"
+max_delay_bars = 1
+max_unit_chars = 12000
+unit_scope = "context_window"
+completeness_requirements = [
+  { purpose = "evidence_maturity", domain = "market_bars", required_for = ["market_reaction_mature"] },
+]
+
+[stream_routing.lane_policies.episode_append]
+route_default = "accumulate"
+candidate_default_route = "accumulate"
+max_delay_bars = 1
+max_unit_chars = 12000
+unit_scope = "context_window"
+
+[market_context]
+enabled = true
+max_prompt_chars = 6000
+
+[market_context.target_profiles.cn_159516]
+tradable_proxy_symbol = "SZ.159516"
+bar_granularity = "1h"
+enabled_components = ["price_volume", "technical", "macro_cross_asset"]
+
+[[market_context.target_profiles.cn_159516.market_data_subscriptions]]
+symbol = "SZ.159516"
+provider = "local_archive"
+purpose = "primary_tradable"
+market_session = "exchange_session"
+exchange = "SZSE"
+exchange_session_scope = "regular"
+bar_granularity = "1h"
+adjustment_policy = "forward_adjusted_visible"
+
+[[market_context.target_profiles.cn_159516.market_data_subscriptions]]
+symbol = "US.SOXX"
+provider = "futu_openapi"
+purpose = "global_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "regular"
+bar_granularity = "1h"
+
+[[market_context.target_profiles.cn_159516.market_data_subscriptions]]
+symbol = "US.SMH"
+provider = "futu_openapi"
+purpose = "peer_etf"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "regular"
+bar_granularity = "1h"
+
+[market_context.target_profiles.cn_159516.price_volume]
+lookback_bars = 240
+trailing_return_windows = ["1h", "4h", "1d", "5d", "20d"]
+
+[market_context.target_profiles.cn_159516.technical]
+ema_periods = [136]
+ichimoku_enabled = true
+
+[market_context.target_profiles.cn_159516.macro_cross_asset]
+enabled = true
+lookback_bars = 240
+trailing_return_windows = ["1d", "5d", "20d"]
+
+[market_context.target_profiles.cn_159516.macro_cross_asset.proxy_groups]
+semiconductor_peer_etfs = ["US.SOXX", "US.SMH"]
+
+[market_context.target_profiles.cn_159516.macro_cross_asset.group_pressure_rules]
+semiconductor_peer_etfs = "positive_supportive"
+
+[replay_build]
+target_key = "cn_159516"
+window_start = "2026-04-02"
+window_end = "2026-04-30"
+manual_input = "data/replay_inputs/manual/cn_159516/smoke.jsonl"
+include_web_search = true
+include_market_news = false
+output = ".tmp/replay_inputs/cn_159516/smoke_20260402_20260430.jsonl"
+write_report = true
+
+[replay_backfill.web_search]
+implementation = "mirothinker"
+search_intent = """中文检索主任务：
+检索并筛选在请求历史窗口内真正可能改变或解释 SZ.159516 交易语境的中文主源或高信息密度市场材料。优先寻找产业、政策、公司、供需、跨市场传导证据，而不是重建本地价格历史。
+
+优先覆盖以下五层信息：
+1. A 股半导体设备/材料核心驱动：国产替代、晶圆厂扩产、招标、验收、开工、稼动率、订单、交付、ASP/供需变化，以及刻蚀、薄膜沉积、检测、清洗、CMP、光刻胶、硅片、靶材、电子特气等关键环节。
+2. 政策与监管：出口管制、关税、实体清单、国产替代政策、大基金、地方补贴、税收、采购导向、先进制程与 AI 算力相关政策变化。
+3. 公司与项目催化：大陆晶圆厂、设备商、材料商、先进封装、AI 基础设施、存储链扩产，以及会改变半导体设备/材料主题风险偏好的项目进展。
+4. 海外传导：ASML、AMAT、LRCX、KLAC、TSMC、Samsung Electronics、SK Hynix、Micron、SOXX、SMH 等通过设备资本开支、HBM/DRAM/NAND 周期、先进封装、foundry 扩产、出口限制、供应链瓶颈、主题再定价传导到 A 股半导体设备/材料。
+5. 市场总结与风格切换：只有当市场稿件明确提供了催化解释、资金风格切换、产业链映射、或跨市场传导语境时，才作为有效候选。
+
+明确排除或降权以下内容：
+- 不要主动检索或提交纯净值页、纯 K 线页、纯报价页、纯盘口页、纯 ETF 资金流页、纯份额/折溢价页、纯拆分/复权说明页。
+- 不要为了补价格信息去追逐“当日涨跌幅、成交额、净流入、净值”这类本地 market data 已可覆盖的内容。
+- 如果某条价格总结或市场快讯同时包含了本地 K 线之外的新增市场语境，例如明确催化、产业链映射、隔夜海外传导、或主题拥挤变化，可以保留，但它不是优先检索目标。
+
+English control framing for overseas transmission and cross-market relevance:
+Use Chinese retrieval first for mainland evidence and English retrieval only where overseas transmission materially changes the mainland trading context for SZ.159516. Explicitly track ASML, AMAT, LRCX, KLAC, TSMC, Samsung Electronics, SK Hynix, Micron, SOXX, and SMH when they matter through equipment capex, HBM/DRAM/NAND cycles, advanced packaging, foundry expansion, export restrictions, supply-chain bottlenecks, or cross-market thematic repricing. Prefer high-signal primary or near-primary reporting over generic commentary, favor concrete events over broad theme summaries, and do not spend turns reconstructing raw price history, NAV mechanics, split mechanics, or standalone ETF flow pages unless they add material causal context unavailable from the local bar archive."""
+prompt_profile_id = "cn_a_share_historical_web_search_v1"
+control_language = "en"
+retrieval_languages = ["zh-CN", "en"]
+slice_hours = 12
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/mirothinker-replay-search-logs"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+acquisition_tool_names = ["search_and_scrape_webpage", "jina_scrape_llm_summary"]
+serper_api_key_env = "SERPER_API_KEY"
+serper_base_url = "https://google.serper.dev"
+jina_api_key_env = "JINA_API_KEY"
+jina_base_url = "https://r.jina.ai"
+summary_llm_api_key_env = "MINIMAX_API_KEY"
+summary_llm_base_url = "https://api.minimaxi.com/v1/chat/completions"
+summary_llm_model_name = "MiniMax-M2.7"

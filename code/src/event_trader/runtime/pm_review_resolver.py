@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
 
+from event_trader.execution.store import ExecutionRecordStore
 from event_trader.pm_review import (
     PMReviewDispatchConsiderationStore,
     PMReviewFailureStore,
@@ -21,6 +22,7 @@ from event_trader.portfolio.active_exposure import (
     ActiveExposureResolverError,
     resolve_active_exposure,
 )
+from event_trader.portfolio.contracts import PMDecision
 from event_trader.portfolio.store import PortfolioStoreError
 from event_trader.storage import WorkspaceLayout
 
@@ -86,6 +88,7 @@ class RuntimePMReviewResolution:
     work_item: PMReviewWorkItem
     request: PMReviewRequest
     existing_pm_decision_ref: str | None = None
+    pending_execution_decision: PMDecision | None = None
     existing_failure_record_ref: str | None = None
 
     def __post_init__(self) -> None:
@@ -103,6 +106,23 @@ class RuntimePMReviewResolution:
         ):
             raise RuntimePMReviewResolutionError(
                 "resolution must not carry both existing decision and failure refs."
+            )
+        if (
+            self.pending_execution_decision is not None
+            and (
+                self.existing_pm_decision_ref is not None
+                or self.existing_failure_record_ref is not None
+            )
+        ):
+            raise RuntimePMReviewResolutionError(
+                "pending execution decision must not carry terminal lifecycle refs."
+            )
+        if (
+            self.pending_execution_decision is not None
+            and self.pending_execution_decision.target_key != self.work_item.target_key
+        ):
+            raise RuntimePMReviewResolutionError(
+                "pending execution decision target_key must match work_item."
             )
 
 
@@ -181,12 +201,23 @@ class RuntimePMReviewRequestResolver:
         if not isinstance(work_item, PMReviewWorkItem):
             raise RuntimePMReviewResolutionError("work_item must be a PMReviewWorkItem.")
         request = self._request_from_request_ref(work_item.pm_review_request_ref)
-        existing_pm_decision_ref = self._latest_pm_decision_ref(
+        existing_pm_decision = self._latest_pm_decision(
             target_key=work_item.target_key,
             request_id=work_item.pm_review_request_id,
         )
+        existing_pm_decision_ref = None
+        pending_execution_decision = None
+        if existing_pm_decision is not None:
+            decision, decision_ref = existing_pm_decision
+            if (
+                not decision.execution_required
+                or self._has_terminal_execution(decision=decision)
+            ):
+                existing_pm_decision_ref = decision_ref
+            else:
+                pending_execution_decision = decision
         existing_failure_record_ref = None
-        if existing_pm_decision_ref is None:
+        if existing_pm_decision is None:
             existing_failure_record_ref = self._latest_terminal_failure_ref(
                 target_key=work_item.target_key,
                 request_id=work_item.pm_review_request_id,
@@ -195,6 +226,7 @@ class RuntimePMReviewRequestResolver:
             work_item=work_item,
             request=request,
             existing_pm_decision_ref=existing_pm_decision_ref,
+            pending_execution_decision=pending_execution_decision,
             existing_failure_record_ref=existing_failure_record_ref,
         )
 
@@ -272,7 +304,12 @@ class RuntimePMReviewRequestResolver:
             raise RuntimePMReviewResolutionError(f"PMReviewRequest id is ambiguous: {request_id}")
         return matches[0]
 
-    def _latest_pm_decision_ref(self, *, target_key: str, request_id: str) -> str | None:
+    def _latest_pm_decision(
+        self,
+        *,
+        target_key: str,
+        request_id: str,
+    ) -> tuple[PMDecision, str] | None:
         try:
             matches = tuple(
                 persisted
@@ -291,7 +328,19 @@ class RuntimePMReviewRequestResolver:
                 item.line_number,
             ),
         )[-1]
-        return f"{persisted.path.resolve(strict=False)}#{persisted.record.decision_id}"
+        return (
+            persisted.record,
+            f"{persisted.path.resolve(strict=False)}#{persisted.record.decision_id}",
+        )
+
+    def _has_terminal_execution(self, *, decision: PMDecision) -> bool:
+        return any(
+            persisted.record.pm_decision_id == decision.decision_id
+            and persisted.record.status in {"executed", "rejected"}
+            for persisted in ExecutionRecordStore(self._layout).read_records(
+                target_key=decision.target_key
+            )
+        )
 
     def _latest_terminal_failure_ref(self, *, target_key: str, request_id: str) -> str | None:
         try:

@@ -1,0 +1,72 @@
+# Offline numerical sample: no source feeds or model credentials.
+workspace_root = "../data/paper-trading/iau"
+market_data_root = "../data/paper-trading/market-data"
+mode = "live"
+heartbeat_interval_seconds = 60
+reflection_interval_hours = 6
+reflection_lookback_hours = 72
+reflection_horizons_hours = [6,24,72]
+
+[pm_review_runtime]
+auto_dispatch_after_analysis = false
+execute_pm_decisions = false
+
+[execution.target_cost_overrides.gold]
+buy_cost_bps = 0.0
+sell_cost_bps = 0.0
+
+[validation.market_data]
+provider = "futu_openapi"
+base_url = "tcp://127.0.0.1:11111"
+timeout_seconds = 10.0
+
+[validation.market_mappings.gold]
+market_symbol = "IAU"
+market_session = "exchange_session"
+exchange = "NYSE"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[stream_routing]
+enabled = true
+policy_version = "gold_iau_5min_catchup_context_120m_v1"
+policy_status = "candidate"
+target_key = "gold"
+bar_granularity = "5min"
+processing_time_safety_emit_enabled = true
+processing_time_safety_emit_after_seconds = 7500
+
+[stream_routing.default_unit_policy]
+route_default = "no_action"
+
+[stream_routing.lane_policies.operator_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.risk_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.news_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.context_window]
+route_default = "accumulate"
+candidate_default_route = "accumulate"
+max_delay_bars = 24
+max_unit_chars = 12000
+unit_scope = "context_window"
+completeness_requirements = [
+  { purpose = "evidence_maturity", domain = "market_bars", required_for = ["market_reaction_mature"] },
+]
+
+[stream_routing.lane_policies.episode_append]
+route_default = "accumulate"
+candidate_default_route = "accumulate"
+max_delay_bars = 6
+max_unit_chars = 12000
+unit_scope = "context_window"

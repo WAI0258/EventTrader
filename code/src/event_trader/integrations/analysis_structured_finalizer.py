@@ -8,14 +8,10 @@ from dataclasses import dataclass
 from typing import Any, Literal, Protocol, cast
 
 from event_trader.contracts.analysis_assessment_schema import (
-    analysis_assessment_optional_fields,
-    analysis_assessment_required_fields,
     analysis_final_payload_contract_markdown,
+    analysis_final_payload_json_schema,
     analysis_final_payload_required_fields,
-    allowed_confidence_values,
-    allowed_pm_review_reasons,
     forbidden_analysis_final_payload_fields,
-    price_level_role_required_fields,
 )
 from event_trader.contracts.analysis_final_payload_validation import (
     AnalysisFinalPayloadValidationResult,
@@ -23,8 +19,6 @@ from event_trader.contracts.analysis_final_payload_validation import (
 )
 from event_trader.contracts.execution_direction_policy import (
     ExecutionDirectionMode,
-    allowed_role_if_already_short_for_execution_direction_mode,
-    allowed_view_states_for_execution_direction_mode,
 )
 from event_trader.integrations.boxed_json import (
     BoxedJsonPayloadError,
@@ -72,6 +66,7 @@ class AnalysisStructuredFinalizerInput:
     expected_event_ids: tuple[str, ...]
     included_lesson_ids: tuple[str, ...]
     execution_direction_mode: ExecutionDirectionMode
+    active_instrument_basis: str | None
     draft_payload: Mapping[str, object] | None
     final_summary: str
     final_boxed_answer: str
@@ -183,139 +178,15 @@ def analysis_final_payload_response_format(
     *,
     execution_direction_mode: ExecutionDirectionMode = "long_short",
 ) -> dict[str, object]:
-    assessment_fields = analysis_assessment_required_fields(execution_direction_mode)
-    price_level_fields = price_level_role_required_fields()
     return {
         "type": "json_schema",
         "json_schema": {
             "name": "analysis_final_payload",
             "strict": True,
-            "schema": {
-                "type": "object",
-                "additionalProperties": False,
-                "required": list(analysis_final_payload_required_fields()),
-                "properties": {
-                    "target_key": {"type": "string"},
-                    "event_ids": {"type": "array", "items": {"type": "string"}},
-                    "used_lesson_ids": {"type": "array", "items": {"type": "string"}},
-                    "analysis_assessment": {
-                        "anyOf": [
-                            {"type": "null"},
-                            {
-                                "type": "object",
-                                "additionalProperties": False,
-                                "required": list(assessment_fields),
-                                "properties": {
-                                    "assessment_id": {"type": "string"},
-                                    "target_key": {"type": "string"},
-                                    "business_at": {"type": "string"},
-                                    "source_event_ids": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                    },
-                                    "memory_write_receipt_ids": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                    },
-                                    "as_if_flat_state": {
-                                        "type": "string",
-                                        "enum": list(
-                                            allowed_view_states_for_execution_direction_mode(
-                                                execution_direction_mode
-                                            )
-                                        ),
-                                    },
-                                    "as_if_flat_rationale_md": {"type": "string"},
-                                    "if_flat_implication_md": {"type": "string"},
-                                    "if_already_long_implication_md": {"type": "string"},
-                                    "if_already_short_implication_md": {
-                                        "type": "string"
-                                    }
-                                    if "if_already_short_implication_md"
-                                    not in analysis_assessment_optional_fields(
-                                        execution_direction_mode
-                                    )
-                                    else {
-                                        "anyOf": [
-                                            {"type": "string"},
-                                            {"type": "null"},
-                                        ]
-                                    },
-                                    "price_level_roles": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "additionalProperties": False,
-                                            "required": list(price_level_fields),
-                                            "properties": _price_level_properties(
-                                                execution_direction_mode=execution_direction_mode
-                                            ),
-                                        },
-                                    },
-                                    "market_setup_dashboard_md": {"type": "string"},
-                                    "key_claim_ids": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                    },
-                                    "contested_prior_claim_ids": {
-                                        "type": "array",
-                                        "items": {"type": "string"},
-                                    },
-                                    "missing_evidence_md": {"type": "string"},
-                                    "pm_candidate_review_required": {"type": "boolean"},
-                                    "pm_current_exposure_review_required": {
-                                        "type": "boolean"
-                                    },
-                                    "pm_review_reasons": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string",
-                                            "enum": list(allowed_pm_review_reasons()),
-                                        },
-                                    },
-                                    "confidence": {
-                                        "type": "string",
-                                        "enum": list(allowed_confidence_values()),
-                                    },
-                                },
-                            },
-                        ]
-                    },
-                },
-            },
+            "schema": analysis_final_payload_json_schema(
+                execution_direction_mode=execution_direction_mode
+            ),
         },
-    }
-
-
-def _price_level_properties(
-    *,
-    execution_direction_mode: ExecutionDirectionMode,
-) -> dict[str, object]:
-    allowed_short_roles = allowed_role_if_already_short_for_execution_direction_mode(
-        execution_direction_mode
-    )
-    return {
-        "level_id": {"type": "string"},
-        "target_key": {"type": "string"},
-        "value": {"anyOf": [{"type": "number"}, {"type": "null"}]},
-        "lower": {"anyOf": [{"type": "number"}, {"type": "null"}]},
-        "upper": {"anyOf": [{"type": "number"}, {"type": "null"}]},
-        "instrument_basis": {"type": "string"},
-        "source_type": {"type": "string"},
-        "source_event_ids": {"type": "array", "items": {"type": "string"}},
-        "source_refs": {"type": "array", "items": {"type": "string"}},
-        "role_if_flat": {"type": "string"},
-        "role_if_already_long": {"type": "string"},
-        "role_if_already_short": (
-            {"type": "string"}
-            if allowed_short_roles is None
-            else {"type": "string", "enum": list(allowed_short_roles)}
-        ),
-        "path_context_required": {"type": "boolean"},
-        "refresh_triggers": {"type": "array", "items": {"type": "string"}},
-        "invalidation_triggers": {"type": "array", "items": {"type": "string"}},
-        "confidence": {"type": "string", "enum": list(allowed_confidence_values())},
-        "rationale_md": {"type": "string"},
     }
 
 
@@ -454,6 +325,7 @@ def _raise_if_invalid(
         expected_event_ids=finalizer_input.expected_event_ids,
         included_lesson_ids=finalizer_input.included_lesson_ids,
         execution_direction_mode=finalizer_input.execution_direction_mode,
+        active_instrument_basis=finalizer_input.active_instrument_basis,
     )
     if not validation.ok:
         raise AnalysisStructuredFinalizerError(
@@ -486,6 +358,8 @@ def _finalizer_prompt(finalizer_input: AnalysisStructuredFinalizerInput) -> str:
         f"Included lesson IDs: {json.dumps(list(finalizer_input.included_lesson_ids))}\n"
         "Active execution_direction_mode: "
         f"{finalizer_input.execution_direction_mode}\n"
+        "Active tradable instrument basis: "
+        f"{finalizer_input.active_instrument_basis or 'unavailable'}\n"
         f"Forbidden final payload fields: {forbidden}\n\n"
         f"{analysis_final_payload_contract_markdown(execution_direction_mode=finalizer_input.execution_direction_mode)}\n\n"
         "Draft ReAct payload:\n"

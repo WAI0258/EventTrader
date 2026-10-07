@@ -1,0 +1,84 @@
+{
+  "episode": {
+    "close_reason": "state_changed_to_opposite_direction",
+    "closed_at": "2026-06-08T08:00:00+00:00",
+    "closed_by_event_ids": [
+      "627361063429feaa9cfa8281"
+    ],
+    "closed_by_state_change_id": "state-change:pm-execution:473e6102876988c20cddcdef19e12525",
+    "direction": "short",
+    "episode_id": "sox:episode:1",
+    "opened_at": "2026-06-04T16:30:00+00:00",
+    "opened_by_event_ids": [
+      "b73aa71de3518ac6b8c71345"
+    ],
+    "opened_by_state_change_id": "state-change:pm-execution:f9893d888d92d53fa8d24c71301ccb81",
+    "target_key": "sox"
+  },
+  "generated_at": "2026-10-07T09:18:55.698030+00:00",
+  "reflection_triggers": [
+    {
+      "close_reason": "state_changed_to_opposite_direction",
+      "closed_by_event_ids": [
+        "627361063429feaa9cfa8281"
+      ],
+      "closed_by_state_change_id": "state-change:pm-execution:473e6102876988c20cddcdef19e12525",
+      "episode_id": "sox:episode:1",
+      "target_key": "sox",
+      "triggered_at": "2026-06-08T08:00:00+00:00"
+    }
+  ],
+  "segments": [
+    {
+      "close_reason": "view_closed",
+      "closed_at": "2026-06-08T08:00:00+00:00",
+      "closed_by_state_change_id": "state-change:pm-execution:473e6102876988c20cddcdef19e12525",
+      "episode_id": "sox:episode:1",
+      "opened_at": "2026-06-04T16:30:00+00:00",
+      "opened_by_state_change_id": "state-change:pm-execution:f9893d888d92d53fa8d24c71301ccb81",
+      "segment_id": "sox:segment:1",
+      "target_key": "sox",
+      "target_weight": -0.5
+    }
+  ],
+  "state_changes": [
+    {
+      "conviction": "weak",
+      "direction": "short",
+      "effective_at": "2026-06-04T16:30:00+00:00",
+      "execution_record_id": "execution-record:8a37c290c382b3e2b388229358a7cb49",
+      "instrument_basis": null,
+      "pm_decision_id": "pm-decision:a20ab0c3a3679f29fc5d22372f8968b0",
+      "predecessor_instrument_basis": null,
+      "rationale_md": "Text omitted from numerical sample.",
+      "source_event_ids": [
+        "b73aa71de3518ac6b8c71345"
+      ],
+      "source_kind": "pm_execution_sidecar",
+      "state": "weak_short",
+      "state_change_id": "state-change:pm-execution:f9893d888d92d53fa8d24c71301ccb81",
+      "target_key": "sox",
+      "target_weight": -0.5,
+      "used_lesson_ids": []
+    },
+    {
+      "conviction": "weak",
+      "direction": "long",
+      "effective_at": "2026-06-08T08:00:00+00:00",
+      "execution_record_id": "execution-record:11336f83aad1346e673202881e3a8a4b",
+      "instrument_basis": null,
+      "pm_decision_id": "pm-decision:1a1fff42de6abd611ac7202e348f8d62",
+      "predecessor_instrument_basis": null,
+      "rationale_md": "Text omitted from numerical sample.",
+      "source_event_ids": [
+        "627361063429feaa9cfa8281"
+      ],
+      "source_kind": "pm_execution_sidecar",
+      "state": "weak_long",
+      "state_change_id": "state-change:pm-execution:473e6102876988c20cddcdef19e12525",
+      "target_key": "sox",
+      "target_weight": 0.5,
+      "used_lesson_ids": []
+    }
+  ]
+}

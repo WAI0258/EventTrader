@@ -5,7 +5,6 @@ from __future__ import annotations
 import re
 from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any
 
 from event_trader.contracts.analysis_assessment import (
     AnalysisAssessment,
@@ -27,6 +26,10 @@ from event_trader.contracts.analysis_assessment_schema import (
 from event_trader.contracts.execution_direction_policy import (
     ExecutionDirectionMode,
     analysis_assessment_direction_policy_violations,
+)
+from event_trader.contracts.instrument_basis import canonicalize_instrument_basis
+from event_trader.contracts.price_level_role import (
+    is_semantically_active_price_level,
 )
 
 
@@ -61,6 +64,7 @@ def validate_analysis_final_payload(
     expected_event_ids: tuple[str, ...],
     included_lesson_ids: tuple[str, ...] = (),
     execution_direction_mode: ExecutionDirectionMode = "long_short",
+    active_instrument_basis: str | None = None,
 ) -> AnalysisFinalPayloadValidationResult:
     if not isinstance(payload, Mapping):
         return _invalid(
@@ -134,6 +138,13 @@ def validate_analysis_final_payload(
     )
     if isinstance(assessment_result, AnalysisFinalPayloadValidationResult):
         return assessment_result
+    basis_integrity_result = _validate_analysis_price_basis_integrity(
+        assessment_result,
+        active_instrument_basis=active_instrument_basis,
+        execution_direction_mode=execution_direction_mode,
+    )
+    if basis_integrity_result is not None:
+        return basis_integrity_result
 
     return AnalysisFinalPayloadValidationResult(
         ok=True,
@@ -343,6 +354,72 @@ def _normalize_analysis_assessment(
     return assessment
 
 
+def _validate_analysis_price_basis_integrity(
+    assessment: AnalysisAssessment | None,
+    *,
+    active_instrument_basis: str | None,
+    execution_direction_mode: ExecutionDirectionMode,
+) -> AnalysisFinalPayloadValidationResult | None:
+    if assessment is None:
+        return None
+    expected_basis = (
+        None
+        if active_instrument_basis is None
+        else canonicalize_instrument_basis(active_instrument_basis) or None
+    )
+    for index, level in enumerate(assessment.price_level_roles):
+        is_actionable = is_semantically_active_price_level(level)
+        if level.source_type == "source_quoted" and is_actionable:
+            field_path = f"analysis_assessment.price_level_roles[{index}].source_type"
+            return _invalid(
+                error_code="analysis_source_quoted_actionability_violation",
+                message=(
+                    f"{field_path} cannot be source_quoted when the level is "
+                    f"actionable. level_id={level.level_id!r}. Source-quoted prices "
+                    "are evidence context, not verified active-instrument levels."
+                ),
+                field_path=field_path,
+                suggested_action=(
+                    "Keep the quoted level informational by setting every role to "
+                    "not_relevant, clearing refresh_triggers and "
+                    "invalidation_triggers, and setting path_context_required=false. "
+                    "If the quote identifies a tradable setup, emit a separate "
+                    "active-basis level supported by visible target market bars; do "
+                    "not relabel the quoted numeric value as the active instrument.\n\n"
+                    f"{price_level_role_contract_markdown(execution_direction_mode=execution_direction_mode)}"
+                ),
+                schema_contract_md=price_level_role_contract_markdown(
+                    execution_direction_mode=execution_direction_mode
+                ),
+            )
+        if expected_basis is None:
+            continue
+        actual_basis = canonicalize_instrument_basis(level.instrument_basis)
+        basis_must_match = level.source_type == "market_bar_derived" or is_actionable
+        if basis_must_match and actual_basis != expected_basis:
+            field_path = f"analysis_assessment.price_level_roles[{index}].instrument_basis"
+            return _invalid(
+                error_code="analysis_price_basis_integrity_violation",
+                message=(
+                    f"{field_path} must match the active tradable instrument basis "
+                    f"for an actionable or market-bar-derived level. "
+                    f"expected={expected_basis!r}, actual={actual_basis!r}, "
+                    f"source_type={level.source_type!r}, level_id={level.level_id!r}."
+                ),
+                field_path=field_path,
+                suggested_action=(
+                    "Emit an actionable level whose instrument_basis and numeric "
+                    "value both belong to the active tradable instrument. Do not "
+                    "relabel a value from another instrument.\n\n"
+                    f"{price_level_role_contract_markdown(execution_direction_mode=execution_direction_mode)}"
+                ),
+                schema_contract_md=price_level_role_contract_markdown(
+                    execution_direction_mode=execution_direction_mode
+                ),
+            )
+    return None
+
+
 def analysis_assessment_contract_repair_message(
     exc: AnalysisAssessmentContractError,
 ) -> str:
@@ -370,16 +447,6 @@ def analysis_assessment_contract_repair_suggestion(
             "validation.\n\n"
             f"{analysis_assessment_contract_markdown(execution_direction_mode=execution_direction_mode)}"
         )
-    if _is_entry_role_pm_candidate_trigger_message(message):
-        return (
-            "Repair analysis_assessment PM trigger consistency. When any "
-            "price_level_roles item has role_if_flat='entry', set "
-            "analysis_assessment.pm_candidate_review_required=true. If downstream "
-            "candidate-style PM review is not actually needed, change that "
-            "price_level_roles item to a non-entry role such as watch_only.\n\n"
-            f"{price_level_role_contract_markdown(execution_direction_mode=execution_direction_mode)}\n\n"
-            f"{analysis_final_payload_contract_markdown(execution_direction_mode=execution_direction_mode)}"
-        )
     if "analysis_price_semantics" in message:
         return (
             "Repair analysis_assessment.analysis_price_semantics. When present, it "
@@ -389,6 +456,12 @@ def analysis_assessment_contract_repair_suggestion(
             f"{analysis_price_semantics_contract_markdown()}"
         )
     if "price_level_roles" in message:
+        if " must be one of:" in message:
+            return (
+                "Repair only the reported PriceLevelRole field using one of the "
+                "listed allowed values; preserve the remaining validated fields.\n\n"
+                f"{price_level_role_contract_markdown(execution_direction_mode=execution_direction_mode)}"
+            )
         return (
             "Repair analysis_assessment.price_level_roles. Each item must be a full "
             "PriceLevelRole object; do not emit incomplete legacy objects like "
@@ -408,10 +481,6 @@ def analysis_assessment_contract_schema_excerpt(
 ) -> str:
     if "must not include analysis_price_semantics" in message:
         return analysis_assessment_contract_markdown(
-            execution_direction_mode=execution_direction_mode
-        )
-    if _is_entry_role_pm_candidate_trigger_message(message):
-        return analysis_final_payload_contract_markdown(
             execution_direction_mode=execution_direction_mode
         )
     if "analysis_price_semantics" in message:
@@ -434,13 +503,6 @@ def analysis_assessment_contract_field_path(message: str) -> str | None:
     if match is None:
         return None
     return match.group(1)
-
-
-def _is_entry_role_pm_candidate_trigger_message(message: str) -> bool:
-    return (
-        "pm_candidate_review_required must be true" in message
-        and "role_if_flat is 'entry'" in message
-    )
 
 
 def price_level_role_repair_details() -> dict[str, object]:

@@ -1,5 +1,10 @@
 """Context assembly primitives for analysis-stage deterministic input selection."""
 
+from .analysis_context import (
+    build_analysis_context_packet,
+    select_analysis_learning_cards,
+    select_research_claim_cards,
+)
 from .checker_adapter import build_checker_context_packet
 from .packets import (
     CURRENT_MEMORY_READ_POLICY,
@@ -19,11 +24,6 @@ from .packets import (
     serialize_context_packet,
     validate_context_packet_visibility,
 )
-from .analysis_context import (
-    build_analysis_context_packet,
-    select_analysis_learning_cards,
-    select_research_claim_cards,
-)
 from .replay_audit import (
     ReplayVisibilityAuditError,
     load_replay_visibility_audit,
@@ -42,25 +42,21 @@ from .workbench import (
     MAX_MARKET_LANE_CHARS,
     MAX_MEMORY_IMPACT_LANE_CHARS,
     MAX_METHOD_LANE_CHARS,
-    MAX_OPERATOR_CONTEXT_LANE_CHARS,
     MEMORY_SECTION_EXCERPT_CHARS,
-    OPERATOR_CONTEXT_CARD_EXCERPT_CHARS,
     AnalysisWorkbenchError,
     EvidenceLane,
     GroundingCoverageReceipt,
     MarketLane,
-    MarketSetupLane,
     MarketRecapReconciliation,
+    MarketSetupLane,
     MemoryImpactLane,
     MethodLane,
-    OperatorContextCompilerReadReceipt,
     OperatorContextLane,
     OperatorSourceMetadata,
     WorkbenchCompilerReadReceipt,
     WorkbenchEvidenceCard,
     WorkbenchMemoryCard,
     WorkbenchOmissionReceipt,
-    WorkbenchOperatorContextCard,
     WorkbenchSourceExcerpt,
     hash_analysis_workbench_payload,
 )
@@ -89,22 +85,18 @@ __all__ = [
     "MAX_MARKET_LANE_CHARS",
     "MAX_MEMORY_IMPACT_LANE_CHARS",
     "MAX_METHOD_LANE_CHARS",
-    "MAX_OPERATOR_CONTEXT_LANE_CHARS",
     "MEMORY_SECTION_EXCERPT_CHARS",
-    "OPERATOR_CONTEXT_CARD_EXCERPT_CHARS",
     "MarketLane",
     "MarketSetupLane",
     "MarketRecapReconciliation",
     "MemoryImpactLane",
     "MethodLane",
-    "OperatorContextCompilerReadReceipt",
     "OperatorContextLane",
     "OperatorSourceMetadata",
     "WorkbenchCompilerReadReceipt",
     "WorkbenchEvidenceCard",
     "WorkbenchMemoryCard",
     "WorkbenchOmissionReceipt",
-    "WorkbenchOperatorContextCard",
     "WorkbenchSourceExcerpt",
     "build_analysis_context_packet",
     "build_checker_context_packet",

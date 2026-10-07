@@ -1,0 +1,9 @@
+{
+  "decision_episode_id": "decision-episode:pm-review:c55cc1fca080e966dae942be",
+  "source_execution_record_id": "execution-record:b0f959c35a23bc0d57fe34899a0887af",
+  "source_pm_decision_id": "pm-decision:bbfba1ebc35fddc31cf7db79031fa805",
+  "state": "flat",
+  "target_key": "gold",
+  "target_weight": 0.0,
+  "updated_at": "2026-09-15T14:05:00+00:00"
+}

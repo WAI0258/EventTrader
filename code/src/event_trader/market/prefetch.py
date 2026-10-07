@@ -16,11 +16,13 @@ from event_trader.config import (
     KernelConfig,
     MarketContextTargetProfileConfig,
 )
-from event_trader.contracts.view_state_change import MarketDataBar
+from event_trader.contracts.view_state_change import (
+    MarketDataBar,
+    MarketDataSeries,
+)
 from event_trader.market.adjustments import (
     AdjustmentDirection,
     MarketDataAdjustmentPolicy,
-    adjustment_direction_for_policy,
     normalize_archive_symbol,
     read_adjustment_sidecar_hash,
 )
@@ -34,17 +36,18 @@ from event_trader.market.contracts import (
 )
 from event_trader.market.features.derivatives import select_derivatives_contracts
 from event_trader.market.provider import (
-    CachedReplayMarketDataProvider,
     MarketBarsProvider,
     MarketOptionsProvider,
     build_default_market_bars_provider,
     build_market_bars_provider,
 )
-from event_trader.market.store import (
-    FileBackedMarketDataStore,
-    MarketDataBarsIntegrity,
-    MarketDataStoreError,
-    MarketDataStoreManifest,
+from event_trader.market.shared_store import (
+    MarketDataSnapshot,
+    MarketSeriesIdentity,
+    SharedMarketDataProvider,
+    SharedMarketDataStore,
+    shared_market_data_root,
+    write_workspace_snapshot_ref,
 )
 from event_trader.market.subscriptions import (
     MarketContextBarSubscription,
@@ -74,12 +77,31 @@ class ReplayMarketPrefetchEvent:
 class ReplayMarketPrefetchReceipt:
     """Result of one replay market-data prefetch phase."""
 
-    store: FileBackedMarketDataStore
-    manifest: MarketDataStoreManifest
+    store: SharedMarketDataStore
+    snapshot: MarketDataSnapshot
     reused_existing: bool
 
-    def cached_provider(self) -> CachedReplayMarketDataProvider:
-        return CachedReplayMarketDataProvider(self.store)
+    def cached_provider(self) -> SharedMarketDataProvider:
+        target_key = self.snapshot.metadata.get("target_key")
+        providers_payload = self.snapshot.metadata.get("providers")
+        providers = providers_payload if isinstance(providers_payload, dict) else {}
+        provider_names = {
+            (target_key, symbol): provider
+            for symbol, provider in providers.items()
+            if isinstance(target_key, str)
+            and isinstance(symbol, str)
+            and isinstance(provider, str)
+        }
+        return SharedMarketDataProvider(
+            store=self.store,
+            provider_name=str(self.snapshot.metadata.get("provider", "unknown")),
+            snapshot_id=self.snapshot.snapshot_id,
+            provider_names=provider_names,
+        )
+
+    @property
+    def snapshot_id(self) -> str:
+        return self.snapshot.snapshot_id
 
 
 @dataclass(frozen=True, slots=True)
@@ -137,6 +159,30 @@ def prefetch_replay_market_data(
     progress: ReplayMarketPrefetchProgress | None = None,
 ) -> ReplayMarketPrefetchReceipt | None:
     """Fetch replay market observations once and persist them for local replay reads."""
+    return _prefetch_shared_market_data(
+        config=config,
+        target_key=target_key,
+        run_id=run_id,
+        events=events,
+        window_start=window_start,
+        window_end=window_end,
+        provider=provider,
+        progress=progress,
+    )
+
+
+def _prefetch_shared_market_data(
+    *,
+    config: KernelConfig,
+    target_key: str,
+    run_id: str,
+    events: tuple[ReplayMarketPrefetchEvent, ...],
+    window_start: datetime,
+    window_end: datetime,
+    provider: MarketBarsProvider | None,
+    progress: ReplayMarketPrefetchProgress | None,
+) -> ReplayMarketPrefetchReceipt | None:
+    """Materialize and pin replay bars in the shared catalog."""
     if config.market_context is None or not config.market_context.enabled:
         return None
     profile_config = config.market_context.target_profiles.get(target_key)
@@ -148,9 +194,7 @@ def prefetch_replay_market_data(
         target_key=target_key,
         profile_config=profile_config,
     )
-    store = FileBackedMarketDataStore(
-        Path(config.workspace_root) / "runtime" / "market_data" / target_key / run_id
-    )
+    store = SharedMarketDataStore(shared_market_data_root(config))
     remote_provider = _resolve_replay_prefetch_provider(
         config=config,
         provider=provider,
@@ -183,10 +227,6 @@ def prefetch_replay_market_data(
         as_of_at=min(event.visible_at for event in target_events),
         market_session=primary_subscription.mapping.market_session,
     )
-    bar_symbols = tuple(subscription.symbol for subscription in bar_subscriptions)
-    subscription_providers = {
-        subscription.symbol: subscription.provider for subscription in bar_subscriptions
-    }
     fingerprint = _prefetch_fingerprint(
         config=config,
         profile=profile,
@@ -200,165 +240,70 @@ def prefetch_replay_market_data(
         subscriptions=bar_subscriptions,
         provider_override=provider,
     )
-    matching_manifest = _load_matching_manifest(
-        store=store,
-        target_key=target_key,
-        run_id=run_id,
-        window_start=window_start,
-        window_end=window_end,
-        fingerprint=fingerprint,
-        allow_portable_fingerprint_mismatch=True,
-    )
-    if matching_manifest is not None and _store_has_required_adjustment_sidecars(
-        config=config,
-        store=store,
-        subscriptions=bar_subscriptions,
-        profile_config=profile_config,
-    ) and _store_has_required_bar_integrity(
-        store=store,
-        manifest=matching_manifest,
-        subscriptions=bar_subscriptions,
-    ):
-        store.write_active_run_pointer()
-        if matching_manifest.fingerprint == fingerprint:
-            _emit_progress(progress, "market prefetch: reuse cached observations")
-        else:
-            _emit_progress(
-                progress,
-                "market prefetch: reuse cached observations via portable integrity match",
-            )
-        return ReplayMarketPrefetchReceipt(
-            store=store,
-            manifest=matching_manifest,
-            reused_existing=True,
-        )
-
-    source_metadata: dict[str, object] = {
-        "prefetch_start_at": prefetch_start.isoformat(),
-        "prefetch_end_at": window_end.isoformat(),
-        "event_count": len(target_events),
-        "prefetch_fingerprint": fingerprint,
-        "prefetch_schema_version": _PREFETCH_SCHEMA_VERSION,
-    }
-    failures: list[dict[str, object]] = []
+    reads: list[tuple[MarketSeriesIdentity, datetime, datetime]] = []
+    all_reused = True
     target_bars: tuple[MarketDataBar, ...] = ()
-    _emit_progress(
-        progress,
-        "market prefetch: bars "
-        f"symbols={len(bar_symbols)} window={prefetch_start.date()}..{window_end.date()}",
-    )
-    symbols_to_fetch: list[str] = []
-    cached_bar_count = 0
+    option_source_metadata: dict[str, object] = {}
+    option_failures: list[dict[str, object]] = []
     for subscription in bar_subscriptions:
-        cached_bars = None
-        if matching_manifest is not None and _bar_integrity_matches_manifest(
-            store=store,
-            manifest=matching_manifest,
-            subscription=subscription,
-        ):
-            cached_bars = _read_cached_prefetch_bars(
-                store=store,
-                symbol=subscription.symbol,
-                granularity=subscription.mapping.bar_granularity,
-                start_at=prefetch_start,
-                end_at=window_end,
-            )
-        if cached_bars is None:
-            symbols_to_fetch.append(subscription.symbol)
-            continue
-        cached_bar_count += 1
-        source_metadata[f"bars_{subscription.symbol}_provider"] = "cached_replay_market_data"
-        source_metadata[f"bars_{subscription.symbol}_cached_bar_count"] = len(cached_bars)
-        if _is_primary_bar_subscription(profile, subscription):
-            target_bars = cached_bars
-        _freeze_required_adjustment_sidecar(
-            store=store,
-            subscription=subscription,
-            profile_config=profile_config,
-            source_metadata=source_metadata,
-            config=config,
-        )
-    if cached_bar_count:
-        _emit_progress(
-            progress,
-            "market prefetch: bars reuse "
-            f"cached={cached_bar_count} fetch={len(symbols_to_fetch)}",
-        )
-    subscriptions_to_fetch = tuple(
-        subscription
-        for subscription in bar_subscriptions
-        if subscription.symbol in symbols_to_fetch
-    )
-    if subscriptions_to_fetch:
-        for result in _prefetch_bar_results(
-            config=config,
-            provider=remote_provider,
-            provider_override=provider,
-            default_provider_name=_default_bar_subscription_provider(
-                config=config,
-                provider=remote_provider,
+        identity = MarketSeriesIdentity.from_mapping(
+            subscription.mapping,
+            provider=subscription.provider,
+            adjustment_policy=(
+                _market_context_subscription_adjustment_policy(
+                    profile_config=profile_config,
+                    market_symbol=subscription.symbol,
+                )
+                or "raw"
             ),
-            subscriptions=subscriptions_to_fetch,
+        )
+        had_rows = store.covers_window(
+            identity,
             start_at=prefetch_start,
             end_at=window_end,
-        ):
-            source_metadata.update(
-                {
-                    f"bars_{result.subscription.symbol}_{key}": value
-                    for key, value in result.metadata.items()
-                }
-            )
-            _freeze_required_adjustment_sidecar(
-                store=store,
-                subscription=result.subscription,
-                profile_config=profile_config,
-                source_metadata=source_metadata,
+        )
+        remote = remote_provider
+        if subscription.provider != _default_bar_subscription_provider(
+            config=config,
+            provider=remote_provider,
+        ) and provider is None:
+            remote = build_market_data_provider_for_replay_subscription(
                 config=config,
-                provider_metadata=result.metadata,
+                provider_name=subscription.provider,
             )
-            if result.error is not None:
-                failure = _failure("bars", result.subscription.symbol, result.error)
-                failures.append(failure)
-                if _is_primary_bar_subscription(profile, result.subscription):
-                    _write_failed_manifest(
-                        store=store,
-                        profile=profile,
-                        run_id=run_id,
-                        provider=remote_provider,
-                        fingerprint=fingerprint,
-                        window_start=window_start,
-                        window_end=window_end,
-                        bar_symbols=bar_symbols,
-                        subscription_providers=subscription_providers,
-                        source_metadata=source_metadata,
-                        failures=tuple(failures),
-                    )
-                    raise ReplayMarketPrefetchError(
-                        f"required primary bars unavailable for {result.subscription.symbol}: "
-                        f"{result.error}"
-                    ) from result.error
-                continue
-            store.write_bars(
-                symbol=result.subscription.symbol,
-                granularity=result.subscription.mapping.bar_granularity,
-                bars=result.bars,
-            )
-            if _is_primary_bar_subscription(profile, result.subscription):
-                target_bars = result.bars
+        try:
+            def fetch(
+                fetch_start: datetime,
+                fetch_end: datetime,
+                *,
+                fetch_remote: MarketBarsProvider = remote,
+                fetch_mapping=subscription.mapping,
+            ) -> MarketDataSeries:
+                return fetch_remote.read_series(
+                    fetch_mapping,
+                    start_at=fetch_start,
+                    end_at=fetch_end,
+                )
 
+            series = store.materialize(
+                identity,
+                start_at=prefetch_start,
+                end_at=window_end,
+                fetch=fetch,
+            )
+        finally:
+            if remote is not remote_provider:
+                _close_market_bars_provider(remote)
+        if _is_primary_bar_subscription(profile, subscription):
+            target_bars = series.bars
+        all_reused = all_reused and had_rows
+        reads.append((identity, prefetch_start, window_end))
     if not target_bars:
         raise ReplayMarketPrefetchError(
             f"required primary bars unavailable for {profile.tradable_proxy_symbol}."
         )
-    _emit_progress(
-        progress,
-        "market prefetch: bars complete "
-        f"primary={profile.tradable_proxy_symbol} failures={len(failures)}",
-    )
-
-    option_contracts: tuple[OptionContractSnapshot, ...] = ()
     if "derivatives" in profile.enabled_components and profile.derivatives is not None:
-        option_contracts = _prefetch_options(
+        _prefetch_options(
             store=store,
             provider=remote_provider,
             profile=profile,
@@ -367,52 +312,51 @@ def prefetch_replay_market_data(
             events=target_events,
             window_start=window_start,
             window_end=window_end,
-            source_metadata=source_metadata,
-            failures=failures,
+            source_metadata=option_source_metadata,
+            failures=option_failures,
             progress=progress,
         )
-
-    source_metadata["prefetch_status"] = "complete"
-    _record_bar_integrity_metadata(
-        store=store,
-        source_metadata=source_metadata,
-        subscriptions=bar_subscriptions,
+    snapshot = store.create_snapshot(
+        mode="replay",
+        reads=reads,
+        metadata={
+            "target_key": target_key,
+            "run_id": run_id,
+            "provider": _default_bar_subscription_provider(
+                config=config,
+                provider=remote_provider,
+            ),
+            "providers": {
+                subscription.symbol: subscription.provider
+                for subscription in bar_subscriptions
+            },
+            "prefetch_fingerprint": fingerprint,
+            "window_start": window_start.isoformat(),
+            "window_end": window_end.isoformat(),
+            "option_source_metadata": option_source_metadata,
+            "option_failures": option_failures,
+        },
     )
-    manifest = MarketDataStoreManifest(
+    write_workspace_snapshot_ref(
+        config.workspace_root,
         target_key=target_key,
         run_id=run_id,
-        fingerprint=fingerprint,
-        provider=_provider_name(remote_provider),
-        subscription_providers=subscription_providers,
-        window_start=window_start,
-        window_end=window_end,
-        bar_symbols=bar_symbols,
-        option_underlyings=(
-            (profile.derivatives_underlying_symbol,)
-            if profile.derivatives is not None
-            else ()
-        ),
-        option_contracts=tuple(contract.contract_symbol for contract in option_contracts),
-        source_metadata=source_metadata,
-        failures=tuple(failures),
+        snapshot_id=snapshot.snapshot_id,
     )
-    store.write_manifest(manifest)
-    store.write_active_run_pointer()
     _emit_progress(
         progress,
-        "market prefetch: complete "
-        f"option_contracts={len(option_contracts)} failures={len(failures)}",
+        "market prefetch: shared snapshot "
+        f"snapshot_id={snapshot.snapshot_id} reused_existing={all_reused}",
     )
     return ReplayMarketPrefetchReceipt(
         store=store,
-        manifest=manifest,
-        reused_existing=False,
+        snapshot=snapshot,
+        reused_existing=all_reused,
     )
-
 
 def _prefetch_options(
     *,
-    store: FileBackedMarketDataStore,
+    store: SharedMarketDataStore,
     provider: MarketBarsProvider,
     profile: MarketContextProfile,
     policy: OptionSelectionPolicy,
@@ -424,12 +368,17 @@ def _prefetch_options(
     failures: list[dict[str, object]],
     progress: ReplayMarketPrefetchProgress | None,
 ) -> tuple[OptionContractSnapshot, ...]:
+    underlying_symbol = profile.derivatives_underlying_symbol
+    if underlying_symbol is None:
+        raise ReplayMarketPrefetchError(
+            "derivatives prefetch requires derivatives_underlying_symbol."
+        )
     options_provider = _as_options_provider(provider)
     if options_provider is None:
         _emit_progress(progress, "market prefetch: options unavailable provider=none")
         failures.append({"component": "options", "reason": "provider_unavailable"})
         store.write_option_chain_metadata(
-            underlying_symbol=profile.derivatives_underlying_symbol,
+            underlying_symbol=underlying_symbol,
             contracts=(),
         )
         return ()
@@ -445,7 +394,7 @@ def _prefetch_options(
     _emit_progress(
         progress,
         "market prefetch: options "
-        f"buckets={len(buckets)} underlying={profile.derivatives_underlying_symbol}",
+        f"buckets={len(buckets)} underlying={underlying_symbol}",
     )
     replay_days = max((window_end.date() - window_start.date()).days, 0)
     expanded_policy = replace(
@@ -473,7 +422,7 @@ def _prefetch_options(
                 bucket_chain = cast(
                     tuple[OptionContractSnapshot, ...],
                     chain_reader(
-                        underlying_symbol=profile.derivatives_underlying_symbol,
+                        underlying_symbol=underlying_symbol,
                         as_of_at=bucket.as_of_at,
                         underlying_price=bucket.price_reference,
                         policy=bucket_policy,
@@ -483,7 +432,7 @@ def _prefetch_options(
                 bucket_chain = tuple(
                     _metadata_only_contract(row)
                     for row in options_provider.read_option_chain(
-                        underlying_symbol=profile.derivatives_underlying_symbol,
+                        underlying_symbol=underlying_symbol,
                         as_of_at=bucket.as_of_at,
                         underlying_price=bucket.price_reference,
                         policy=bucket_policy,
@@ -501,7 +450,7 @@ def _prefetch_options(
             failures.append(
                 _failure(
                     "option_chain_metadata",
-                    f"{profile.derivatives_underlying_symbol}:{bucket.event_date.isoformat()}",
+                    f"{underlying_symbol}:{bucket.event_date.isoformat()}",
                     exc,
                 )
             )
@@ -515,7 +464,7 @@ def _prefetch_options(
                 reconstruction_metadata,
             ) = _reconstruct_option_universe_for_bucket(
                 provider=options_provider,
-                underlying_symbol=profile.derivatives_underlying_symbol,
+                underlying_symbol=underlying_symbol,
                 as_of_at=bucket.as_of_at,
                 policy=bucket_policy,
                 price_min=bucket.price_min,
@@ -557,7 +506,7 @@ def _prefetch_options(
             "market prefetch: options complete contracts=0 selected=0",
         )
         store.write_option_chain_metadata(
-            underlying_symbol=profile.derivatives_underlying_symbol,
+            underlying_symbol=underlying_symbol,
             contracts=(),
         )
         source_metadata["contract_universe_source"] = _option_universe_source_label(chain_sources)
@@ -582,7 +531,7 @@ def _prefetch_options(
         )
         return ()
     store.write_option_chain_metadata(
-        underlying_symbol=profile.derivatives_underlying_symbol,
+        underlying_symbol=underlying_symbol,
         contracts=chain,
     )
     _emit_progress(
@@ -603,7 +552,7 @@ def _prefetch_options(
             policy=policy,
             source_metadata=source_metadata,
             failures=failures,
-            underlying_symbol=profile.derivatives_underlying_symbol,
+            underlying_symbol=underlying_symbol,
         )
     if selected and policy.include_historical_bars:
         _emit_progress(progress, "market prefetch: option bars")
@@ -616,7 +565,7 @@ def _prefetch_options(
             policy=policy,
             source_metadata=source_metadata,
             failures=failures,
-            underlying_symbol=profile.derivatives_underlying_symbol,
+            underlying_symbol=underlying_symbol,
         )
     store.write_option_trades(trades=trades)
     store.write_option_bars(bars=bars)
@@ -752,25 +701,6 @@ def _close_market_bars_provider(provider: MarketBarsProvider) -> None:
     close = getattr(provider, "close", None)
     if callable(close):
         close()
-
-
-def _read_cached_prefetch_bars(
-    *,
-    store: FileBackedMarketDataStore,
-    symbol: str,
-    granularity: str,
-    start_at: datetime,
-    end_at: datetime,
-) -> tuple[MarketDataBar, ...] | None:
-    try:
-        return store.read_bars(
-            symbol=symbol,
-            granularity=granularity,
-            start_at=start_at,
-            end_at=end_at,
-        ).bars
-    except (MarketDataStoreError, json.JSONDecodeError, ValueError):
-        return None
 
 
 def _option_date_buckets(
@@ -1264,173 +1194,6 @@ def _prefetch_bar_metadata(
     return metadata
 
 
-def _manifest_matches(
-    *,
-    store: FileBackedMarketDataStore,
-    target_key: str,
-    run_id: str,
-    window_start: datetime,
-    window_end: datetime,
-    fingerprint: str,
-) -> bool:
-    if not store.manifest_path.exists():
-        return False
-    return (
-        _load_matching_manifest(
-            store=store,
-            target_key=target_key,
-            run_id=run_id,
-            window_start=window_start,
-            window_end=window_end,
-            fingerprint=fingerprint,
-        )
-        is not None
-    )
-
-
-def _load_matching_manifest(
-    *,
-    store: FileBackedMarketDataStore,
-    target_key: str,
-    run_id: str,
-    window_start: datetime,
-    window_end: datetime,
-    fingerprint: str,
-    allow_portable_fingerprint_mismatch: bool = False,
-) -> MarketDataStoreManifest | None:
-    if not store.manifest_path.exists():
-        return None
-    manifest = store.read_manifest()
-    if (
-        manifest.target_key != target_key
-        or manifest.run_id != run_id
-        or manifest.window_start != window_start
-        or manifest.window_end != window_end
-        or manifest.source_metadata.get("prefetch_status") != "complete"
-    ):
-        return None
-    if manifest.fingerprint != fingerprint and not allow_portable_fingerprint_mismatch:
-        return None
-    return manifest
-
-
-def _record_bar_integrity_metadata(
-    *,
-    store: FileBackedMarketDataStore,
-    source_metadata: dict[str, object],
-    subscriptions: tuple[MarketContextBarSubscription, ...],
-) -> None:
-    for subscription in subscriptions:
-        integrity = store.read_bars_integrity(
-            symbol=subscription.symbol,
-            granularity=subscription.mapping.bar_granularity,
-        )
-        _write_bar_integrity_metadata(
-            source_metadata=source_metadata,
-            symbol=subscription.symbol,
-            integrity=integrity,
-        )
-
-
-def _write_bar_integrity_metadata(
-    *,
-    source_metadata: dict[str, object],
-    symbol: str,
-    integrity: MarketDataBarsIntegrity,
-) -> None:
-    source_metadata[f"bars_{symbol}_integrity_sha256"] = integrity.content_sha256
-    source_metadata[f"bars_{symbol}_integrity_bar_count"] = integrity.bar_count
-    source_metadata[f"bars_{symbol}_integrity_first_start_at"] = (
-        integrity.first_start_at.isoformat()
-    )
-    source_metadata[f"bars_{symbol}_integrity_latest_end_at"] = (
-        integrity.latest_end_at.isoformat()
-    )
-
-
-def _store_has_required_bar_integrity(
-    *,
-    store: FileBackedMarketDataStore,
-    manifest: MarketDataStoreManifest,
-    subscriptions: tuple[MarketContextBarSubscription, ...],
-) -> bool:
-    return all(
-        _bar_integrity_matches_manifest(
-            store=store,
-            manifest=manifest,
-            subscription=subscription,
-        )
-        for subscription in subscriptions
-    )
-
-
-def _bar_integrity_matches_manifest(
-    *,
-    store: FileBackedMarketDataStore,
-    manifest: MarketDataStoreManifest,
-    subscription: MarketContextBarSubscription,
-) -> bool:
-    metadata = manifest.source_metadata
-    symbol = subscription.symbol
-    required_keys = (
-        f"bars_{symbol}_integrity_sha256",
-        f"bars_{symbol}_integrity_bar_count",
-        f"bars_{symbol}_integrity_first_start_at",
-        f"bars_{symbol}_integrity_latest_end_at",
-    )
-    if any(key not in metadata for key in required_keys):
-        return False
-    try:
-        integrity = store.read_bars_integrity(
-            symbol=symbol,
-            granularity=subscription.mapping.bar_granularity,
-        )
-    except MarketDataStoreError:
-        return False
-    expected_sha = metadata.get(f"bars_{symbol}_integrity_sha256")
-    expected_count = metadata.get(f"bars_{symbol}_integrity_bar_count")
-    expected_first = metadata.get(f"bars_{symbol}_integrity_first_start_at")
-    expected_latest = metadata.get(f"bars_{symbol}_integrity_latest_end_at")
-    return (
-        expected_sha == integrity.content_sha256
-        and expected_count == integrity.bar_count
-        and expected_first == integrity.first_start_at.isoformat()
-        and expected_latest == integrity.latest_end_at.isoformat()
-    )
-
-
-def _write_failed_manifest(
-    *,
-    store: FileBackedMarketDataStore,
-    profile: MarketContextProfile,
-    run_id: str,
-    provider: MarketBarsProvider,
-    fingerprint: str,
-    window_start: datetime,
-    window_end: datetime,
-    bar_symbols: tuple[str, ...],
-    subscription_providers: dict[str, str],
-    source_metadata: dict[str, object],
-    failures: tuple[dict[str, object], ...],
-) -> None:
-    store.write_manifest(
-        MarketDataStoreManifest(
-            target_key=profile.target_key,
-            run_id=run_id,
-            fingerprint=fingerprint,
-            provider=_provider_name(provider),
-            subscription_providers=subscription_providers,
-            window_start=window_start,
-            window_end=window_end,
-            bar_symbols=bar_symbols,
-            option_underlyings=(),
-            option_contracts=(),
-            source_metadata={**source_metadata, "prefetch_status": "failed"},
-            failures=failures,
-        )
-    )
-
-
 def _resolve_replay_prefetch_provider(
     *,
     config: KernelConfig,
@@ -1449,6 +1212,15 @@ def _build_configured_market_bars_provider(config: KernelConfig) -> MarketBarsPr
             "or an explicit provider override."
         )
     return provider
+
+
+def build_market_data_provider_for_replay_subscription(
+    *,
+    config: KernelConfig,
+    provider_name: str,
+) -> MarketBarsProvider:
+    """Build one explicitly configured subscription provider for shared materialization."""
+    return build_market_bars_provider(config, provider_name=provider_name)
 
 
 def _prefetch_fingerprint(
@@ -1665,93 +1437,6 @@ def _adjustment_fingerprint_payload(
             }
         )
     return payload
-
-
-def _store_has_required_adjustment_sidecars(
-    *,
-    config: KernelConfig,
-    store: FileBackedMarketDataStore,
-    subscriptions: tuple[MarketContextBarSubscription, ...],
-    profile_config: MarketContextTargetProfileConfig,
-) -> bool:
-    for subscription in subscriptions:
-        policy = _market_context_subscription_adjustment_policy(
-            profile_config=profile_config,
-            market_symbol=subscription.symbol,
-        )
-        if policy is None:
-            continue
-        if not store.has_adjustment_sidecar(
-            symbol=subscription.symbol,
-            direction=adjustment_direction_for_policy(policy),
-        ):
-            return False
-        source_path = _resolve_adjustment_source_path(
-            config=config,
-            subscription=subscription,
-            provider_metadata=None,
-            direction=adjustment_direction_for_policy(policy),
-        )
-        if source_path is None or not source_path.is_file():
-            return False
-        stored_path = store.adjustment_sidecar_path(
-            symbol=subscription.symbol,
-            direction=adjustment_direction_for_policy(policy),
-        )
-        if stored_path.read_text(encoding="utf-8") != source_path.read_text(encoding="utf-8"):
-            return False
-    return True
-
-
-def _freeze_required_adjustment_sidecar(
-    *,
-    store: FileBackedMarketDataStore,
-    subscription: MarketContextBarSubscription,
-    profile_config: MarketContextTargetProfileConfig,
-    source_metadata: dict[str, object],
-    config: KernelConfig,
-    provider_metadata: dict[str, object] | None = None,
-) -> None:
-    policy = _market_context_subscription_adjustment_policy(
-        profile_config=profile_config,
-        market_symbol=subscription.symbol,
-    )
-    if policy is None:
-        return
-    direction = adjustment_direction_for_policy(policy)
-    archive_symbol = normalize_archive_symbol(subscription.symbol)
-    sidecar_path = _resolve_adjustment_source_path(
-        config=config,
-        subscription=subscription,
-        provider_metadata=provider_metadata,
-        direction=direction,
-    )
-    if sidecar_path is None or not sidecar_path.is_file():
-        raise ReplayMarketPrefetchError(
-            "configured market-data adjustment sidecar is missing for "
-            f"{subscription.symbol}: {sidecar_path}"
-        )
-    sidecar_content = sidecar_path.read_text(encoding="utf-8")
-    stored_path = store.adjustment_sidecar_path(
-        symbol=subscription.symbol,
-        direction=direction,
-    )
-    if stored_path.is_file() and stored_path.read_text(encoding="utf-8") == sidecar_content:
-        source_metadata[f"adjustments_{subscription.symbol}_policy"] = policy
-        source_metadata[f"adjustments_{subscription.symbol}_archive_symbol"] = archive_symbol
-        source_metadata[f"adjustments_{subscription.symbol}_status"] = "cached"
-        return
-    store.write_adjustment_sidecar(
-        symbol=subscription.symbol,
-        direction=direction,
-        content=sidecar_content,
-    )
-    source_metadata[f"adjustments_{subscription.symbol}_policy"] = policy
-    source_metadata[f"adjustments_{subscription.symbol}_archive_symbol"] = archive_symbol
-    source_metadata[f"adjustments_{subscription.symbol}_source_path"] = (
-        sidecar_path.resolve(strict=False).as_posix()
-    )
-    source_metadata[f"adjustments_{subscription.symbol}_status"] = "stored"
 
 
 def _market_context_subscription_adjustment_policy(

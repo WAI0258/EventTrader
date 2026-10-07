@@ -26,7 +26,7 @@ SystemViewState = Literal[
 ]
 ViewDirection = Literal["flat", "long", "short"]
 ViewConviction = Literal["none", "weak", "strong"]
-ViewStateChangeSourceKind = Literal["pm_execution_sidecar"]
+ViewStateChangeSourceKind = Literal["pm_execution_sidecar", "basis_handover"]
 MarketSession = Literal["continuous", "exchange_session"]
 ExchangeSessionScope = Literal["regular", "extended"]
 ViewCloseReason = Literal[
@@ -34,12 +34,14 @@ ViewCloseReason = Literal[
     "state_changed_to_opposite_direction",
     "manual_close",
     "target_disabled",
+    "basis_handover",
 ]
 SegmentCloseReason = Literal[
     "weight_changed",
     "view_closed",
     "manual_close",
     "target_disabled",
+    "basis_handover",
 ]
 TransitionAction = Literal[
     "record_flat",
@@ -50,6 +52,7 @@ TransitionAction = Literal[
     "close_view",
     "reverse_view",
     "trigger_reflection",
+    "rollover_view",
 ]
 HorizonBaselineStatus = Literal["final", "pending_market_data"]
 
@@ -66,10 +69,11 @@ _VIEW_CLOSE_REASONS: frozenset[ViewCloseReason] = frozenset(
         "state_changed_to_opposite_direction",
         "manual_close",
         "target_disabled",
+        "basis_handover",
     }
 )
 _SEGMENT_CLOSE_REASONS: frozenset[SegmentCloseReason] = frozenset(
-    {"weight_changed", "view_closed", "manual_close", "target_disabled"}
+    {"weight_changed", "view_closed", "manual_close", "target_disabled", "basis_handover"}
 )
 _REFLECTION_CLOSE_REASONS: frozenset[
     Literal["state_changed_to_flat", "state_changed_to_opposite_direction"]
@@ -107,6 +111,8 @@ class ViewStateChange:
     used_lesson_ids: tuple[str, ...] = ()
     pm_decision_id: str | None = None
     execution_record_id: str | None = None
+    predecessor_instrument_basis: str | None = None
+    instrument_basis: str | None = None
 
     def __post_init__(self) -> None:
         object.__setattr__(
@@ -164,10 +170,8 @@ class ViewStateChange:
             "used_lesson_ids",
             _validate_lesson_ids(self.used_lesson_ids),
         )
-        if self.source_kind != "pm_execution_sidecar":
-            raise ViewStateChangeContractError(
-                "source_kind must be pm_execution_sidecar."
-            )
+        if self.source_kind not in {"pm_execution_sidecar", "basis_handover"}:
+            raise ViewStateChangeContractError("source_kind is unsupported.")
         object.__setattr__(self, "source_kind", self.source_kind)
         pm_lineage = {
             "pm_decision_id": self.pm_decision_id,
@@ -177,22 +181,50 @@ class ViewStateChange:
             field_name: _validate_optional_non_blank(value, field_name)
             for field_name, value in pm_lineage.items()
         }
-        required_lineage_fields = (
-            "pm_decision_id",
-            "execution_record_id",
-        )
-        missing = [
-            field_name
-            for field_name in required_lineage_fields
-            if normalized_lineage[field_name] is None
-        ]
-        if missing:
+        if self.source_kind == "pm_execution_sidecar":
+            missing = [
+                field_name
+                for field_name, value in normalized_lineage.items()
+                if value is None
+            ]
+            if missing:
+                raise ViewStateChangeContractError(
+                    "pm_execution_sidecar ViewStateChange requires structured PM lineage ids: "
+                    f"{missing!r}."
+                )
+        elif any(value is not None for value in normalized_lineage.values()):
             raise ViewStateChangeContractError(
-                "pm_execution_sidecar ViewStateChange requires structured PM lineage ids: "
-                f"{missing!r}."
+                "basis_handover ViewStateChange must not carry PM lineage ids."
             )
         for field_name, value in normalized_lineage.items():
             object.__setattr__(self, field_name, value)
+        predecessor_basis = _validate_optional_non_blank(
+            self.predecessor_instrument_basis,
+            "predecessor_instrument_basis",
+        )
+        successor_basis = _validate_optional_non_blank(
+            self.instrument_basis,
+            "instrument_basis",
+        )
+        if self.source_kind == "basis_handover":
+            if predecessor_basis is None or successor_basis is None:
+                raise ViewStateChangeContractError(
+                    "basis_handover ViewStateChange requires both instrument bases."
+                )
+            if self.state == "flat":
+                raise ViewStateChangeContractError(
+                    "basis_handover ViewStateChange requires a directional state."
+                )
+            if predecessor_basis == successor_basis:
+                raise ViewStateChangeContractError(
+                    "basis_handover ViewStateChange requires different instrument bases."
+                )
+        elif predecessor_basis is not None or successor_basis is not None:
+            raise ViewStateChangeContractError(
+                "pm_execution_sidecar ViewStateChange must not carry instrument bases."
+            )
+        object.__setattr__(self, "predecessor_instrument_basis", predecessor_basis)
+        object.__setattr__(self, "instrument_basis", successor_basis)
 
 
 @dataclass(frozen=True, slots=True)

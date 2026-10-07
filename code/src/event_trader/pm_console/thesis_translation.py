@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 import json
-import os
 import re
 import urllib.error
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from hashlib import sha256
 from http import HTTPStatus
-from pathlib import Path
 from typing import Protocol
 from urllib.request import Request, urlopen
 
@@ -28,7 +26,7 @@ from event_trader.storage import WorkspaceLayout
 
 _PROMPT_VERSION = "thesis_translate_v3"
 _PROTECTED_TERMS_VERSION = "v2"
-_CACHE_ROOT = Path("pm_console") / "thesis_translation_cache"
+_MAX_TRANSLATION_WORKERS = 4
 _TRANSLATOR_UNAVAILABLE_CODE = "translator_unavailable"
 _TRANSLATOR_UNAVAILABLE_MESSAGE = (
     "no PM Console thesis translator is configured for this server process."
@@ -98,15 +96,6 @@ class OpenAICompatibleThesisSectionTranslator:
     model: str
     base_url: str = "https://api.openai.com/v1"
 
-    @classmethod
-    def from_environment(cls) -> OpenAICompatibleThesisSectionTranslator | None:
-        api_key = os.getenv("OPENAI_API_KEY", "").strip()
-        model = os.getenv("EVENT_TRADER_PM_CONSOLE_TRANSLATION_MODEL", "").strip()
-        if not api_key or not model:
-            return None
-        base_url = os.getenv("OPENAI_BASE_URL", "").strip() or "https://api.openai.com/v1"
-        return cls(api_key=api_key, model=model, base_url=base_url)
-
     def translate(
         self,
         *,
@@ -123,10 +112,7 @@ class OpenAICompatibleThesisSectionTranslator:
             ],
             "temperature": 0,
         }
-        if "gpt-5" in self.model:
-            payload["max_completion_tokens"] = 4096
-        else:
-            payload["max_tokens"] = 4096
+        payload["max_tokens"] = 4096
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         request = Request(
             _chat_completions_url(self.base_url),
@@ -166,54 +152,6 @@ class OpenAICompatibleThesisSectionTranslator:
         )
 
 
-@dataclass(frozen=True, slots=True)
-class _CachedTranslationRecord:
-    canonical_bundle_sha256: str
-    locale: str
-    sections: tuple[PMConsoleTranslatedSectionDTO, ...]
-    provider: str
-    model: str
-    prompt_version: str
-    protected_terms_version: str
-
-    def to_json_payload(self) -> dict[str, object]:
-        return {
-            "canonical_bundle_sha256": self.canonical_bundle_sha256,
-            "locale": self.locale,
-            "sections": [section.to_json_payload() for section in self.sections],
-            "provider": self.provider,
-            "model": self.model,
-            "prompt_version": self.prompt_version,
-            "protected_terms_version": self.protected_terms_version,
-        }
-
-    @classmethod
-    def from_json_payload(cls, payload: object) -> _CachedTranslationRecord:
-        if not isinstance(payload, dict):
-            raise PMConsoleThesisTranslationError("cached translation record must be an object.")
-        canonical_bundle_sha256 = _require_non_blank(
-            payload.get("canonical_bundle_sha256"),
-            "canonical_bundle_sha256",
-        )
-        locale = _require_non_blank(payload.get("locale"), "locale")
-        sections_payload = payload.get("sections")
-        if not isinstance(sections_payload, list) or not sections_payload:
-            raise PMConsoleThesisTranslationError("cached translation record must include sections.")
-        sections = tuple(_translated_section_from_payload(item) for item in sections_payload)
-        return cls(
-            canonical_bundle_sha256=canonical_bundle_sha256,
-            locale=locale,
-            sections=sections,
-            provider=_require_non_blank(payload.get("provider"), "provider"),
-            model=_require_non_blank(payload.get("model"), "model"),
-            prompt_version=_require_non_blank(payload.get("prompt_version"), "prompt_version"),
-            protected_terms_version=_require_non_blank(
-                payload.get("protected_terms_version"),
-                "protected_terms_version",
-            ),
-        )
-
-
 class PMConsoleThesisTranslationService:
     """Translate Thesis Evolution revisions without changing thesis truth."""
 
@@ -227,7 +165,6 @@ class PMConsoleThesisTranslationService:
             raise PMConsoleThesisTranslationError("layout must be a WorkspaceLayout instance.")
         self._layout = layout
         self._translator = translator
-        self._cache_root = layout.runtime_root / _CACHE_ROOT
 
     def translate_revision(
         self,
@@ -249,8 +186,7 @@ class PMConsoleThesisTranslationService:
                 request=request,
                 error_code="unknown_revision",
                 error_message=(
-                    "unknown thesis revision: "
-                    f"target={target_key} revision_id={revision_id}"
+                    f"unknown thesis revision: target={target_key} revision_id={revision_id}"
                 ),
             )
         if persisted.record.canonical_bundle_sha256 != request.canonical_bundle_sha256:
@@ -264,17 +200,6 @@ class PMConsoleThesisTranslationService:
                     "canonical_bundle_sha256 does not match the selected thesis revision."
                 ),
             )
-        cached = self._read_cache(
-            canonical_bundle_sha256=request.canonical_bundle_sha256,
-            locale=request.locale,
-        )
-        if cached is not None:
-            return self._response_from_cache(
-                cache_record=cached,
-                target_key=target_key,
-                revision_id=revision_id,
-                request=request,
-            )
         if self._translator is None:
             raise self._failure(
                 status=HTTPStatus.SERVICE_UNAVAILABLE,
@@ -285,72 +210,98 @@ class PMConsoleThesisTranslationService:
                 error_message=_TRANSLATOR_UNAVAILABLE_MESSAGE,
             )
         translator_dto = PMConsoleThesisTranslationTranslatorDTO(
-            provider="openai",
+            provider="configured",
             model=_translator_model_name(self._translator),
             prompt_version=_PROMPT_VERSION,
         )
-        translated_sections: list[PMConsoleTranslatedSectionDTO] = []
+        translated_sections: list[PMConsoleTranslatedSectionDTO | None] = [None] * len(
+            persisted.record.sections
+        )
         verification_failures: list[str] = []
-        for section in persisted.record.sections:
+        translation_failures: list[str] = []
+        translator_metadata: dict[int, PMConsoleThesisTranslationTranslatorDTO] = {}
+        jobs: list[tuple[int, object]] = []
+        for index, section in enumerate(persisted.record.sections):
             if not section.content_md.strip():
-                translated_sections.append(
-                    PMConsoleTranslatedSectionDTO(
-                        section_id=section.section_id,
-                        page_path=section.page_path,
-                        page_name=_page_name_from_page_path(section.page_path),
-                        section_name=section.section_name,
-                        source_content_sha256=section.content_sha256,
-                        translated_content_md=section.content_md,
-                    )
+                translated_sections[index] = _translated_section(
+                    section=section,
+                    translated_content_md=section.content_md,
                 )
                 continue
+            jobs.append((index, section))
+
+        def translate_one(index: int, section: object):
             protected_terms = _extract_protected_terms(section.content_md)
             prompt = _build_translation_prompt(
                 locale=request.locale,
                 protected_terms=protected_terms,
                 source_content_md=section.content_md,
             )
-            try:
-                translated = self._translator.translate(
-                    prompt=prompt,
-                    source_content_md=section.content_md,
-                    locale=request.locale,
-                )
-            except PMConsoleThesisTranslationFailure:
-                raise
-            except PMConsoleThesisTranslationError as exc:
-                raise self._failure(
-                    status=HTTPStatus.BAD_GATEWAY,
-                    target_key=target_key,
-                    revision_id=revision_id,
-                    request=request,
-                    error_code="translator_error",
-                    error_message=str(exc),
-                ) from exc
-            translator_dto = PMConsoleThesisTranslationTranslatorDTO(
-                provider=translated.provider,
-                model=translated.model,
-                prompt_version=_PROMPT_VERSION,
+            translated = self._translator.translate(
+                prompt=prompt,
+                source_content_md=section.content_md,
+                locale=request.locale,
             )
             verification = _verify_translation(
                 source_content_md=section.content_md,
                 translated_content_md=translated.translated_content_md,
                 protected_terms=protected_terms,
             )
-            if not verification.passed:
-                verification_failures.extend(
-                    f"{section.section_id}: {failure}" for failure in verification.failures
+            return index, section, translated, verification
+
+        worker_count = min(_MAX_TRANSLATION_WORKERS, max(1, len(jobs)))
+        with ThreadPoolExecutor(
+            max_workers=worker_count,
+            thread_name_prefix="pm-console-translate",
+        ) as executor:
+            futures = {
+                executor.submit(translate_one, index, section): (index, section)
+                for index, section in jobs
+            }
+            for future in as_completed(futures):
+                index, section = futures[future]
+                try:
+                    _, section, translated, verification = future.result()
+                except Exception as exc:
+                    translation_failures.append(f"{section.section_id}: {exc}")
+                    continue
+                translator_metadata[index] = PMConsoleThesisTranslationTranslatorDTO(
+                    provider=translated.provider,
+                    model=translated.model,
+                    prompt_version=_PROMPT_VERSION,
                 )
-                continue
-            translated_sections.append(
-                PMConsoleTranslatedSectionDTO(
-                    section_id=section.section_id,
-                    page_path=section.page_path,
-                    page_name=_page_name_from_page_path(section.page_path),
-                    section_name=section.section_name,
-                    source_content_sha256=section.content_sha256,
+                if not verification.passed:
+                    verification_failures.extend(
+                        f"{section.section_id}: {failure}" for failure in verification.failures
+                    )
+                    continue
+                translated_sections[index] = _translated_section(
+                    section=section,
                     translated_content_md=translated.translated_content_md,
                 )
+
+        if translator_metadata:
+            translator_dto = translator_metadata[min(translator_metadata)]
+
+        if translation_failures:
+            raise self._failure(
+                status=HTTPStatus.BAD_GATEWAY,
+                target_key=target_key,
+                revision_id=revision_id,
+                request=request,
+                error_code="translator_error",
+                error_message="; ".join(sorted(translation_failures)),
+                translator=translator_dto,
+            )
+        if any(section is None for section in translated_sections):
+            raise self._failure(
+                status=HTTPStatus.UNPROCESSABLE_ENTITY,
+                target_key=target_key,
+                revision_id=revision_id,
+                request=request,
+                error_code="verification_failed",
+                error_message="translation did not produce every thesis section.",
+                translator=translator_dto,
             )
         verification = PMConsoleThesisTranslationVerificationDTO(
             passed=not verification_failures,
@@ -367,22 +318,18 @@ class PMConsoleThesisTranslationService:
                 translator=translator_dto,
                 verification=verification,
             )
+        completed_sections = tuple(
+            section for section in translated_sections if section is not None
+        )
         response = PMConsoleThesisTranslationResponseDTO(
             generated_at=datetime.now(UTC).isoformat(),
             target_key=target_key,
             revision_id=revision_id,
             locale=request.locale,
             canonical_bundle_sha256=request.canonical_bundle_sha256,
-            sections=tuple(translated_sections),
-            cached=False,
+            sections=completed_sections,
             translator=translator_dto,
             verification=verification,
-        )
-        self._write_cache(
-            canonical_bundle_sha256=request.canonical_bundle_sha256,
-            locale=request.locale,
-            sections=tuple(translated_sections),
-            translator=translator_dto,
         )
         return response
 
@@ -395,107 +342,6 @@ class PMConsoleThesisTranslationService:
             translator=self._translator,
             locale=locale,
         )
-
-    def _response_from_cache(
-        self,
-        *,
-        cache_record: _CachedTranslationRecord,
-        target_key: str,
-        revision_id: str,
-        request: PMConsoleThesisTranslationRequestDTO,
-    ) -> PMConsoleThesisTranslationResponseDTO:
-        return PMConsoleThesisTranslationResponseDTO(
-            generated_at=datetime.now(UTC).isoformat(),
-            target_key=target_key,
-            revision_id=revision_id,
-            locale=request.locale,
-            canonical_bundle_sha256=request.canonical_bundle_sha256,
-            sections=cache_record.sections,
-            cached=True,
-            translator=PMConsoleThesisTranslationTranslatorDTO(
-                provider=cache_record.provider,
-                model=cache_record.model,
-                prompt_version=cache_record.prompt_version,
-            ),
-            verification=PMConsoleThesisTranslationVerificationDTO(
-                passed=True,
-                failures=(),
-            ),
-        )
-
-    def _read_cache(
-        self,
-        *,
-        canonical_bundle_sha256: str,
-        locale: str,
-    ) -> _CachedTranslationRecord | None:
-        path = self._cache_path(
-            canonical_bundle_sha256=canonical_bundle_sha256,
-            locale=locale,
-        )
-        if not path.exists() or not path.is_file():
-            return None
-        try:
-            payload = json.loads(path.read_text(encoding="utf-8"))
-            record = _CachedTranslationRecord.from_json_payload(payload)
-        except (OSError, json.JSONDecodeError, PMConsoleThesisTranslationError):
-            return None
-        if record.prompt_version != _PROMPT_VERSION:
-            return None
-        if record.protected_terms_version != _PROTECTED_TERMS_VERSION:
-            return None
-        if record.canonical_bundle_sha256 != canonical_bundle_sha256:
-            return None
-        if record.locale != locale:
-            return None
-        return record
-
-    def _write_cache(
-        self,
-        *,
-        canonical_bundle_sha256: str,
-        locale: str,
-        sections: tuple[PMConsoleTranslatedSectionDTO, ...],
-        translator: PMConsoleThesisTranslationTranslatorDTO,
-    ) -> None:
-        path = self._cache_path(
-            canonical_bundle_sha256=canonical_bundle_sha256,
-            locale=locale,
-        )
-        record = _CachedTranslationRecord(
-            canonical_bundle_sha256=canonical_bundle_sha256,
-            locale=locale,
-            sections=sections,
-            provider=translator.provider,
-            model=translator.model,
-            prompt_version=translator.prompt_version,
-            protected_terms_version=_PROTECTED_TERMS_VERSION,
-        )
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(
-            json.dumps(record.to_json_payload(), ensure_ascii=False, sort_keys=True),
-            encoding="utf-8",
-        )
-
-    def _cache_path(
-        self,
-        *,
-        canonical_bundle_sha256: str,
-        locale: str,
-    ) -> Path:
-        model_name = _translator_model_name(self._translator)
-        cache_key = sha256(
-            "::".join(
-                (
-                    canonical_bundle_sha256,
-                    locale,
-                    model_name,
-                    _PROMPT_VERSION,
-                    _PROTECTED_TERMS_VERSION,
-                )
-            ).encode("utf-8")
-        ).hexdigest()
-        return (self._cache_root / f"{cache_key}.json").resolve(strict=False)
 
     def _failure(
         self,
@@ -719,11 +565,24 @@ def _chat_completions_url(base_url: str) -> str:
     return f"{normalized}/v1/chat/completions"
 
 
+def _translated_section(
+    *,
+    section,
+    translated_content_md: str,
+) -> PMConsoleTranslatedSectionDTO:
+    return PMConsoleTranslatedSectionDTO(
+        section_id=section.section_id,
+        page_path=section.page_path,
+        page_name=_page_name_from_page_path(section.page_path),
+        section_name=section.section_name,
+        source_content_sha256=section.content_sha256,
+        translated_content_md=translated_content_md,
+    )
+
+
 def _translator_model_name(translator: ThesisSectionTranslator | None) -> str:
     model = getattr(translator, "model", None)
-    if isinstance(model, str) and model.strip():
-        return model.strip()
-    return "unconfigured"
+    return model.strip() if isinstance(model, str) and model.strip() else "unconfigured"
 
 
 def _page_name_from_page_path(page_path: str) -> str:

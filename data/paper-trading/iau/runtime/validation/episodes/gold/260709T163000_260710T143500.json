@@ -1,0 +1,94 @@
+{
+  "episode": {
+    "close_reason": "state_changed_to_flat",
+    "closed_at": "2026-07-10T14:35:00+00:00",
+    "closed_by_event_ids": [
+      "3e3a95276e245e3256896680",
+      "2449c798869800fa59cdde5d",
+      "8d725a16a5c8f652058d0534"
+    ],
+    "closed_by_state_change_id": "state-change:pm-execution:b2d940271834e9605979b959a898f247",
+    "direction": "long",
+    "episode_id": "gold:episode:1",
+    "opened_at": "2026-07-09T16:30:00+00:00",
+    "opened_by_event_ids": [
+      "99c480b9ca883b1cd7be50ac",
+      "e544821aff91b5245c937f28",
+      "f3e872ba92c546f4f2da393e"
+    ],
+    "opened_by_state_change_id": "state-change:pm-execution:6badef09e7bacb5c486414e25034bd24",
+    "target_key": "gold"
+  },
+  "generated_at": "2026-10-07T09:18:57.220386+00:00",
+  "reflection_triggers": [
+    {
+      "close_reason": "state_changed_to_flat",
+      "closed_by_event_ids": [
+        "3e3a95276e245e3256896680",
+        "2449c798869800fa59cdde5d",
+        "8d725a16a5c8f652058d0534"
+      ],
+      "closed_by_state_change_id": "state-change:pm-execution:b2d940271834e9605979b959a898f247",
+      "episode_id": "gold:episode:1",
+      "target_key": "gold",
+      "triggered_at": "2026-07-10T14:35:00+00:00"
+    }
+  ],
+  "segments": [
+    {
+      "close_reason": "view_closed",
+      "closed_at": "2026-07-10T14:35:00+00:00",
+      "closed_by_state_change_id": "state-change:pm-execution:b2d940271834e9605979b959a898f247",
+      "episode_id": "gold:episode:1",
+      "opened_at": "2026-07-09T16:30:00+00:00",
+      "opened_by_state_change_id": "state-change:pm-execution:6badef09e7bacb5c486414e25034bd24",
+      "segment_id": "gold:segment:1",
+      "target_key": "gold",
+      "target_weight": 0.5
+    }
+  ],
+  "state_changes": [
+    {
+      "conviction": "weak",
+      "direction": "long",
+      "effective_at": "2026-07-09T16:30:00+00:00",
+      "execution_record_id": "execution-record:7c09f200210208333bdbb64610aeb637",
+      "instrument_basis": null,
+      "pm_decision_id": "pm-decision:ed59282b16fece46081742bbe96f97b6",
+      "predecessor_instrument_basis": null,
+      "rationale_md": "Text omitted from numerical sample.",
+      "source_event_ids": [
+        "99c480b9ca883b1cd7be50ac",
+        "e544821aff91b5245c937f28",
+        "f3e872ba92c546f4f2da393e"
+      ],
+      "source_kind": "pm_execution_sidecar",
+      "state": "weak_long",
+      "state_change_id": "state-change:pm-execution:6badef09e7bacb5c486414e25034bd24",
+      "target_key": "gold",
+      "target_weight": 0.5,
+      "used_lesson_ids": []
+    },
+    {
+      "conviction": "none",
+      "direction": "flat",
+      "effective_at": "2026-07-10T14:35:00+00:00",
+      "execution_record_id": "execution-record:5fc673f75d78fb118f52c1c7cbd4eaf7",
+      "instrument_basis": null,
+      "pm_decision_id": "pm-decision:a7e9664a1b819b43f083bdda44970c18",
+      "predecessor_instrument_basis": null,
+      "rationale_md": "Text omitted from numerical sample.",
+      "source_event_ids": [
+        "3e3a95276e245e3256896680",
+        "2449c798869800fa59cdde5d",
+        "8d725a16a5c8f652058d0534"
+      ],
+      "source_kind": "pm_execution_sidecar",
+      "state": "flat",
+      "state_change_id": "state-change:pm-execution:b2d940271834e9605979b959a898f247",
+      "target_key": "gold",
+      "target_weight": 0.0,
+      "used_lesson_ids": []
+    }
+  ]
+}

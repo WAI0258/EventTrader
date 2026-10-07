@@ -9,12 +9,18 @@ from pathlib import Path
 from event_trader.audit import write_live_smoke_trace_bundle
 from event_trader.config import load_kernel_config
 from event_trader.market.provider import (
-    CachedReplayMarketDataProvider,
     build_default_market_bars_provider,
 )
-from event_trader.market.store import FileBackedMarketDataStore, read_active_replay_run_id
+from event_trader.market.shared_store import (
+    SharedMarketDataProvider,
+    SharedMarketDataStore,
+    read_workspace_snapshot_ref,
+    shared_market_data_root,
+)
 from event_trader.operator.repair.runtime_analysis import (
+    AnalysisRecoveryApplyReport,
     AnalysisRecoveryReport,
+    apply_analysis_recovery,
     audit_live_analysis_consistency,
     plan_analysis_recovery,
 )
@@ -52,6 +58,31 @@ def register_runtime_repair_subcommands(
     scan_parser.add_argument(
         "--event-id",
         help="Restrict inspection to one evidence event id.",
+    )
+    apply_analysis_parser = subparsers.add_parser(
+        "apply-analysis-recovery",
+        help=(
+            "Dry-run or apply safe rollback-precommit analysis recovery. "
+            "Default is dry-run."
+        ),
+    )
+    apply_analysis_parser.add_argument(
+        "--workspace-root",
+        required=True,
+        help="Canonical event-trader workspace root to inspect or update.",
+    )
+    apply_analysis_parser.add_argument(
+        "--target-key",
+        help="Restrict recovery to one target key.",
+    )
+    apply_analysis_parser.add_argument(
+        "--event-id",
+        help="Restrict recovery to one evidence event id.",
+    )
+    apply_analysis_parser.add_argument(
+        "--apply",
+        action="store_true",
+        help="Write a new idempotent analysis queue item. Omit for dry-run.",
     )
     audit_parser = subparsers.add_parser(
         "audit-analysis-consistency",
@@ -176,6 +207,8 @@ def register_runtime_repair_subcommands(
 def run_runtime_repair_command(args: argparse.Namespace) -> int:
     if args.command == "scan-analysis-candidates":
         return _run_scan_analysis_candidates(args)
+    if args.command == "apply-analysis-recovery":
+        return _run_apply_analysis_recovery(args)
     if args.command == "audit-analysis-consistency":
         return _run_audit_analysis_consistency(args)
     if args.command == "migrate-research-memory-citations":
@@ -207,6 +240,19 @@ def _run_scan_analysis_candidates(args: argparse.Namespace) -> int:
         )
     )
     return _analysis_recovery_exit_code(report)
+
+
+def _run_apply_analysis_recovery(args: argparse.Namespace) -> int:
+    workspace_root = Path(args.workspace_root).expanduser().resolve(strict=False)
+    layout = build_workspace_layout(workspace_root)
+    report = apply_analysis_recovery(
+        layout=layout,
+        target_key=args.target_key,
+        event_id=args.event_id,
+        apply=args.apply,
+    )
+    print(json.dumps(report.to_json_payload(), ensure_ascii=False, indent=2))
+    return _analysis_recovery_apply_exit_code(report)
 
 
 def _run_audit_analysis_consistency(args: argparse.Namespace) -> int:
@@ -280,19 +326,33 @@ def _build_pm_execution_recovery_market_provider(
     config,
     target_key: str,
 ):
-    target_market_root = layout.runtime_root / "market_data" / target_key
-    replay_run_id = read_active_replay_run_id(target_market_root)
-    if replay_run_id is not None:
-        return CachedReplayMarketDataProvider(
-            FileBackedMarketDataStore(target_market_root / replay_run_id)
+    snapshot_id = read_workspace_snapshot_ref(
+        layout.root,
+        target_key=target_key,
+    )
+    store = SharedMarketDataStore(shared_market_data_root(config))
+    provider_name = (
+        config.validation.market_data.provider
+        if config.validation is not None
+        else "unknown"
+    )
+    if snapshot_id is not None:
+        return SharedMarketDataProvider(
+            store=store,
+            provider_name=provider_name,
+            snapshot_id=snapshot_id,
         )
-    provider = build_default_market_bars_provider(config)
-    if provider is None:
+    remote = build_default_market_bars_provider(config)
+    if remote is None:
         raise RuntimeError(
-            "PM execution recovery requires cached replay market data or a configured "
-            "validation.market_data provider."
+            "PM execution recovery requires a shared market-data snapshot or a "
+            "configured validation.market_data provider."
         )
-    return provider
+    return SharedMarketDataProvider(
+        store=store,
+        provider_name=provider_name,
+        remote_provider=remote,
+    )
 
 
 def _run_scan_reflection_recovery(args: argparse.Namespace) -> int:
@@ -359,6 +419,10 @@ def _analysis_recovery_exit_code(report: AnalysisRecoveryReport) -> int:
         decision.planned_action in {"no_action", "rollback_precommit", "resume", "finalize"}
         for decision in report.decisions
     ) else 1
+
+
+def _analysis_recovery_apply_exit_code(report: AnalysisRecoveryApplyReport) -> int:
+    return 0 if report.blocked_count == 0 else 1
 
 
 def _pm_execution_recovery_exit_code(report: PMExecutionRecoveryReport) -> int:

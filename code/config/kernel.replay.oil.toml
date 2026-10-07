@@ -1,0 +1,72 @@
+# Replay config for crude oil historical backfill/build/run.
+
+workspace_root = ".local/replay-oil-20260201_20260430-workspace"
+mode = "replay"
+heartbeat_interval_seconds = 0.05
+reflection_interval_hours = 24
+reflection_lookback_hours = 168
+reflection_horizons_hours = [24, 72, 168]
+
+[analysis_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/mirothinker-analysis-logs"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+
+[checker_agent]
+implementation = "single_pass"
+log_dir = ".local/mirothinker-checker-logs"
+llm_provider = "openai"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/v1"
+evidence_excerpt_chars = 4000
+section_excerpt_chars = 2000
+recent_timeline_items = 10
+max_pack_chars = 16000
+force_escalate_on_insufficient_coverage = true
+
+[reflection_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/mirothinker-reflection-logs"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+
+[replay_build]
+target_key = "oil"
+window_start = "2026-02-01"
+window_end = "2026-04-30"
+include_web_search = true
+output = "data/oil_20260201_20260430.jsonl"
+write_report = true
+
+[replay_backfill.web_search]
+implementation = "mirothinker"
+search_intent = "find the most material developments, releases, policy signals, supply disruptions, OPEC decisions, inventory surprises, refinery outages, shipping risk, sanctions, geopolitical events, demand shifts, and macro developments within the requested historical window that could move crude oil directly or through USD, rates, growth expectations, or broad risk sentiment"
+slice_hours = 8
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/mirothinker-replay-search-logs"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+acquisition_tool_names = ["search_and_scrape_webpage", "jina_scrape_llm_summary", "event_trader_anthropic_web_search"]
+serper_api_key_env = "SERPER_API_KEY"
+serper_base_url = "https://google.serper.dev"
+jina_api_key_env = "JINA_API_KEY"
+jina_base_url = "https://r.jina.ai"
+summary_llm_api_key_env = "MINIMAX_API_KEY"
+summary_llm_base_url = "https://api.minimaxi.com/v1/chat/completions"
+summary_llm_model_name = "MiniMax-M2.7"
+anthropic_web_search_api_key_env = "MINIMAX_API_KEY"
+anthropic_web_search_base_url = "https://api.minimaxi.com/anthropic"
+anthropic_web_search_model = "MiniMax-M2.7"
+anthropic_web_search_tool_type = "web_search_20250305"
+anthropic_web_search_max_uses = 5
+anthropic_web_search_version = "2023-06-01"

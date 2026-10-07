@@ -1,39 +1,28 @@
-"""Operator-context contracts, parser, and durable writer for target operator.md."""
-
-from .contracts import (
-    OperatorContextCard,
-    OperatorContextContractError,
-    OperatorContextWriteMode,
-    OperatorContextWriteModeError,
-    OperatorContextWriteReceipt,
-    make_operator_context_receipt_id,
+"""Human-owned target ``operator.md`` read and replacement boundary."""
+from .reader import (
+    CanonicalOperatorContextReader,
+    OperatorContextReadError,
+    OperatorContextSnapshot,
 )
-from .parser import (
-    OperatorContextParseError,
-    parse_operator_context_cards,
-    parse_operator_context_page,
-    render_operator_context_card_block,
+from .service import (
+    OperatorContextConflictError,
+    OperatorContextDocument,
+    OperatorContextHistoryVersion,
+    OperatorContextService,
+    OperatorContextServiceError,
 )
-from .writer import (
-    FileBackedOperatorContextWriteReceiptStore,
-    OperatorContextWriter,
-    OperatorContextWriterError,
-    resolve_operator_page_path,
-)
+from .updater import OperatorContextUpdateError, operator_context_path, replace_operator_context
 
 __all__ = [
-    "FileBackedOperatorContextWriteReceiptStore",
-    "OperatorContextCard",
-    "OperatorContextContractError",
-    "OperatorContextParseError",
-    "OperatorContextWriteMode",
-    "OperatorContextWriteModeError",
-    "OperatorContextWriteReceipt",
-    "OperatorContextWriter",
-    "OperatorContextWriterError",
-    "make_operator_context_receipt_id",
-    "parse_operator_context_cards",
-    "parse_operator_context_page",
-    "render_operator_context_card_block",
-    "resolve_operator_page_path",
+    "CanonicalOperatorContextReader",
+    "OperatorContextReadError",
+    "OperatorContextSnapshot",
+    "OperatorContextConflictError",
+    "OperatorContextDocument",
+    "OperatorContextHistoryVersion",
+    "OperatorContextService",
+    "OperatorContextServiceError",
+    "OperatorContextUpdateError",
+    "operator_context_path",
+    "replace_operator_context",
 ]

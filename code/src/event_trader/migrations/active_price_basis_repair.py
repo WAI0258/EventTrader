@@ -517,10 +517,6 @@ def _carry_forward_active_setup_from_latest(
             assessment.analysis_price_semantics,
             active_price_level_ids=carried_level_ids,
         ),
-        pm_candidate_review_required=(
-            assessment.pm_candidate_review_required
-            or any(level.role_if_flat == "entry" for level in carried_levels)
-        ),
     )
     return carried
 

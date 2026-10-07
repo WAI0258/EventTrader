@@ -193,10 +193,13 @@ async def run_strict_mirothinker_agent(
         agent_name=contract.agent_name,
     )
     try:
+        # The vendor includes task_id in a task-log filename.  Preserve the
+        # logical ID in event-trader, but pass a portable run ID to its runtime.
+        vendor_task_id = mirothinker_portable_run_id(task_id)
         final_summary, final_boxed_answer, log_file_path, failure_experience_summary = (
             await execute_task_pipeline(
                 cfg=cfg,
-                task_id=task_id,
+                task_id=vendor_task_id,
                 task_description=task_description,
                 task_file_name=task_file_name,
                 main_agent_tool_manager=tool_manager,

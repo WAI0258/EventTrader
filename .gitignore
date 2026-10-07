@@ -10,3 +10,8 @@ __pycache__/
 .DS_Store
 
 generated/
+node_modules/
+dist/
+*.tsbuildinfo
+*.sqlite3-wal
+*.sqlite3-shm

@@ -13,9 +13,45 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, cast
-from urllib.parse import parse_qsl, urlsplit
 
 from event_trader.contracts._validators import validate_timestamp
+from event_trader.feeds.search_agent_contract import (
+    HISTORICAL_SEARCH_APPEND_TOOL_NAME as _HISTORICAL_APPEND_TOOL_NAME,
+)
+from event_trader.feeds.search_agent_contract import (
+    HISTORICAL_SEARCH_MAX_ATTEMPTS as _HISTORICAL_COLLECTION_MAX_ATTEMPTS,
+)
+from event_trader.feeds.search_agent_contract import (
+    HISTORICAL_SEARCH_TOOL_SERVER_NAME as _HISTORICAL_COLLECTION_MCP_SERVER_NAME,
+)
+from event_trader.feeds.search_agent_contract import (
+    LIVE_SEARCH_APPEND_TOOL_NAME as _LIVE_APPEND_TOOL_NAME,
+)
+from event_trader.feeds.search_agent_contract import (
+    LIVE_SEARCH_MAX_ATTEMPTS as _LIVE_SEARCH_MAX_ATTEMPTS,
+)
+from event_trader.feeds.search_agent_contract import (
+    LIVE_SEARCH_TOOL_SERVER_NAME as _LIVE_COLLECTION_MCP_SERVER_NAME,
+)
+from event_trader.feeds.search_agent_contract import (
+    SEARCH_ACQUISITION_FAILURE_BUDGET as _ACQUISITION_FAILURE_BUDGET,
+)
+from event_trader.feeds.search_agent_contract import (
+    SEARCH_AGENT_ROLE,
+    SEARCH_TOOL_SERVER_NAME,
+    SearchAgentContractError,
+    SearchAttemptRepairRequired,
+    build_append_rejected_repair_feedback,
+    build_historical_final_status_repair_feedback,
+    build_source_grounding_repair_feedback,
+    build_unverified_no_source_found_repair_feedback,
+    execute_search_with_repair,
+    find_ungrounded_source_refs,
+    is_retriable_search_collection_final_status_error,
+    is_verified_no_source_found,
+    normalize_search_collection_final_status,
+    search_acquisition_success_count,
+)
 from event_trader.feeds.web_search import SearchAgentRunner
 from event_trader.feeds.web_search_backfill import (
     HistoricalWebSearchCollectionResult,
@@ -28,7 +64,6 @@ from event_trader.integrations.boxed_json import (
 )
 from event_trader.integrations.mirothinker_llm_config import (
     build_mirothinker_llm_config,
-    normalize_mirothinker_reasoning_effort,
 )
 from event_trader.integrations.mirothinker_runtime_paths import (
     MiroThinkerRuntimePathError,
@@ -43,16 +78,25 @@ from event_trader.integrations.strict_mirothinker_agent import (
     preflight_required_mcp_tools,
     raise_on_mirothinker_limit_failure,
 )
-from event_trader.source_policy import EVENT_TYPES, SOURCE_KINDS
+from event_trader.reasoning.effort import normalize_agent_reasoning_effort
+from event_trader.reasoning.runtime import (
+    AgentRunReceipt,
+    AgentRuntime,
+    AgentTask,
+    AgentToolGateway,
+    execute_agent_runtime_once,
+)
 from event_trader.source_archive.web_search import (
     HistoricalWebSearchWriteReceipt,
     WebSearchAcquisitionProvenance,
 )
+from event_trader.source_policy import EVENT_TYPES, SOURCE_KINDS
 
 type SearchCollectionRunner = Callable[..., HistoricalWebSearchCollectionResult]
 
 _COLLECTION_MAX_TURNS = 60
 _COLLECTION_KEEP_TOOL_RESULTS = 12
+_LIVE_SEARCH_MAX_TURNS = 32
 _SEARCH_STAGING_DIR_NAME = "search_staging"
 _LIVE_WEB_SEARCH_RECEIPT_PATH_ENV = "EVENT_TRADER_LIVE_WEB_SEARCH_RECEIPT_PATH"
 _LIVE_WEB_SEARCH_TARGET_KEY_ENV = "EVENT_TRADER_LIVE_WEB_SEARCH_TARGET_KEY"
@@ -65,13 +109,8 @@ _HISTORICAL_WEB_SEARCH_DISCOVERED_AT_ENV = "EVENT_TRADER_HISTORICAL_WEB_SEARCH_D
 _HISTORICAL_WEB_SEARCH_ACQUISITION_PROVENANCE_ENV = (
     "EVENT_TRADER_HISTORICAL_WEB_SEARCH_ACQUISITION_PROVENANCE"
 )
-_LIVE_APPEND_TOOL_NAME = "append_live_web_search_candidate"
-_HISTORICAL_APPEND_TOOL_NAME = "append_historical_web_search_candidate"
-_LIVE_COLLECTION_MCP_SERVER_NAME = "event_trader_live_web_search"
-_HISTORICAL_COLLECTION_MCP_SERVER_NAME = "event_trader_historical_web_search"
 _OPENAI_WEB_SEARCH_TOOL_NAME = "event_trader_openai_web_search"
 _ANTHROPIC_WEB_SEARCH_TOOL_NAME = "event_trader_anthropic_web_search"
-_ACQUISITION_FAILURE_BUDGET = 10
 _DEFAULT_ACQUISITION_TOOL_NAMES = (
     "search_and_scrape_webpage",
     "jina_scrape_llm_summary",
@@ -90,27 +129,6 @@ _ACQUISITION_MCP_PRE_FLIGHT_SPEC_BY_TOOL_NAME: dict[str, tuple[str, str]] = {
     "search_and_scrape_webpage": ("search_and_scrape_webpage", "google_search"),
     "jina_scrape_llm_summary": ("jina_scrape_llm_summary", "scrape_and_extract_info"),
 }
-_LIVE_SEARCH_MAX_ATTEMPTS = 2
-_HISTORICAL_COLLECTION_MAX_ATTEMPTS = 2
-_TRACKING_GROUNDING_QUERY_PARAM_NAMES = frozenset(
-    {
-        "fbclid",
-        "gclid",
-        "mc_cid",
-        "mc_eid",
-    }
-)
-_INSPECTED_ONLY_GROUNDING_NOISE_QUERY_PARAM_NAMES = frozenset(
-    {
-        "domshim",
-        "noservercache",
-        "noservertelemetry",
-        "batchservertelemetry",
-        "renderwebcomponents",
-        "wcseo",
-    }
-)
-_INSPECTED_ONLY_APIVERSION_QUERY_PARAM_NAME = "apiversion"
 _WEB_SEARCH_EVENT_TYPE_LABELS = tuple(
     f"event_type:{event_type}" for event_type in sorted(EVENT_TYPES)
 )
@@ -128,7 +146,10 @@ class _AcquisitionFailureBudgetExceeded(BaseException):
     """Internal stop signal that must bypass MiroFlow rollback handling."""
 
 
-class _LiveSearchAgentNeedsRetry(MiroThinkerSearchRuntimeError):
+class _LiveSearchAgentNeedsRetry(
+    MiroThinkerSearchRuntimeError,
+    SearchAttemptRepairRequired,
+):
     def __init__(
         self,
         *,
@@ -136,10 +157,13 @@ class _LiveSearchAgentNeedsRetry(MiroThinkerSearchRuntimeError):
         feedback: str,
     ) -> None:
         self.feedback = feedback
-        super().__init__(message)
+        RuntimeError.__init__(self, message)
 
 
-class _HistoricalCollectionNeedsRetry(MiroThinkerSearchRuntimeError):
+class _HistoricalCollectionNeedsRetry(
+    MiroThinkerSearchRuntimeError,
+    SearchAttemptRepairRequired,
+):
     def __init__(
         self,
         *,
@@ -147,7 +171,7 @@ class _HistoricalCollectionNeedsRetry(MiroThinkerSearchRuntimeError):
         feedback: str,
     ) -> None:
         self.feedback = feedback
-        super().__init__(message)
+        RuntimeError.__init__(self, message)
 
 
 @dataclass(slots=True)
@@ -365,7 +389,7 @@ class MiroThinkerSearchRuntimeConfig:
         object.__setattr__(
             self,
             "llm_reasoning_effort",
-            normalize_mirothinker_reasoning_effort(
+            normalize_agent_reasoning_effort(
                 self.llm_reasoning_effort,
                 field_name="llm_reasoning_effort",
                 error_type=MiroThinkerSearchRuntimeError,
@@ -559,31 +583,26 @@ async def _run_search_agent_once(
         query=query,
         discovered_at=discovered_at,
     )
-    task_description = base_task_description
-    for attempt_index in range(_LIVE_SEARCH_MAX_ATTEMPTS):
-        task_id = (
-            base_task_id
-            if attempt_index == 0
-            else f"{base_task_id}-retry{attempt_index}"
+    async def run_attempt(
+        task_id: str,
+        task_description: str,
+    ) -> Mapping[str, object]:
+        return await _run_live_search_agent_attempt(
+            config=config,
+            vendor_root=vendor_root,
+            target_key=target_key,
+            query=query,
+            discovered_at=discovered_at,
+            task_id=task_id,
+            task_description=task_description,
         )
-        try:
-            return await _run_live_search_agent_attempt(
-                config=config,
-                vendor_root=vendor_root,
-                target_key=target_key,
-                query=query,
-                discovered_at=discovered_at,
-                task_id=task_id,
-                task_description=task_description,
-            )
-        except _LiveSearchAgentNeedsRetry as exc:
-            if attempt_index + 1 >= _LIVE_SEARCH_MAX_ATTEMPTS:
-                raise
-            task_description = _build_search_task_prompt_after_validation_failure(
-                base_task_description=base_task_description,
-                feedback=exc.feedback,
-            )
-    raise MiroThinkerSearchRuntimeError("MiroThinker live search agent did not run.")
+
+    return await execute_search_with_repair(
+        base_task_id=base_task_id,
+        base_task_description=base_task_description,
+        max_attempts=_LIVE_SEARCH_MAX_ATTEMPTS,
+        run_attempt=run_attempt,
+    )
 
 
 async def _run_live_search_agent_attempt(
@@ -618,7 +637,7 @@ async def _run_live_search_agent_attempt(
             query=query,
             discovered_at=discovered_at,
             task_description=task_description,
-            max_turns=200,
+            max_turns=_LIVE_SEARCH_MAX_TURNS,
             task_id=task_id,
             tool_names=config.acquisition_tool_names,
             live_collection_receipt_path=receipt_path,
@@ -636,14 +655,14 @@ async def _run_live_search_agent_attempt(
                 not_before_mtime_ns=task_started_at_ns,
                 runtime_tool_trace=runtime_tool_trace,
             )
-            if _collection_tool_success_count(tool_trace) <= 0:
+            if search_acquisition_success_count(tool_trace) <= 0:
                 raise MiroThinkerSearchRuntimeError(
                     "MiroThinker live search agent accepted source candidates without "
                     "a successful acquisition tool call."
                 )
-            ungrounded_source_refs = _ungrounded_live_source_refs(
+            ungrounded_source_refs = find_ungrounded_source_refs(
                 accepted_source_refs=collection_payload.accepted_source_refs,
-                acquisition_source_refs=tool_trace.inspected_source_refs,
+                inspected_source_refs=tool_trace.inspected_source_refs,
             )
             if ungrounded_source_refs:
                 message = (
@@ -653,7 +672,7 @@ async def _run_live_search_agent_attempt(
                 )
                 raise _LiveSearchAgentNeedsRetry(
                     message=message,
-                    feedback=_build_source_grounding_retry_feedback(
+                    feedback=build_source_grounding_repair_feedback(
                         ungrounded_source_refs=ungrounded_source_refs,
                         inspected_source_refs=tool_trace.inspected_source_refs,
                     ),
@@ -669,7 +688,7 @@ async def _run_live_search_agent_attempt(
                     "MiroThinker live search agent submitted only rejected candidate(s); "
                     f"first rejection: {first_rejection_reason}"
                 ),
-                feedback=_build_append_rejected_retry_feedback(
+                feedback=build_append_rejected_repair_feedback(
                     first_rejection_reason=first_rejection_reason,
                 ),
             )
@@ -689,22 +708,19 @@ async def _run_live_search_agent_attempt(
             not_before_mtime_ns=task_started_at_ns,
             runtime_tool_trace=runtime_tool_trace,
         )
-        final_status = _normalize_collection_final_status(payload_text)
+        try:
+            final_status = normalize_search_collection_final_status(payload_text)
+        except SearchAgentContractError as exc:
+            raise MiroThinkerSearchRuntimeError(str(exc)) from exc
         if final_status == "no_source_found":
-            if (
-                _collection_tool_success_count(tool_trace) > 0
-                and _collection_tool_has_source_ref_coverage(tool_trace=tool_trace)
-                and _collection_tool_failure_count(tool_trace) <= 0
-            ):
+            if is_verified_no_source_found(tool_trace):
                 return collection_payload.raw_payload
             raise _LiveSearchAgentNeedsRetry(
                 message=(
                     "MiroThinker live search agent produced no accepted source candidates "
                     "and did not provide a verified no_source_found result."
                 ),
-                feedback=_build_unverified_no_source_found_retry_feedback(
-                    tool_trace=tool_trace,
-                ),
+                feedback=build_unverified_no_source_found_repair_feedback(trace=tool_trace),
             )
         raise MiroThinkerSearchRuntimeError(
             "MiroThinker live search agent produced no accepted source candidates and "
@@ -732,33 +748,26 @@ async def _run_search_collection_with_retries(
         query=query,
         discovered_at=discovered_at,
     )
-    task_description = base_task_description
-    for attempt_index in range(_HISTORICAL_COLLECTION_MAX_ATTEMPTS):
-        task_id = (
-            base_task_id
-            if attempt_index == 0
-            else f"{base_task_id}-retry{attempt_index}"
+    async def run_attempt(
+        task_id: str,
+        task_description: str,
+    ) -> HistoricalWebSearchCollectionResult:
+        return await _run_search_collection_once(
+            config=config,
+            vendor_root=vendor_root,
+            target_key=target_key,
+            query=query,
+            discovered_at=discovered_at,
+            acquisition_provenance=acquisition_provenance,
+            task_id=task_id,
+            task_description=task_description,
         )
-        try:
-            return await _run_search_collection_once(
-                config=config,
-                vendor_root=vendor_root,
-                target_key=target_key,
-                query=query,
-                discovered_at=discovered_at,
-                acquisition_provenance=acquisition_provenance,
-                task_id=task_id,
-                task_description=task_description,
-            )
-        except _HistoricalCollectionNeedsRetry as exc:
-            if attempt_index + 1 >= _HISTORICAL_COLLECTION_MAX_ATTEMPTS:
-                raise
-            task_description = _build_search_task_prompt_after_validation_failure(
-                base_task_description=base_task_description,
-                feedback=exc.feedback,
-            )
-    raise MiroThinkerSearchRuntimeError(
-        "MiroThinker historical search agent did not run."
+
+    return await execute_search_with_repair(
+        base_task_id=base_task_id,
+        base_task_description=base_task_description,
+        max_attempts=_HISTORICAL_COLLECTION_MAX_ATTEMPTS,
+        run_attempt=run_attempt,
     )
 
 
@@ -816,19 +825,19 @@ async def _run_search_collection_once(
                 runtime_tool_trace=runtime_tool_trace,
             )
             try:
-                final_status = _normalize_collection_final_status(payload_text)
-            except MiroThinkerSearchRuntimeError as exc:
-                if _is_retriable_historical_collection_final_status_error(str(exc)):
+                final_status = normalize_search_collection_final_status(payload_text)
+            except SearchAgentContractError as exc:
+                if is_retriable_search_collection_final_status_error(str(exc)):
                     raise _HistoricalCollectionNeedsRetry(
                         message=(
                             "MiroThinker historical search agent returned an invalid "
                             "final status payload."
                         ),
-                        feedback=_build_historical_final_status_retry_feedback(
+                        feedback=build_historical_final_status_repair_feedback(
                             error_text=str(exc)
                         ),
                     ) from exc
-                raise
+                raise MiroThinkerSearchRuntimeError(str(exc)) from exc
             result = _load_historical_collection_result(
                 receipt_path,
                 final_status=final_status,
@@ -840,6 +849,128 @@ async def _run_search_collection_once(
             _remove_collection_stage(stage_root)
         else:
             _reset_collection_artifact(receipt_path)
+
+
+@dataclass(frozen=True, slots=True)
+class _MiroThinkerSearchToolGateway:
+    tool_manager: Any
+    tool_routes: Mapping[str, tuple[str, str]]
+
+    @property
+    def server_name(self) -> str:
+        return SEARCH_TOOL_SERVER_NAME
+
+    @property
+    def available_tool_names(self) -> tuple[str, ...]:
+        return tuple(self.tool_routes)
+
+    async def call_tool(
+        self,
+        tool_name: str,
+        arguments: Mapping[str, object],
+    ) -> object:
+        route = self.tool_routes.get(tool_name)
+        if route is None:
+            raise MiroThinkerSearchRuntimeError(
+                f"Search tool is not available: {tool_name}"
+            )
+        execute_tool_call = getattr(self.tool_manager, "execute_tool_call", None)
+        if not callable(execute_tool_call):
+            raise MiroThinkerSearchRuntimeError(
+                "Search tool gateway requires ToolManager.execute_tool_call."
+            )
+        server_name, routed_tool_name = route
+        return await execute_tool_call(
+            server_name,
+            routed_tool_name,
+            dict(arguments),
+        )
+
+
+@dataclass(frozen=True, slots=True)
+class _MiroThinkerSearchAgentRuntime:
+    tools: _MiroThinkerSearchToolGateway
+    execute_task_pipeline: Any
+    cfg: Any
+    sub_agent_tool_managers: dict[str, Any]
+    output_formatter: Any
+    log_dir: Path
+    wall_clock_timeout_seconds: int
+
+    async def run_once(
+        self,
+        task: AgentTask,
+        tools: AgentToolGateway,
+    ) -> AgentRunReceipt:
+        if task.role != SEARCH_AGENT_ROLE:
+            raise MiroThinkerSearchRuntimeError(
+                f"MiroThinker search runtime requires role={SEARCH_AGENT_ROLE!r}."
+            )
+        if tools is not self.tools:
+            raise MiroThinkerSearchRuntimeError(
+                "MiroThinker search runtime received an unexpected tool gateway."
+            )
+        try:
+            run_coro = self.execute_task_pipeline(
+                cfg=self.cfg,
+                task_id=task.task_id,
+                task_description=task.task_description,
+                task_file_name="",
+                main_agent_tool_manager=self.tools.tool_manager,
+                sub_agent_tool_managers=self.sub_agent_tool_managers,
+                output_formatter=self.output_formatter,
+                log_dir=str(self.log_dir),
+            )
+            final_summary, final_boxed_answer, log_file_path, _ = (
+                await asyncio.wait_for(
+                    run_coro,
+                    timeout=self.wall_clock_timeout_seconds,
+                )
+                if self.wall_clock_timeout_seconds
+                else await run_coro
+            )
+        except TimeoutError as exc:
+            raise MiroThinkerSearchRuntimeError(
+                "MiroThinker search agent timed out after "
+                f"{self.wall_clock_timeout_seconds} seconds."
+            ) from exc
+        raise_on_mirothinker_limit_failure(
+            log_file_path=log_file_path,
+            error_factory=MiroThinkerSearchRuntimeError,
+            agent_name="MiroThinker search agent",
+        )
+        return AgentRunReceipt(
+            final_summary=final_summary,
+            contract_output_text=final_boxed_answer,
+            diagnostic_log_ref=log_file_path,
+        )
+
+
+def _build_mirothinker_search_attempt_runtime(
+    *,
+    tool_manager: Any,
+    tool_routes: Mapping[str, tuple[str, str]],
+    execute_task_pipeline: Any,
+    cfg: Any,
+    sub_agent_tool_managers: dict[str, Any],
+    output_formatter: Any,
+    log_dir: Path,
+    wall_clock_timeout_seconds: int,
+) -> tuple[AgentRuntime, AgentToolGateway]:
+    tools = _MiroThinkerSearchToolGateway(
+        tool_manager=tool_manager,
+        tool_routes=dict(tool_routes),
+    )
+    runtime = _MiroThinkerSearchAgentRuntime(
+        tools=tools,
+        execute_task_pipeline=execute_task_pipeline,
+        cfg=cfg,
+        sub_agent_tool_managers=sub_agent_tool_managers,
+        output_formatter=output_formatter,
+        log_dir=log_dir,
+        wall_clock_timeout_seconds=wall_clock_timeout_seconds,
+    )
+    return runtime, tools
 
 
 async def _run_search_task_once(
@@ -976,41 +1107,38 @@ async def _run_search_task_once(
             error_factory=MiroThinkerSearchRuntimeError,
             agent_name="MiroThinker search agent",
         )
+    tool_routes = _build_search_tool_routes(
+        tool_names=tool_names,
+        live_collection_enabled=live_collection_receipt_path is not None,
+        historical_collection_enabled=historical_collection_receipt_path is not None,
+    )
+    runtime, tools = _build_mirothinker_search_attempt_runtime(
+        tool_manager=main_agent_tool_manager,
+        tool_routes=tool_routes,
+        execute_task_pipeline=execute_task_pipeline,
+        cfg=agent_cfg,
+        sub_agent_tool_managers=sub_agent_tool_managers,
+        output_formatter=output_formatter,
+        log_dir=config.log_dir,
+        wall_clock_timeout_seconds=config.wall_clock_timeout_seconds,
+    )
     try:
-        run_coro = execute_task_pipeline(
-            cfg=agent_cfg,
-            task_id=task_id,
-            task_description=task_description,
-            task_file_name="",
-            main_agent_tool_manager=main_agent_tool_manager,
-            sub_agent_tool_managers=sub_agent_tool_managers,
-            output_formatter=output_formatter,
-            log_dir=str(config.log_dir),
-        )
-        final_summary, final_boxed_answer, log_file_path, _ = (
-            await asyncio.wait_for(
-                run_coro,
-                timeout=config.wall_clock_timeout_seconds,
-            )
-            if config.wall_clock_timeout_seconds
-            else await run_coro
-        )
-        raise_on_mirothinker_limit_failure(
-            log_file_path=log_file_path,
-            error_factory=MiroThinkerSearchRuntimeError,
-            agent_name="MiroThinker search agent",
+        run_result = await execute_agent_runtime_once(
+            runtime=runtime,
+            task=AgentTask(
+                role=SEARCH_AGENT_ROLE,
+                task_id=task_id,
+                task_description=task_description,
+                required_tool_names=tuple(tool_routes),
+            ),
+            tools=tools,
         )
     except _AcquisitionFailureBudgetExceeded as exc:
         raise MiroThinkerSearchRuntimeError(str(exc)) from None
-    except TimeoutError as exc:
-        raise MiroThinkerSearchRuntimeError(
-            "MiroThinker search agent timed out after "
-            f"{config.wall_clock_timeout_seconds} seconds."
-        ) from exc
     try:
         return _extract_payload_text(
-            final_boxed_answer=final_boxed_answer,
-            final_summary=final_summary,
+            final_boxed_answer=run_result.contract_output_text,
+            final_summary=run_result.final_summary,
         )
     except MiroThinkerSearchRuntimeError:
         if (
@@ -1019,6 +1147,31 @@ async def _run_search_task_once(
         ):
             return ""
         raise
+
+
+def _build_search_tool_routes(
+    *,
+    tool_names: tuple[str, ...],
+    live_collection_enabled: bool,
+    historical_collection_enabled: bool,
+) -> dict[str, tuple[str, str]]:
+    routes: dict[str, tuple[str, str]] = {}
+    for tool_name in tool_names:
+        routes[tool_name] = _ACQUISITION_MCP_PRE_FLIGHT_SPEC_BY_TOOL_NAME.get(
+            tool_name,
+            (tool_name, tool_name),
+        )
+    if live_collection_enabled:
+        routes[_LIVE_APPEND_TOOL_NAME] = (
+            _LIVE_COLLECTION_MCP_SERVER_NAME,
+            _LIVE_APPEND_TOOL_NAME,
+        )
+    if historical_collection_enabled:
+        routes[_HISTORICAL_APPEND_TOOL_NAME] = (
+            _HISTORICAL_COLLECTION_MCP_SERVER_NAME,
+            _HISTORICAL_APPEND_TOOL_NAME,
+        )
+    return routes
 
 
 def _vendor_tool_names(tool_names: tuple[str, ...]) -> list[str]:
@@ -1460,91 +1613,6 @@ def _live_search_operating_boundary_prompt() -> str:
         "- Do not judge importance, urgency, tradability, thesis impact, or "
         "position impact.\n\n"
     )
-
-
-def _build_search_task_prompt_after_validation_failure(
-    *,
-    base_task_description: str,
-    feedback: str,
-) -> str:
-    return base_task_description + "\n\n" + feedback
-
-
-def _build_source_grounding_retry_feedback(
-    *,
-    ungrounded_source_refs: tuple[str, ...],
-    inspected_source_refs: tuple[str, ...],
-) -> str:
-    return (
-        "Previous search attempt failed deterministic source audit.\n"
-        "The agent submitted accepted source_ref value(s) that were not proven by "
-        "successful inspected source output.\n\n"
-        "Submitted but unproven source_ref value(s):\n"
-        f"{_format_retry_value_list(ungrounded_source_refs)}\n\n"
-        "Successful inspected source output proved these source URL(s):\n"
-        f"{_format_retry_value_list(inspected_source_refs)}\n\n"
-        "For this new attempt, do not submit an unproven source_ref again unless "
-        "you first inspect that source_ref with an acquisition tool. If a source "
-        "cannot be inspected, submit an actually inspected source, find another "
-        "inspectable source, or return no_source_found. Do not treat this audit "
-        "feedback as source material."
-    )
-
-
-def _build_append_rejected_retry_feedback(*, first_rejection_reason: str) -> str:
-    return (
-        "Previous search attempt failed deterministic append validation.\n"
-        "The append tool rejected every submitted candidate.\n\n"
-        "First rejection reason:\n"
-        f"- {first_rejection_reason}\n\n"
-        "For this new attempt, use the original task and submit only candidates "
-        "that satisfy the append contract. If no real inspected source exists, "
-        "return no_source_found. Do not treat this validation feedback as source "
-        "material."
-    )
-
-
-def _build_unverified_no_source_found_retry_feedback(
-    *,
-    tool_trace: MiroThinkerCollectionToolTrace,
-) -> str:
-    return (
-        "Previous search attempt returned no_source_found, but deterministic "
-        "audit could not verify that result.\n\n"
-        "Audit facts:\n"
-        f"- acquisition successes: {_collection_tool_success_count(tool_trace)}\n"
-        f"- acquisition failures: {_collection_tool_failure_count(tool_trace)}\n"
-        "- inspected source URL(s):\n"
-        f"{_format_retry_value_list(tool_trace.inspected_source_refs)}\n"
-        "- source URL(s) surfaced by acquisition tools:\n"
-        f"{_format_retry_value_list(tool_trace.source_refs)}\n\n"
-        "For this new attempt, inspect source material before returning "
-        "no_source_found. If source candidates cannot be inspected, find another "
-        "inspectable source or return no_source_found only after the acquisition "
-        "trace proves the result. Do not treat this audit feedback as source "
-        "material."
-    )
-
-
-def _build_historical_final_status_retry_feedback(*, error_text: str) -> str:
-    return (
-        "Previous historical search attempt failed the final output contract.\n"
-        "The agent did not finish with the required boxed JSON status payload.\n\n"
-        "Deterministic audit failure:\n"
-        f"- {error_text}\n\n"
-        "For this new attempt, keep using the append tool exactly as instructed, "
-        "then end with exactly one tiny JSON object wrapped in \\boxed{...} and no "
-        "extra text before or after it.\n"
-        '- If one or more acceptable sources were appended, end with `{"status":"completed"}`.\n'
-        '- If no acceptable inspected source is available after validation, end with `{"status":"no_source_found"}`.\n'
-        "Do not treat this validation feedback as source material."
-    )
-
-
-def _format_retry_value_list(values: tuple[str, ...]) -> str:
-    if not values:
-        return "- (none)"
-    return "\n".join(f"- {value}" for value in values)
 
 
 def _build_search_collection_prompt(
@@ -2121,129 +2189,6 @@ def _load_live_collection_payload(
     )
 
 
-def _collection_tool_success_count(tool_trace: MiroThinkerCollectionToolTrace) -> int:
-    return tool_trace.search_success_count + tool_trace.scrape_success_count
-
-
-def _collection_tool_failure_count(tool_trace: MiroThinkerCollectionToolTrace) -> int:
-    return tool_trace.search_failure_count + tool_trace.scrape_failure_count
-
-
-def _collection_tool_has_source_ref_coverage(
-    *,
-    tool_trace: MiroThinkerCollectionToolTrace,
-) -> bool:
-    if tool_trace.inspected_source_refs:
-        return True
-    return not tool_trace.source_refs
-
-
-def _ungrounded_live_source_refs(
-    *,
-    accepted_source_refs: tuple[str, ...],
-    acquisition_source_refs: tuple[str, ...],
-) -> tuple[str, ...]:
-    return tuple(
-        source_ref
-        for source_ref in accepted_source_refs
-        if not any(
-            _source_ref_grounding_match(
-                accepted_source_ref=source_ref,
-                inspected_source_ref=inspected_source_ref,
-            )
-            for inspected_source_ref in acquisition_source_refs
-        )
-    )
-
-
-def _source_ref_grounding_match(
-    *,
-    accepted_source_ref: str,
-    inspected_source_ref: str,
-) -> bool:
-    accepted = _parse_source_ref_for_grounding(accepted_source_ref)
-    inspected = _parse_source_ref_for_grounding(inspected_source_ref)
-    if accepted[:4] != inspected[:4]:
-        return False
-    return _grounding_query_match(
-        accepted_query_items=accepted[4],
-        inspected_query_items=inspected[4],
-    )
-
-
-def _parse_source_ref_for_grounding(
-    source_ref: str,
-) -> tuple[str, str, str, str, tuple[tuple[str, str], ...]]:
-    parsed = urlsplit(source_ref.strip())
-    scheme = parsed.scheme.lower()
-    netloc = parsed.netloc.lower()
-    path = parsed.path or "/"
-    fragment = parsed.fragment
-    query_items = tuple(
-        (key, value)
-        for key, value in parse_qsl(parsed.query, keep_blank_values=True)
-        if not _is_tracking_grounding_query_param(key)
-    )
-    return (scheme, netloc, path, fragment, query_items)
-
-
-def _grounding_query_match(
-    *,
-    accepted_query_items: tuple[tuple[str, str], ...],
-    inspected_query_items: tuple[tuple[str, str], ...],
-) -> bool:
-    accepted_query_param_names = {
-        _normalize_query_param_name(key) for key, _ in accepted_query_items
-    }
-    inspected_has_strong_transport_marker = any(
-        _is_inspected_only_grounding_noise_query_param(key) for key, _ in inspected_query_items
-    )
-    accepted_index = 0
-    accepted_count = len(accepted_query_items)
-    for inspected_item in inspected_query_items:
-        if (
-            accepted_index < accepted_count
-            and inspected_item == accepted_query_items[accepted_index]
-        ):
-            accepted_index += 1
-            continue
-        if (
-            _is_inspected_only_grounding_noise_query_param(inspected_item[0])
-            and _normalize_query_param_name(inspected_item[0])
-            not in accepted_query_param_names
-        ):
-            continue
-        if (
-            _is_inspected_only_apiversion_query_param(inspected_item[0])
-            and inspected_has_strong_transport_marker
-            and _normalize_query_param_name(inspected_item[0])
-            not in accepted_query_param_names
-        ):
-            continue
-        return False
-    return accepted_index == accepted_count
-
-
-def _normalize_query_param_name(name: str) -> str:
-    normalized = name.strip().lower()
-    return normalized
-
-
-def _is_tracking_grounding_query_param(name: str) -> bool:
-    normalized = _normalize_query_param_name(name)
-    return normalized.startswith("utm_") or normalized in _TRACKING_GROUNDING_QUERY_PARAM_NAMES
-
-
-def _is_inspected_only_grounding_noise_query_param(name: str) -> bool:
-    normalized = _normalize_query_param_name(name)
-    return normalized in _INSPECTED_ONLY_GROUNDING_NOISE_QUERY_PARAM_NAMES
-
-
-def _is_inspected_only_apiversion_query_param(name: str) -> bool:
-    normalized = _normalize_query_param_name(name)
-    return normalized == _INSPECTED_ONLY_APIVERSION_QUERY_PARAM_NAME
-
-
 def _load_historical_collection_result(
     receipt_path: Path,
     *,
@@ -2351,19 +2296,11 @@ def _load_historical_collection_result(
         1 for payload in receipt_payloads if payload.get("status") == "append_attempt"
     )
     append_rejected_count = len(boundary_rejection_reasons)
-    collection_tool_success_count = (
-        tool_trace.search_success_count + tool_trace.scrape_success_count
-    )
-    collection_tool_failure_count = (
-        tool_trace.search_failure_count + tool_trace.scrape_failure_count
-    )
     if (
         final_status == "no_source_found"
         and successful_append_count <= 0
         and append_failed_count <= 0
-        and collection_tool_success_count > 0
-        and _collection_tool_has_source_ref_coverage(tool_trace=tool_trace)
-        and collection_tool_failure_count <= 0
+        and is_verified_no_source_found(tool_trace)
     ):
         final_exit_reason = "no_source_found"
     else:
@@ -2409,54 +2346,6 @@ def _collection_final_status_required(
     result: HistoricalWebSearchCollectionResult,
 ) -> bool:
     return result.successful_append_count <= 0
-
-
-def _normalize_collection_final_status(payload_text: str) -> str:
-    try:
-        payload = load_first_boxed_json_object(
-            final_boxed_answer=payload_text,
-            final_summary="",
-            object_start_fields=("status",),
-            missing_error=(
-                "MiroThinker historical search agent did not return a boxed JSON status payload."
-            ),
-            non_json_error=("MiroThinker historical search agent returned non-JSON boxed output."),
-            non_object_error=("MiroThinker historical search agent must return one JSON object."),
-        )
-    except BoxedJsonPayloadError as exc:
-        raise MiroThinkerSearchRuntimeError(str(exc)) from exc
-    if set(payload) != {"status"}:
-        unexpected_fields = sorted(set(payload) - {"status"})
-        missing_fields = sorted({"status"} - set(payload))
-        problems: list[str] = []
-        if missing_fields:
-            problems.append(f"missing field(s): {', '.join(missing_fields)}")
-        if unexpected_fields:
-            problems.append(f"unexpected field(s): {', '.join(unexpected_fields)}")
-        raise MiroThinkerSearchRuntimeError(
-            "MiroThinker historical search agent returned the wrong final payload "
-            f"shape; {'; '.join(problems)}."
-        )
-    status = payload["status"]
-    if status not in {"completed", "no_source_found"}:
-        raise MiroThinkerSearchRuntimeError(
-            "MiroThinker historical search agent final status must be completed or no_source_found."
-        )
-    return status
-
-
-def _is_retriable_historical_collection_final_status_error(error_text: str) -> bool:
-    return error_text.startswith(
-        "MiroThinker historical search agent did not return a boxed JSON status payload."
-    ) or error_text.startswith(
-        "MiroThinker historical search agent returned non-JSON boxed output."
-    ) or error_text.startswith(
-        "MiroThinker historical search agent must return one JSON object."
-    ) or error_text.startswith(
-        "MiroThinker historical search agent returned the wrong final payload shape;"
-    ) or error_text.startswith(
-        "MiroThinker historical search agent final status must be completed or no_source_found."
-    )
 
 
 def _effective_collection_tool_trace(

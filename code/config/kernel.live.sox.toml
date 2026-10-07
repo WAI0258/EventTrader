@@ -1,0 +1,317 @@
+# Single-process live dry-run config for a SOX semiconductor thesis.
+# Only target_key="sox" is admitted as a trading/research target.
+# SOXX is the tradable/evaluation proxy; broad-market and oil ETFs are context only.
+
+workspace_root = ".local/live-sox-workspace"
+mode = "live"
+heartbeat_interval_seconds = 60
+reflection_interval_hours = 6
+reflection_lookback_hours = 72
+reflection_horizons_hours = [6, 24, 72]
+
+[execution.target_cost_overrides.sox]
+buy_cost_bps = 1.5
+sell_cost_bps = 1.5
+
+
+[pm_review_runtime]
+auto_dispatch_after_analysis = true
+execute_pm_decisions = true
+require_workspace_ready = true
+position_review_gate_enabled = true
+position_review_cooldown_minutes = 240
+position_review_rearm_buffer_bps = 10.0
+
+[artifact_retention]
+analysis_debug_log_days = 90
+pm_review_debug_log_days = 90
+checker_debug_log_days = 60
+search_debug_log_days = 30
+reflection_debug_log_days = 90
+
+[analysis_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/live-sox-logs/analysis"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+wall_clock_timeout_seconds = 1200
+
+[checker_agent]
+implementation = "single_pass"
+log_dir = ".local/live-sox-logs/checker"
+llm_provider = "openai"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/v1"
+evidence_excerpt_chars = 4000
+section_excerpt_chars = 2000
+recent_timeline_items = 10
+max_pack_chars = 16000
+force_escalate_on_insufficient_coverage = true
+
+[pm_review_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/live-sox-logs/pm_review"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+wall_clock_timeout_seconds = 1200
+
+[reflection_agent]
+implementation = "mirothinker"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/live-sox-logs/reflection"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+
+[live]
+enabled_channels = ["web_search"]
+
+[live.web_search]
+implementation = "mirothinker"
+cadence_profile = "us_equity_active"
+vendor_root = "vendor/mirothinker"
+log_dir = ".local/live-sox-logs/search"
+llm_provider = "anthropic"
+llm_model_name = "MiniMax-M2.7"
+llm_api_key_env = "MINIMAX_API_KEY"
+llm_base_url = "https://api.minimaxi.com/anthropic"
+acquisition_tool_names = ["search_and_scrape_webpage", "jina_scrape_llm_summary"]
+serper_api_key_env = "SERPER_API_KEY"
+serper_base_url = "https://google.serper.dev"
+jina_api_key_env = "JINA_API_KEY"
+jina_base_url = "https://r.jina.ai"
+summary_llm_api_key_env = "MINIMAX_API_KEY"
+summary_llm_base_url = "https://api.minimaxi.com/v1/chat/completions"
+summary_llm_model_name = "MiniMax-M2.7"
+
+[live.web_search.cadence_profiles.us_equity_active]
+timezone = "America/New_York"
+trading_day_local_times = [
+  "08:45",
+  "09:45",
+  "10:45",
+  "11:45",
+  "12:45",
+  "13:45",
+  "14:45",
+  "15:45",
+  "17:00",
+]
+closed_day_local_times = ["12:00"]
+
+[[live.web_search.targets]]
+target_key = "sox"
+search_intent = "track material live developments that may affect the Philadelphia Semiconductor Index thesis through semiconductor equipment demand, AI accelerator demand, memory and foundry cycles, export controls, supply-chain disruptions, hyperscaler capex, earnings revisions, ETF flows, SOXX price action, broad US equity risk, and oil-driven macro or geopolitical stress"
+prompt_profile_id = "us_equity_historical_web_search_v1"
+control_language = "en"
+retrieval_languages = ["en"]
+
+[live_catchup.web_search]
+max_slice_hours = 16
+
+
+[live.market_data]
+enabled = true
+canonical_bar_granularity = "5min"
+
+[[live.market_data.targets]]
+target_key = "sox"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "SOXX"
+provider = "futu_openapi"
+purpose = "primary_tradable"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "SMH"
+provider = "futu_openapi"
+purpose = "peer_etf"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "DRAM"
+provider = "futu_openapi"
+purpose = "industry_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "EWY"
+provider = "futu_openapi"
+purpose = "regional_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "SPY"
+provider = "futu_openapi"
+purpose = "broad_market_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "QQQ"
+provider = "futu_openapi"
+purpose = "growth_market_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "BNO"
+provider = "futu_openapi"
+purpose = "commodity_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "USO"
+provider = "futu_openapi"
+purpose = "commodity_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[[live.market_data.targets.subscriptions]]
+symbol = "VIXY"
+provider = "futu_openapi"
+purpose = "volatility_proxy"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[live.market_data.warmup]
+enabled = true
+min_lookback_days = 90
+
+[validation.market_data]
+provider = "futu_openapi"
+base_url = "tcp://127.0.0.1:11111"
+timeout_seconds = 10.0
+
+[validation.market_mappings.sox]
+market_symbol = "SOXX"
+market_session = "exchange_session"
+exchange = "NASDAQ"
+exchange_session_scope = "extended"
+bar_granularity = "5min"
+
+[stream_routing]
+enabled = true
+policy_version = "sox_soxx_5min_live_ceau_v2"
+policy_status = "candidate"
+target_key = "sox"
+bar_granularity = "5min"
+processing_time_safety_emit_enabled = true
+processing_time_safety_emit_after_seconds = 2100
+
+[stream_routing.default_unit_policy]
+route_default = "no_action"
+
+[stream_routing.lane_policies.operator_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.risk_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.news_interrupt]
+route_default = "emit"
+candidate_default_route = "emit"
+max_delay_bars = 0
+
+[stream_routing.lane_policies.context_window]
+route_default = "accumulate"
+candidate_default_route = "accumulate"
+max_delay_bars = 6
+max_unit_chars = 12000
+unit_scope = "context_window"
+completeness_requirements = [
+  { purpose = "evidence_maturity", domain = "market_bars", required_for = ["market_reaction_mature"] },
+]
+
+[stream_routing.lane_policies.episode_append]
+route_default = "accumulate"
+candidate_default_route = "accumulate"
+max_delay_bars = 3
+max_unit_chars = 12000
+unit_scope = "context_window"
+
+[market_context]
+enabled = true
+max_prompt_chars = 6000
+
+[market_context.target_profiles.sox]
+tradable_proxy_symbol = "SOXX"
+derivatives_underlying_symbol = "SOXX"
+bar_granularity = "5min"
+enabled_components = ["price_volume", "technical", "macro_cross_asset"]
+
+[market_context.target_profiles.sox.price_volume]
+lookback_bars = 240
+trailing_return_windows = ["1h", "4h", "1d", "5d", "20d"]
+
+[market_context.target_profiles.sox.market_path]
+enabled = true
+session = "exchange_session"
+range_lookback_calendar_days = 20
+range_lookback_sessions = 20
+range_lookback_daily_bars = 60
+atr_period = 14
+atr_multiple = 2.0
+pct_floor = 0.025
+min_leg_bars = 3
+large_move_pct = 0.08
+near_extreme_pct = 0.03
+
+[market_context.target_profiles.sox.technical]
+ema_periods = [136]
+ichimoku_enabled = true
+
+[market_context.target_profiles.sox.macro_cross_asset]
+enabled = true
+lookback_bars = 240
+trailing_return_windows = ["1d", "5d", "20d"]
+
+[market_context.target_profiles.sox.macro_cross_asset.proxy_groups]
+semiconductor_peer_etfs = ["SMH", "DRAM"]
+korea_memory_chain = ["EWY"]
+broad_us_equities = ["SPY", "QQQ"]
+oil_stress = ["BNO", "USO"]
+volatility_proxy = ["VIXY"]
+
+[market_context.target_profiles.sox.macro_cross_asset.group_pressure_rules]
+semiconductor_peer_etfs = "positive_supportive"
+korea_memory_chain = "contextual"
+broad_us_equities = "positive_supportive"
+oil_stress = "contextual"
+volatility_proxy = "positive_headwind"

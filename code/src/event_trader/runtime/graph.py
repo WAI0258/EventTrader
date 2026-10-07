@@ -673,46 +673,42 @@ class EventTraderRuntimeGraph:
 
     def run_reflection_cycle(self) -> ReflectionHeartbeatReceipt:
         enqueue_receipt = self.enqueue_reflection_cycle()
-        if enqueue_receipt.status == "enqueued":
-            self.drain_reflection_work(limit=1)
-        pump_results = self.pump_reflection_completions(limit=1)
-        if not pump_results:
-            recovered_receipt = self._recover_published_reflection_receipt(
-                enqueue_receipt.idempotency_key
-            )
-            if recovered_receipt is not None:
-                return recovered_receipt
+        if self._reflection_worker is not None:
+            self._reflection_worker.process_by_idempotency_key(enqueue_receipt.idempotency_key)
+        pump_result = self._pump_reflection_completion_for_key(enqueue_receipt.idempotency_key)
+        if pump_result is None:
             raise RuntimeGraphError("reflection cycle did not produce a visible result.")
-        result = pump_results[-1]
-        if result.status == "failed":
+        if pump_result.status == "failed":
             raise RuntimeGraphError(
                 "reflection cycle failed: "
-                f"{result.entry.failure_reason}: {result.entry.failure_error}"
+                f"{pump_result.entry.failure_reason}: {pump_result.entry.failure_error}"
             )
-        if result.visible_receipt is None:
+        if pump_result.visible_receipt is None:
             raise RuntimeGraphError("reflection completion did not expose a receipt.")
-        return result.visible_receipt
+        return pump_result.visible_receipt
 
-    def _recover_published_reflection_receipt(
+    def _pump_reflection_completion_for_key(
         self,
         idempotency_key: str,
-    ) -> ReflectionHeartbeatReceipt | None:
+    ) -> ReflectionCompletionPumpResult | None:
         if self._reflection_outbox is None:
             return None
-        for entry in self._reflection_outbox.load_published():
-            if entry.idempotency_key != idempotency_key:
-                continue
-            if entry.entry_kind == "failed":
-                raise RuntimeGraphError(
-                    "reflection cycle failed: "
-                    f"{entry.failure_reason}: {entry.failure_error}"
-                )
-            if entry.receipt is None:
-                raise RuntimeGraphError("reflection completion did not expose a receipt.")
-            self._reflection_cycle_count = entry.cycle_number
-            self._last_reflection_receipt = entry.receipt
-            return entry.receipt
-        return None
+        entry = self._reflection_outbox.find_pending(idempotency_key)
+        if entry is not None:
+            entry = self._reflection_outbox.mark_published(entry)
+        else:
+            entry = self._reflection_outbox.find_published(idempotency_key)
+        if entry is None:
+            return None
+        if entry.entry_kind == "failed":
+            return ReflectionCompletionPumpResult(status="failed", entry=entry)
+        self._reflection_cycle_count = entry.cycle_number
+        self._last_reflection_receipt = entry.receipt
+        return ReflectionCompletionPumpResult(
+            status="completed",
+            entry=entry,
+            visible_receipt=entry.receipt,
+        )
 
     def drain_all(self) -> None:
         """Run one composed drain/pump pass across checker, analysis, and PMReview."""

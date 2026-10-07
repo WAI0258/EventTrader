@@ -6,12 +6,14 @@ import json
 from datetime import datetime
 from hashlib import sha256
 
-from event_trader.contracts.pm_review_reason import PMReviewReason
-from event_trader.contracts.view_state_change import canonical_view_state_target_weight
+from event_trader.contracts.view_state_change import (
+    canonical_view_state_target_weight,
+)
 from event_trader.pm_review.contracts import (
     PMDecisionDraft,
     PMReviewInput,
     PMReviewRequest,
+    pm_review_hold_reason_required,
     requested_state_allowed_for_execution_direction_mode,
 )
 from event_trader.portfolio.contracts import PMDecision
@@ -22,14 +24,18 @@ from event_trader.storage import WorkspaceLayout
 class PMDecisionAdapterError(ValueError):
     """Raised when PM judgment cannot become a PMDecision."""
 
+    def __init__(
+        self,
+        message: str,
+        *,
+        repair_fields: tuple[str, ...] = (),
+    ) -> None:
+        self.repair_fields = repair_fields
+        super().__init__(message)
 
-_EXPLICIT_HOLD_REVIEW_REASONS: frozenset[PMReviewReason] = frozenset(
-    {
-        "current_exposure_pressure",
-        "risk_reward_compression",
-        "invalidation_touched",
-    }
-)
+
+class PMDecisionHoldReasonRequiredError(PMDecisionAdapterError):
+    """Raised when a risk-triggered unchanged exposure lacks its hold code."""
 
 
 def build_pm_decision_from_draft(
@@ -74,9 +80,7 @@ def build_pm_decision_from_draft(
         source_event_ids=source_event_ids,
         actual_state_before_decision=pm_review_input.actual_current_state,
         actual_target_weight_before_decision=pm_review_input.actual_target_weight_before,
-        execution_required=(
-            requested_target_weight != pm_review_input.actual_target_weight_before
-        ),
+        execution_required=(requested_target_weight != pm_review_input.actual_target_weight_before),
         requested_state=decision_draft.requested_state,
         requested_target_weight=requested_target_weight,
         rationale_md=decision_draft.rationale_md,
@@ -116,36 +120,56 @@ def _validate_request_and_draft(
     if not isinstance(pm_review_input, PMReviewInput):
         raise PMDecisionAdapterError("pm_review_input must be a PMReviewInput instance.")
     if not isinstance(decision_draft, PMDecisionDraft):
-        raise PMDecisionAdapterError(
-            "decision_draft must be a PMDecisionDraft instance."
-        )
+        raise PMDecisionAdapterError("decision_draft must be a PMDecisionDraft instance.")
     if pm_review_input.pm_review_request_id != request.request_id:
         raise PMDecisionAdapterError(
             "pm_review_input.pm_review_request_id must match request.request_id."
         )
     if pm_review_input.target_key != request.target_key:
-        raise PMDecisionAdapterError(
-            "pm_review_input.target_key must match request.target_key."
-        )
+        raise PMDecisionAdapterError("pm_review_input.target_key must match request.target_key.")
     if pm_review_input.business_at != request.business_at:
-        raise PMDecisionAdapterError(
-            "pm_review_input.business_at must match request.business_at."
-        )
+        raise PMDecisionAdapterError("pm_review_input.business_at must match request.business_at.")
     if decision_draft.pm_review_request_id != request.request_id:
         raise PMDecisionAdapterError(
             "decision_draft.pm_review_request_id must match request.request_id."
         )
     if decision_draft.target_key != request.target_key:
-        raise PMDecisionAdapterError(
-            "decision_draft.target_key must match request.target_key."
-        )
+        raise PMDecisionAdapterError("decision_draft.target_key must match request.target_key.")
     if decision_draft.business_at != request.business_at:
-        raise PMDecisionAdapterError(
-            "decision_draft.business_at must match request.business_at."
-        )
+        raise PMDecisionAdapterError("decision_draft.business_at must match request.business_at.")
     if decision_draft.requested_state != "flat" and not decision_draft.cited_event_ids:
         raise PMDecisionAdapterError(
-            "non-flat PMDecisionDraft requires cited_event_ids for PMDecision."
+            "non-flat PMDecisionDraft requires cited_event_ids for PMDecision.",
+            repair_fields=("cited_event_ids",),
+        )
+    visible_event_ids = {record.event_id for record in pm_review_input.visible_evidence}
+    unavailable_event_ids = tuple(
+        event_id
+        for event_id in decision_draft.cited_event_ids
+        if event_id not in visible_event_ids
+    )
+    if unavailable_event_ids:
+        raise PMDecisionAdapterError(
+            "PMDecisionDraft.cited_event_ids must come from "
+            "PMReviewInput.visible_evidence; unavailable values: "
+            f"{', '.join(unavailable_event_ids)}.",
+            repair_fields=("cited_event_ids",),
+        )
+    visible_market_bar_ids = {
+        f"bar:{bar.start_at.isoformat()}:{bar.end_at.isoformat()}"
+        for bar in pm_review_input.visible_market_bars
+    }
+    unavailable_market_bar_ids = tuple(
+        bar_id
+        for bar_id in decision_draft.cited_market_bar_ids
+        if bar_id not in visible_market_bar_ids
+    )
+    if unavailable_market_bar_ids:
+        raise PMDecisionAdapterError(
+            "PMDecisionDraft.cited_market_bar_ids must come from "
+            "PMReviewInput.visible_market_bars; unavailable values: "
+            f"{', '.join(unavailable_market_bar_ids)}.",
+            repair_fields=("cited_market_bar_ids",),
         )
     if not requested_state_allowed_for_execution_direction_mode(
         decision_draft.requested_state,
@@ -155,11 +179,11 @@ def _validate_request_and_draft(
             "PMDecisionDraft.requested_state is not allowed for target execution_direction_mode "
             f"{pm_review_input.execution_direction_mode!r}: {decision_draft.requested_state!r}."
         )
-    if _requires_explicit_hold_reason(
+    if decision_draft.hold_reason_code is None and pm_review_hold_reason_required(
         pm_review_input=pm_review_input,
-        decision_draft=decision_draft,
+        requested_state=decision_draft.requested_state,
     ):
-        raise PMDecisionAdapterError(
+        raise PMDecisionHoldReasonRequiredError(
             "PMDecisionDraft must provide hold_reason_code when current-exposure "
             "review reasons require an explicit hold justification and requested_state "
             "keeps actual_current_state unchanged."
@@ -172,30 +196,11 @@ def _validate_decision_available_at(
     decision_available_at: datetime,
 ) -> None:
     if not isinstance(decision_available_at, datetime) or decision_available_at.tzinfo is None:
-        raise PMDecisionAdapterError(
-            "decision_available_at must be a timezone-aware datetime."
-        )
+        raise PMDecisionAdapterError("decision_available_at must be a timezone-aware datetime.")
     if decision_available_at < request.business_at:
         raise PMDecisionAdapterError(
             "decision_available_at must be at or after request.business_at."
         )
-
-
-def _requires_explicit_hold_reason(
-    *,
-    pm_review_input: PMReviewInput,
-    decision_draft: PMDecisionDraft,
-) -> bool:
-    if not pm_review_input.current_exposure_required:
-        return False
-    if decision_draft.requested_state != pm_review_input.actual_current_state:
-        return False
-    if decision_draft.hold_reason_code is not None:
-        return False
-    return any(
-        reason in _EXPLICIT_HOLD_REVIEW_REASONS
-        for reason in pm_review_input.review_reasons
-    )
 
 
 def _derive_decision_episode_id(
@@ -252,6 +257,7 @@ def _derive_pm_review_decision_id(
 
 __all__ = [
     "PMDecisionAdapterError",
+    "PMDecisionHoldReasonRequiredError",
     "append_pm_decision_from_draft",
     "build_pm_decision_from_draft",
 ]

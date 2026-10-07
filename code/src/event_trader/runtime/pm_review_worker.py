@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Literal
 
 from .contracts import PMReviewCompleted, PMReviewFailed, base_message_kwargs
@@ -18,7 +19,7 @@ from .pm_review_queue import (
 )
 from .pm_review_resolver import RuntimePMReviewRequestResolver, RuntimePMReviewResolution
 
-type PMReviewWorkerStatus = Literal["no_work", "completed", "failed"]
+type PMReviewWorkerStatus = Literal["no_work", "completed", "deferred", "failed"]
 type RuntimePublisher = Callable[[str, object, bool], None]
 
 
@@ -30,15 +31,16 @@ class PMReviewWorkerError(ValueError):
 class RuntimePMReviewExecutionResult:
     """Normalized PMReview execution outcome for the runtime worker."""
 
-    status: Literal["completed", "failed"]
+    status: Literal["completed", "deferred", "failed"]
     pm_decision_ref: str | None = None
+    retry_at: datetime | None = None
     failure_record_ref: str | None = None
     failure_reason: str | None = None
     failure_error: str | None = None
 
     def __post_init__(self) -> None:
-        if self.status not in {"completed", "failed"}:
-            raise PMReviewWorkerError("status must be completed or failed.")
+        if self.status not in {"completed", "deferred", "failed"}:
+            raise PMReviewWorkerError("status must be completed, deferred, or failed.")
         if self.status == "completed":
             if not isinstance(self.pm_decision_ref, str) or not self.pm_decision_ref.strip():
                 raise PMReviewWorkerError("completed result requires pm_decision_ref.")
@@ -51,6 +53,21 @@ class RuntimePMReviewExecutionResult:
                 )
             ):
                 raise PMReviewWorkerError("completed result must not carry failure fields.")
+            return
+        if self.status == "deferred":
+            if not isinstance(self.pm_decision_ref, str) or not self.pm_decision_ref.strip():
+                raise PMReviewWorkerError("deferred result requires pm_decision_ref.")
+            if not isinstance(self.retry_at, datetime) or self.retry_at.tzinfo is None:
+                raise PMReviewWorkerError("deferred result requires a timezone-aware retry_at.")
+            if any(
+                value is not None
+                for value in (
+                    self.failure_record_ref,
+                    self.failure_reason,
+                    self.failure_error,
+                )
+            ):
+                raise PMReviewWorkerError("deferred result must not carry failure fields.")
             return
         if not isinstance(self.failure_record_ref, str) or not self.failure_record_ref.strip():
             raise PMReviewWorkerError("failed result requires failure_record_ref.")
@@ -71,12 +88,13 @@ class PMReviewWorkerProcessResult:
     work_item_id: str | None = None
     completion: PMReviewQueueCompletion | None = None
     failure: PMReviewQueueFailure | None = None
+    retry_at: datetime | None = None
     outbox_entry: PMReviewCompletionOutboxEntry | None = None
     published_message: PMReviewCompleted | PMReviewFailed | None = None
 
     def __post_init__(self) -> None:
-        if self.status not in {"no_work", "completed", "failed"}:
-            raise PMReviewWorkerError("status must be no_work, completed, or failed.")
+        if self.status not in {"no_work", "completed", "deferred", "failed"}:
+            raise PMReviewWorkerError("status must be no_work, completed, deferred, or failed.")
         if self.status == "no_work":
             if any(
                 value is not None
@@ -86,12 +104,27 @@ class PMReviewWorkerProcessResult:
                     self.failure,
                     self.outbox_entry,
                     self.published_message,
+                    self.retry_at,
                 )
             ):
                 raise PMReviewWorkerError("no_work result must not carry work state.")
             return
         if not isinstance(self.work_item_id, str) or not self.work_item_id.strip():
             raise PMReviewWorkerError("work_item_id must be present for work results.")
+        if self.status == "deferred":
+            if not isinstance(self.retry_at, datetime) or self.retry_at.tzinfo is None:
+                raise PMReviewWorkerError("deferred result requires retry_at.")
+            if any(
+                value is not None
+                for value in (
+                    self.completion,
+                    self.failure,
+                    self.outbox_entry,
+                    self.published_message,
+                )
+            ):
+                raise PMReviewWorkerError("deferred result must not carry terminal state.")
+            return
         if self.status == "completed":
             if not isinstance(self.completion, PMReviewQueueCompletion):
                 raise PMReviewWorkerError("completed result requires completion.")
@@ -204,6 +237,19 @@ class NautilusPMReviewWorker:
                     published_message=published_message,
                 )
             execution_result = _normalize_execution_result(self._execute(resolution))
+            if execution_result.status == "deferred":
+                retry_at = execution_result.retry_at
+                if retry_at is None:
+                    raise PMReviewWorkerError("deferred PMReview execution requires retry_at.")
+                deferred_item = self._queue.defer(
+                    claim,
+                    available_at=retry_at,
+                )
+                return PMReviewWorkerProcessResult(
+                    status="deferred",
+                    work_item_id=deferred_item.work_item_id,
+                    retry_at=deferred_item.available_at,
+                )
             if execution_result.status == "completed":
                 completion = self._queue.complete(
                     claim,

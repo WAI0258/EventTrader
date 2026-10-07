@@ -261,6 +261,7 @@ def validate_context_packet_visibility(
             }
         )
     memory_reads = _research_memory_read_receipts_by_path(packet)
+    operator_reads = _operator_context_read_receipts_by_path(packet)
     for item in packet.items:
         if item.visible_time > packet.decision_visibility.business_at:
             violations.append(
@@ -274,6 +275,22 @@ def validate_context_packet_visibility(
                     "business_at": packet.decision_visibility.business_at.isoformat(),
                 }
             )
+        if item.surface_type == "operator_context":
+            operator_receipts = operator_reads.get(item.source_id, ())
+            if not any(
+                receipt.get("content_sha256") == item.content_hash
+                for receipt in operator_receipts
+            ):
+                violations.append(
+                    {
+                        "violation_type": "missing_or_mismatched_operator_context_read",
+                        "packet_id": packet.packet_id,
+                        "stage": packet.stage,
+                        "source_id": item.source_id,
+                        "surface_type": item.surface_type,
+                    }
+                )
+            continue
         read_path = _research_memory_read_path_for_item(item)
         if read_path is None:
             continue
@@ -560,6 +577,31 @@ def _research_memory_read_receipts_by_path(
         if not isinstance(page_path, str) or not page_path.strip():
             continue
         if not isinstance(content_sha256, str) or not content_sha256.strip():
+            continue
+        receipts.setdefault(page_path.strip(), []).append(dict(receipt))
+    return {page_path: tuple(values) for page_path, values in receipts.items()}
+
+
+def _operator_context_read_receipts_by_path(
+    packet: ContextPacket,
+) -> dict[str, tuple[dict[str, object], ...]]:
+    receipts: dict[str, list[dict[str, object]]] = {}
+    for receipt in packet.receipts:
+        if not isinstance(receipt, dict):
+            continue
+        if receipt.get("receipt_type") != "operator_context_read":
+            continue
+        page_path = receipt.get("page_path")
+        content_sha256 = receipt.get("content_sha256")
+        read_at = receipt.get("read_at")
+        if (
+            not isinstance(page_path, str)
+            or not page_path.strip()
+            or not isinstance(content_sha256, str)
+            or not content_sha256.strip()
+            or not isinstance(read_at, str)
+            or not read_at.strip()
+        ):
             continue
         receipts.setdefault(page_path.strip(), []).append(dict(receipt))
     return {page_path: tuple(values) for page_path, values in receipts.items()}

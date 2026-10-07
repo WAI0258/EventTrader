@@ -10,6 +10,10 @@ from typing import Literal, cast
 
 from event_trader.contracts._validators import normalize_content, validate_target_key
 from event_trader.contracts.research_memory import resolve_page_ref
+from event_trader.episode_memory.contracts import (
+    EpisodeMemoryContractError,
+    validate_learning_card_consumer_role,
+)
 
 type ReflectionLearningOutcome = Literal[
     "no_learning_write",
@@ -349,8 +353,9 @@ def parse_learning_decision_payload(
     value: object,
     *,
     review_decision: str,
+    target_key: str | None = None,
 ) -> ReflectionLearningDecision:
-    """Parse MiroThinker JSON into a strict learning decision."""
+    """Parse one Reflection learning decision before any lifecycle write."""
 
     if not isinstance(value, Mapping):
         raise ReflectionLearningContractError("learning_decision must be a JSON object.")
@@ -359,7 +364,7 @@ def parse_learning_decision_payload(
     if not isinstance(raw_actions, list):
         raise ReflectionLearningContractError("learning_decision.actions must be an array.")
     actions = tuple(
-        _parse_action_payload(item, index=index)
+        _parse_action_payload(item, index=index, target_key=target_key)
         for index, item in enumerate(raw_actions)
     )
     decision = ReflectionLearningDecision(
@@ -370,7 +375,12 @@ def parse_learning_decision_payload(
     return decision
 
 
-def _parse_action_payload(value: object, *, index: int) -> ReflectionLearningAction:
+def _parse_action_payload(
+    value: object,
+    *,
+    index: int,
+    target_key: str | None,
+) -> ReflectionLearningAction:
     if not isinstance(value, Mapping):
         raise ReflectionLearningContractError(
             f"learning_decision.actions[{index}] must be a JSON object."
@@ -380,7 +390,13 @@ def _parse_action_payload(value: object, *, index: int) -> ReflectionLearningAct
         raise ReflectionLearningContractError(
             f"learning_decision.actions[{index}].error_attributions must be an array."
         )
-    return ReflectionLearningAction(
+    action_payload = _require_mapping(value, "payload")
+    _validate_optional_promotion_payload(
+        action_payload.get("promotion"),
+        target_key=target_key,
+        field_prefix=f"learning_decision.actions[{index}].payload.promotion",
+    )
+    action = ReflectionLearningAction(
         action_id=_require_text(value, "action_id"),
         outcome=_normalize_outcome(_require_text(value, "outcome")),
         rationale=_require_text(value, "rationale"),
@@ -390,8 +406,9 @@ def _parse_action_payload(value: object, *, index: int) -> ReflectionLearningAct
         error_attributions=tuple(
             _normalize_error_attribution(str(item)) for item in attributions
         ),
-        payload=_require_mapping(value, "payload"),
+        payload=action_payload,
     )
+    return action
 
 
 def _validate_action_payload(
@@ -448,13 +465,50 @@ def _validate_action_payload(
     raise ReflectionLearningContractError(f"unknown learning outcome: {outcome!r}")
 
 
-def _validate_optional_promotion_payload(value: object) -> None:
+def _validate_optional_promotion_payload(
+    value: object,
+    *,
+    target_key: str | None = None,
+    field_prefix: str = "promotion",
+) -> None:
     if value is None:
         return
     if not isinstance(value, Mapping):
         raise ReflectionLearningContractError("promotion must be a JSON object when set.")
-    _require_text(value, "consumer_role")
-    _require_text(value, "scope_key")
+    consumer_role = _require_text(value, "consumer_role")
+    try:
+        validate_learning_card_consumer_role(consumer_role)
+    except EpisodeMemoryContractError as exc:
+        raise ReflectionLearningContractError(
+            f"{field_prefix}.consumer_role must be one of: analysis, pm_review, "
+            "reflection_learning."
+        ) from exc
+    scope_key = _require_text(value, "scope_key")
+    if scope_key != "shared" and not (
+        scope_key.startswith("target:") and scope_key.partition(":")[2]
+    ):
+        allowed_scope_text = (
+            f"'shared' or 'target:{target_key}'"
+            if target_key is not None
+            else "'shared' or 'target:<target_key>'"
+        )
+        raise ReflectionLearningContractError(
+            f"{field_prefix}.scope_key must be {allowed_scope_text}."
+        )
+    if scope_key != "shared":
+        try:
+            validate_target_key(
+                scope_key.partition(":")[2],
+                error_type=ReflectionLearningContractError,
+            )
+        except ReflectionLearningContractError as exc:
+            raise ReflectionLearningContractError(
+                f"{field_prefix}.scope_key must be a canonical target scope."
+            ) from exc
+    if target_key is not None and scope_key not in {"shared", f"target:{target_key}"}:
+        raise ReflectionLearningContractError(
+            f"{field_prefix}.scope_key must be 'shared' or 'target:{target_key}'."
+        )
     _require_text(value, "title")
     _require_text(value, "summary_md")
     _require_text(value, "body_md")

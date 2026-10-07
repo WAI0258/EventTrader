@@ -55,15 +55,20 @@ from event_trader.market.prefetch import (
     prefetch_replay_market_data,
 )
 from event_trader.market.provider import (
-    CachedReplayMarketDataProvider,
+    BinanceSpotMarketDataProvider,
     FutuOpenApiMarketDataProvider,
+    HyperliquidPerpMarketDataProvider,
     MarketBarsProvider,
     MarketDataProvider,
     MarketOptionsProvider,
 )
-from event_trader.market.store import (
-    FileBackedMarketDataStore,
-    MarketDataStoreManifest,
+from event_trader.market.shared_store import (
+    MarketDataSnapshot,
+    MarketSeriesIdentity,
+    SharedMarketDataError,
+    SharedMarketDataProvider,
+    SharedMarketDataStore,
+    shared_market_data_root,
 )
 from event_trader.market.terminal import (
     MarketContextTerminal,
@@ -80,11 +85,11 @@ from event_trader.market.terminal import (
 __all__ = [
     "AppliedAdjustment",
     "BollingerBandsFeature",
-    "CachedReplayMarketDataProvider",
+    "BinanceSpotMarketDataProvider",
     "DerivativesContext",
     "EmaFeature",
-    "FileBackedMarketDataStore",
     "FutuOpenApiMarketDataProvider",
+    "HyperliquidPerpMarketDataProvider",
     "IchimokuFeature",
     "MacroCrossAssetContext",
     "MacroCrossAssetGroupSummary",
@@ -92,7 +97,6 @@ __all__ = [
     "MacroCrossAssetProxySummary",
     "MarketBarsProvider",
     "MarketDataProvider",
-    "MarketDataStoreManifest",
     "LocalArchiveBuildError",
     "LocalArchiveBuildReceipt",
     "LocalArchiveBuildSpec",
@@ -105,7 +109,9 @@ __all__ = [
     "MarketContextTerminal",
     "MarketContextTerminalError",
     "MarketDataAdjustmentPolicy",
+    "MarketDataSnapshot",
     "MarketOptionsProvider",
+    "MarketSeriesIdentity",
     "MarketTerminalAvailabilityHeader",
     "MarketTerminalCrossAssetContext",
     "MarketTerminalCrossAssetWindow",
@@ -131,6 +137,9 @@ __all__ = [
     "RsiFeature",
     "TechnicalContext",
     "TechnicalDivergenceFeature",
+    "SharedMarketDataError",
+    "SharedMarketDataProvider",
+    "SharedMarketDataStore",
     "adjust_price_for_realized_policy",
     "apply_adjustment_policy_to_bars",
     "apply_adjustment_policy_to_series",
@@ -140,4 +149,5 @@ __all__ = [
     "load_adjustment_sidecar_from_archive_root",
     "load_adjustment_sidecar_from_source_metadata",
     "prefetch_replay_market_data",
+    "shared_market_data_root",
 ]

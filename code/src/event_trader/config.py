@@ -6,7 +6,7 @@ import json
 import os
 import re
 import tomllib
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from hashlib import sha256
 from math import isfinite
@@ -14,6 +14,19 @@ from pathlib import Path
 from typing import Final, Literal, cast
 from urllib.parse import urlparse
 
+from event_trader.agent_implementation import (
+    MIROTHINKER_IMPLEMENTATION,
+    AnalysisAgentImplementation,
+    CheckerAgentImplementation,
+    PMReviewAgentImplementation,
+    ReflectionAgentImplementation,
+    SearchAgentImplementation,
+    normalize_analysis_implementation,
+    normalize_checker_implementation,
+    normalize_pm_review_implementation,
+    normalize_reflection_implementation,
+    normalize_search_implementation,
+)
 from event_trader.ceau.contracts import CEAUContractError
 from event_trader.ceau.policy import StreamRoutingConfig
 from event_trader.contracts._validators import validate_labels, validate_target_key
@@ -22,16 +35,20 @@ from event_trader.integrations.analysis_structured_finalizer import (
     AnalysisStructuredOutputMode,
     normalize_analysis_structured_output_mode,
 )
-from event_trader.integrations.mirothinker_llm_config import (
-    normalize_mirothinker_reasoning_effort,
-)
+from event_trader.reasoning.effort import normalize_agent_reasoning_effort
 
 RuntimeMode = Literal["live", "replay"]
 LiveSourceChannel = Literal["web_search", "market_news"]
 LiveMarketNewsWebSocketSessionMode = Literal["rth_only"]
 ValidationMarketSession = Literal["continuous", "exchange_session"]
 ValidationExchangeSessionScope = Literal["regular", "extended"]
-ValidationMarketDataProvider = Literal["alpaca_like", "bc_private_v1", "futu_openapi"]
+ValidationMarketDataProvider = Literal[
+    "alpaca_like",
+    "bc_private_v1",
+    "binance_spot",
+    "futu_openapi",
+    "hyperliquid_perp",
+]
 ValidationExecutionDirectionMode = Literal["long_only", "long_short"]
 MarketDataAdjustmentPolicy = Literal[
     "forward_adjusted_visible",
@@ -40,7 +57,9 @@ MarketDataAdjustmentPolicy = Literal[
 MarketDataSubscriptionProvider = Literal[
     "alpaca_like",
     "bc_private_v1",
+    "binance_spot",
     "futu_openapi",
+    "hyperliquid_perp",
     "local_archive",
 ]
 ExecutionMode = Literal["paper"]
@@ -77,6 +96,7 @@ _REQUIRED_FIELDS: Final[tuple[str, ...]] = (
     "reflection_horizons_hours",
 )
 _OPTIONAL_TOP_LEVEL_FIELDS: Final[tuple[str, ...]] = (
+    "market_data_root",
     "live",
     "live_catchup",
     "analysis_agent",
@@ -232,7 +252,7 @@ _LIVE_CATCHUP_ALLOWED_FIELDS: Final[tuple[str, ...]] = (
     "market_news",
 )
 _ANALYSIS_AGENT_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
-    "vendor_root",
+    "implementation",
     "log_dir",
     "llm_provider",
     "llm_model_name",
@@ -240,6 +260,7 @@ _ANALYSIS_AGENT_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
     "llm_base_url",
 )
 _CHECKER_AGENT_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
+    "implementation",
     "log_dir",
     "llm_provider",
     "llm_model_name",
@@ -255,14 +276,16 @@ _CHECKER_AGENT_OPTIONAL_FIELDS: Final[tuple[str, ...]] = (
     "force_escalate_on_insufficient_coverage",
 )
 _ANALYSIS_AGENT_OPTIONAL_FIELDS: Final[tuple[str, ...]] = (
+    "vendor_root",
     "llm_reasoning_effort",
     "llm_max_context_length",
+    "llm_max_output_tokens",
     "wall_clock_timeout_seconds",
     "structured_output_mode",
     "structured_output_probe",
 )
 _PM_REVIEW_AGENT_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
-    "vendor_root",
+    "implementation",
     "log_dir",
     "llm_provider",
     "llm_model_name",
@@ -270,19 +293,26 @@ _PM_REVIEW_AGENT_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
     "llm_base_url",
 )
 _PM_REVIEW_AGENT_OPTIONAL_FIELDS: Final[tuple[str, ...]] = (
+    "vendor_root",
     "llm_reasoning_effort",
     "llm_max_context_length",
+    "llm_max_output_tokens",
     "wall_clock_timeout_seconds",
 )
 _REFLECTION_AGENT_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
-    "vendor_root",
+    "implementation",
     "log_dir",
     "llm_provider",
     "llm_model_name",
     "llm_api_key_env",
     "llm_base_url",
 )
-_REFLECTION_AGENT_OPTIONAL_FIELDS: Final[tuple[str, ...]] = ("llm_max_context_length",)
+_REFLECTION_AGENT_OPTIONAL_FIELDS: Final[tuple[str, ...]] = (
+    "vendor_root",
+    "llm_max_context_length",
+    "llm_max_output_tokens",
+    "wall_clock_timeout_seconds",
+)
 _VALIDATION_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
     "market_data",
     "market_mappings",
@@ -296,6 +326,18 @@ _VALIDATION_MARKET_DATA_ALLOWED_FIELDS: Final[tuple[str, ...]] = (
     *_VALIDATION_MARKET_DATA_REQUIRED_FIELDS,
     "api_key_env",
     "local_archive_root",
+    "supplemental_providers",
+)
+_VALIDATION_SUPPLEMENTAL_PROVIDER_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
+    "base_url",
+    "timeout_seconds",
+)
+_VALIDATION_SUPPLEMENTAL_PROVIDER_ALLOWED_FIELDS: Final[tuple[str, ...]] = (
+    *_VALIDATION_SUPPLEMENTAL_PROVIDER_REQUIRED_FIELDS,
+    "api_key_env",
+)
+_SUPPORTED_SUPPLEMENTAL_MARKET_DATA_PROVIDERS: Final[frozenset[str]] = frozenset(
+    {"futu_openapi", "hyperliquid_perp"}
 )
 _VALIDATION_MARKET_MAPPING_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
     "market_symbol",
@@ -312,9 +354,9 @@ _VALIDATION_MARKET_MAPPING_ALLOWED_FIELDS: Final[tuple[str, ...]] = (
     "adjustment_policy",
 )
 _WEB_SEARCH_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
+    "implementation",
     "targets",
     "cadence_profile",
-    "vendor_root",
     "log_dir",
     "llm_provider",
     "llm_model_name",
@@ -322,6 +364,7 @@ _WEB_SEARCH_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
     "llm_base_url",
 )
 _WEB_SEARCH_OPTIONAL_FIELDS: Final[tuple[str, ...]] = (
+    "vendor_root",
     "cadence_profiles",
     "acquisition_tool_names",
     "llm_reasoning_effort",
@@ -430,12 +473,12 @@ _LIVE_MARKET_DATA_SUBSCRIPTION_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
     "provider",
     "purpose",
     "market_session",
-    "exchange",
-    "exchange_session_scope",
     "bar_granularity",
 )
 _LIVE_MARKET_DATA_SUBSCRIPTION_ALLOWED_FIELDS: Final[tuple[str, ...]] = (
     *_LIVE_MARKET_DATA_SUBSCRIPTION_REQUIRED_FIELDS,
+    "exchange",
+    "exchange_session_scope",
     "adjustment_policy",
 )
 _LIVE_MARKET_DATA_WARMUP_REQUIRED_FIELDS: Final[tuple[str, ...]] = (
@@ -483,6 +526,7 @@ _DEFAULT_CHECKER_MAX_PACK_CHARS: Final[int] = 16_000
 _DEFAULT_CHECKER_FORCE_ESCALATE_ON_INSUFFICIENT_COVERAGE: Final[bool] = True
 _DEFAULT_ANALYSIS_AGENT_WALL_CLOCK_TIMEOUT_SECONDS: Final[int] = 0
 _DEFAULT_AGENT_LLM_MAX_CONTEXT_LENGTH: Final[int] = 204_800
+_DEFAULT_AGENT_LLM_MAX_OUTPUT_TOKENS: Final[int] = 12_000
 _DEFAULT_WEB_SEARCH_LLM_MAX_CONTEXT_LENGTH: Final[int] = 65_536
 _EXECUTION_ALLOWED_FIELDS: Final[tuple[str, ...]] = (
     "mode",
@@ -559,10 +603,11 @@ class LiveWebSearchCadenceProfileConfig:
 class LiveWebSearchConfig:
     """Validated shared live web-search runtime configuration."""
 
+    implementation: SearchAgentImplementation
     targets: tuple[LiveWebSearchTargetConfig, ...]
     cadence_profile: str
     cadence_profile_config: LiveWebSearchCadenceProfileConfig
-    vendor_root: Path
+    vendor_root: Path | None
     log_dir: Path
     llm_provider: str
     llm_model_name: str
@@ -691,8 +736,8 @@ class MarketDataSubscriptionConfig:
     provider: MarketDataSubscriptionProvider
     purpose: str
     market_session: ValidationMarketSession
-    exchange: str
-    exchange_session_scope: ValidationExchangeSessionScope
+    exchange: str | None
+    exchange_session_scope: ValidationExchangeSessionScope | None
     bar_granularity: str
     adjustment_policy: MarketDataAdjustmentPolicy | None = None
 
@@ -735,9 +780,10 @@ class LiveConfig:
 
 @dataclass(frozen=True, slots=True)
 class AnalysisAgentConfig:
-    """Validated MiroThinker analysis runtime configuration."""
+    """Validated analysis-agent runtime configuration."""
 
-    vendor_root: Path
+    implementation: AnalysisAgentImplementation
+    vendor_root: Path | None
     log_dir: Path
     llm_provider: str
     llm_model_name: str
@@ -745,6 +791,7 @@ class AnalysisAgentConfig:
     llm_base_url: str
     llm_reasoning_effort: str | None
     llm_max_context_length: int
+    llm_max_output_tokens: int
     wall_clock_timeout_seconds: int
     structured_output_mode: AnalysisStructuredOutputMode = "disabled"
     structured_output_probe: bool = True
@@ -754,6 +801,7 @@ class AnalysisAgentConfig:
 class CheckerAgentConfig:
     """Validated checker runtime configuration."""
 
+    implementation: CheckerAgentImplementation
     log_dir: Path
     llm_provider: str
     llm_model_name: str
@@ -771,20 +819,24 @@ class CheckerAgentConfig:
 class ReflectionAgentConfig:
     """Validated reflection runtime configuration."""
 
-    vendor_root: Path
+    implementation: ReflectionAgentImplementation
+    vendor_root: Path | None
     log_dir: Path
     llm_provider: str
     llm_model_name: str
     llm_api_key: str
     llm_base_url: str
     llm_max_context_length: int
+    llm_max_output_tokens: int
+    wall_clock_timeout_seconds: int
 
 
 @dataclass(frozen=True, slots=True)
 class PMReviewAgentConfig:
     """Validated PM review runtime configuration."""
 
-    vendor_root: Path
+    implementation: PMReviewAgentImplementation
+    vendor_root: Path | None
     log_dir: Path
     llm_provider: str
     llm_model_name: str
@@ -792,6 +844,7 @@ class PMReviewAgentConfig:
     llm_base_url: str
     llm_reasoning_effort: str | None
     llm_max_context_length: int
+    llm_max_output_tokens: int
     wall_clock_timeout_seconds: int
 
 
@@ -799,7 +852,8 @@ class PMReviewAgentConfig:
 class _AgentRuntimeConfigValues:
     """Validated shared agent runtime config fields."""
 
-    vendor_root: Path
+    implementation: str
+    vendor_root: Path | None
     log_dir: Path
     llm_provider: str
     llm_model_name: str
@@ -807,6 +861,7 @@ class _AgentRuntimeConfigValues:
     llm_base_url: str
     llm_reasoning_effort: str | None
     llm_max_context_length: int
+    llm_max_output_tokens: int
 
 
 @dataclass(frozen=True, slots=True)
@@ -818,6 +873,19 @@ class ValidationMarketDataConfig:
     api_key: str
     timeout_seconds: float
     local_archive_root: Path | None = None
+    supplemental_providers: dict[ValidationMarketDataProvider, MarketDataProviderConfig] = (
+        field(default_factory=dict)
+    )
+
+
+@dataclass(frozen=True, slots=True)
+class MarketDataProviderConfig:
+    """Connection settings for one non-primary live market-data provider."""
+
+    provider: ValidationMarketDataProvider
+    base_url: str
+    api_key: str
+    timeout_seconds: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -1202,6 +1270,7 @@ class KernelConfig:
     )
     artifact_retention: ArtifactRetentionConfig | None = None
     stream_routing: StreamRoutingConfig | None = None
+    market_data_root: Path | None = None
     config_hash: str = ""
 
     def to_audit_identity(self) -> KernelConfigAuditIdentity:
@@ -1326,6 +1395,10 @@ def load_kernel_config(config_path: str | Path) -> KernelConfig:
             config_path=path,
         ),
         stream_routing=_validate_optional_stream_routing_config(raw_config.get("stream_routing")),
+        market_data_root=_validate_optional_market_data_root(
+            raw_config.get("market_data_root"),
+            config_path=path,
+        ),
         config_hash=_kernel_config_hash(raw_config),
     )
     _validate_live_source_market_mappings(config)
@@ -1454,6 +1527,21 @@ def _validate_workspace_root(raw_value: object, config_path: Path) -> Path:
         workspace_root = resolve_config_relative_path(workspace_root, config_path=config_path)
 
     return workspace_root.resolve(strict=False)
+
+
+def _validate_optional_market_data_root(
+    raw_value: object,
+    *,
+    config_path: Path,
+) -> Path | None:
+    if raw_value is None:
+        return None
+    if not isinstance(raw_value, str) or not raw_value.strip():
+        raise BootstrapConfigError("Config field 'market_data_root' must be a non-empty path.")
+    root = Path(raw_value).expanduser()
+    if not root.is_absolute():
+        root = resolve_config_relative_path(root, config_path=config_path)
+    return root.resolve(strict=False)
 
 
 def _validate_mode(raw_value: object) -> RuntimeMode:
@@ -1585,10 +1673,18 @@ def _validate_optional_live_config(
         unknown = ", ".join(extra_fields)
         raise BootstrapConfigError(f"Unknown live config fields: {unknown}")
 
-    enabled_channels = _validate_live_enabled_channels(raw_value["enabled_channels"])
     web_search_config = raw_value.get("web_search")
     market_news_config = raw_value.get("market_news")
     market_data_config = raw_value.get("market_data")
+    market_data = (
+        _validate_live_market_data_config(market_data_config)
+        if market_data_config is not None
+        else None
+    )
+    enabled_channels = _validate_live_enabled_channels(
+        raw_value["enabled_channels"],
+        allow_empty_for_market_data_only=market_data is not None and market_data.enabled,
+    )
     web_search_enabled = "web_search" in enabled_channels
     market_news_enabled = "market_news" in enabled_channels
     if web_search_config is not None and not web_search_enabled:
@@ -1616,21 +1712,21 @@ def _validate_optional_live_config(
             if market_news_enabled
             else None
         ),
-        market_data=(
-            _validate_live_market_data_config(market_data_config)
-            if market_data_config is not None
-            else None
-        ),
+        market_data=market_data,
     )
 
 
 def _validate_live_enabled_channels(
     raw_value: object,
+    *,
+    allow_empty_for_market_data_only: bool = False,
 ) -> tuple[LiveSourceChannel, ...]:
-    if not isinstance(raw_value, list) or not raw_value:
+    if not isinstance(raw_value, list) or (
+        not raw_value and not allow_empty_for_market_data_only
+    ):
         raise BootstrapConfigError(
             "Config field 'live.enabled_channels' must be a non-empty array "
-            "of live source channel names."
+            "of live source channel names unless enabled live.market_data is configured."
         )
 
     channels: list[LiveSourceChannel] = []
@@ -1689,6 +1785,11 @@ def _validate_live_web_search_config(
             f"Unknown live.web_search config fields: {unknown}"
         )
 
+    implementation = normalize_search_implementation(
+        raw_value["implementation"],
+        field_name="live.web_search.implementation",
+        error_type=BootstrapConfigError,
+    )
     acquisition_tool_names = _validate_tool_name_tuple(
         raw_value.get(
             "acquisition_tool_names",
@@ -1707,6 +1808,7 @@ def _validate_live_web_search_config(
         field_name="live.web_search.cadence_profile",
     )
     return LiveWebSearchConfig(
+        implementation=implementation,
         targets=_validate_live_web_search_targets(raw_value["targets"]),
         cadence_profile=cadence_profile,
         cadence_profile_config=_validate_live_web_search_cadence_profile_config(
@@ -1714,10 +1816,11 @@ def _validate_live_web_search_config(
             cadence_profile=cadence_profile,
             field_name="live.web_search.cadence_profiles",
         ),
-        vendor_root=_validate_relative_or_absolute_path(
-            raw_value["vendor_root"],
+        vendor_root=_validate_agent_vendor_root(
+            raw_value,
+            implementation=implementation,
             config_path=config_path,
-            field_name="live.web_search.vendor_root",
+            table_name="live.web_search",
         ),
         log_dir=_validate_relative_or_absolute_path(
             raw_value["log_dir"],
@@ -1740,7 +1843,7 @@ def _validate_live_web_search_config(
             raw_value["llm_base_url"],
             field_name="live.web_search.llm_base_url",
         ),
-        llm_reasoning_effort=normalize_mirothinker_reasoning_effort(
+        llm_reasoning_effort=normalize_agent_reasoning_effort(
             raw_value.get("llm_reasoning_effort"),
             field_name="live.web_search.llm_reasoning_effort",
             error_type=BootstrapConfigError,
@@ -2469,6 +2572,37 @@ def _validate_live_market_data_subscriptions(
                 f"Config field '{item_field_name}.bar_granularity' must match "
                 f"{expected_bar_granularity_field_name}."
             )
+        market_session = _validate_validation_market_session(
+            item["market_session"],
+            field_name=f"{item_field_name}.market_session",
+        )
+        exchange = (
+            _validate_non_blank_string(
+                item["exchange"],
+                field_name=f"{item_field_name}.exchange",
+            ).upper()
+            if "exchange" in item
+            else None
+        )
+        exchange_session_scope = (
+            _validate_validation_exchange_session_scope(
+                item["exchange_session_scope"],
+                field_name=f"{item_field_name}.exchange_session_scope",
+            )
+            if "exchange_session_scope" in item
+            else None
+        )
+        from event_trader.market.session_policy import validate_market_session_contract_fields
+
+        validate_market_session_contract_fields(
+            market_session=market_session,
+            exchange=exchange,
+            exchange_session_scope=exchange_session_scope,
+            error_type=BootstrapConfigError,
+            market_session_field_name=f"{item_field_name}.market_session",
+            exchange_field_name=f"{item_field_name}.exchange",
+            exchange_session_scope_field_name=f"{item_field_name}.exchange_session_scope",
+        )
         subscriptions.append(
             MarketDataSubscriptionConfig(
                 symbol=symbol,
@@ -2480,18 +2614,9 @@ def _validate_live_market_data_subscriptions(
                     item["purpose"],
                     field_name=f"{item_field_name}.purpose",
                 ),
-                market_session=_validate_validation_market_session(
-                    item["market_session"],
-                    field_name=f"{item_field_name}.market_session",
-                ),
-                exchange=_validate_non_blank_string(
-                    item["exchange"],
-                    field_name=f"{item_field_name}.exchange",
-                ).upper(),
-                exchange_session_scope=_validate_validation_exchange_session_scope(
-                    item["exchange_session_scope"],
-                    field_name=f"{item_field_name}.exchange_session_scope",
-                ),
+                market_session=market_session,
+                exchange=exchange,
+                exchange_session_scope=exchange_session_scope,
                 bar_granularity=bar_granularity,
                 adjustment_policy=(
                     _validate_market_data_adjustment_policy(
@@ -2578,12 +2703,14 @@ def _validate_live_market_data_subscription_provider(
     if normalized not in {
         "alpaca_like",
         "bc_private_v1",
+        "binance_spot",
         "futu_openapi",
+        "hyperliquid_perp",
         "local_archive",
     }:
         raise BootstrapConfigError(
             f"'{field_name}' must be one of: alpaca_like, bc_private_v1, "
-            "futu_openapi, local_archive."
+            "binance_spot, futu_openapi, hyperliquid_perp, local_archive."
         )
     return cast(MarketDataSubscriptionProvider, normalized)
 
@@ -2849,10 +2976,13 @@ def _validate_optional_analysis_agent_config(
         table_name="analysis_agent",
         required_fields=_ANALYSIS_AGENT_REQUIRED_FIELDS,
         optional_fields=_ANALYSIS_AGENT_OPTIONAL_FIELDS,
+        normalize_implementation=normalize_analysis_implementation,
     )
     if normalized is None:
         return None
+    raw_table = cast(dict[str, object], raw_value)
     return AnalysisAgentConfig(
+        implementation=cast(AnalysisAgentImplementation, normalized.implementation),
         vendor_root=normalized.vendor_root,
         log_dir=normalized.log_dir,
         llm_provider=normalized.llm_provider,
@@ -2861,16 +2991,17 @@ def _validate_optional_analysis_agent_config(
         llm_base_url=normalized.llm_base_url,
         llm_reasoning_effort=normalized.llm_reasoning_effort,
         llm_max_context_length=normalized.llm_max_context_length,
+        llm_max_output_tokens=normalized.llm_max_output_tokens,
         wall_clock_timeout_seconds=_validate_optional_non_negative_int_with_default(
-            raw_value.get("wall_clock_timeout_seconds"),
+            raw_table.get("wall_clock_timeout_seconds"),
             field_name="analysis_agent.wall_clock_timeout_seconds",
             default=_DEFAULT_ANALYSIS_AGENT_WALL_CLOCK_TIMEOUT_SECONDS,
         ),
         structured_output_mode=_validate_analysis_structured_output_mode(
-            raw_value.get("structured_output_mode", "disabled")
+            raw_table.get("structured_output_mode", "disabled")
         ),
         structured_output_probe=_validate_optional_bool(
-            raw_value.get("structured_output_probe"),
+            raw_table.get("structured_output_probe"),
             field_name="analysis_agent.structured_output_probe",
             default=True,
         ),
@@ -2941,13 +3072,18 @@ def _validate_optional_checker_agent_config(
         raw_value["llm_base_url"],
         field_name="checker_agent.llm_base_url",
     )
-    llm_reasoning_effort = normalize_mirothinker_reasoning_effort(
+    llm_reasoning_effort = normalize_agent_reasoning_effort(
         raw_value.get("llm_reasoning_effort"),
         field_name="checker_agent.llm_reasoning_effort",
         error_type=BootstrapConfigError,
     )
 
     return CheckerAgentConfig(
+        implementation=normalize_checker_implementation(
+            raw_value["implementation"],
+            field_name="checker_agent.implementation",
+            error_type=BootstrapConfigError,
+        ),
         log_dir=log_dir,
         llm_provider=llm_provider,
         llm_model_name=llm_model_name,
@@ -2993,11 +3129,13 @@ def _validate_optional_pm_review_agent_config(
         table_name="pm_review_agent",
         required_fields=_PM_REVIEW_AGENT_REQUIRED_FIELDS,
         optional_fields=_PM_REVIEW_AGENT_OPTIONAL_FIELDS,
+        normalize_implementation=normalize_pm_review_implementation,
     )
     if normalized is None:
         return None
     raw_table = cast(dict[str, object], raw_value)
     return PMReviewAgentConfig(
+        implementation=cast(PMReviewAgentImplementation, normalized.implementation),
         vendor_root=normalized.vendor_root,
         log_dir=normalized.log_dir,
         llm_provider=normalized.llm_provider,
@@ -3006,6 +3144,7 @@ def _validate_optional_pm_review_agent_config(
         llm_base_url=normalized.llm_base_url,
         llm_reasoning_effort=normalized.llm_reasoning_effort,
         llm_max_context_length=normalized.llm_max_context_length,
+        llm_max_output_tokens=normalized.llm_max_output_tokens,
         wall_clock_timeout_seconds=_validate_optional_non_negative_int_with_default(
             raw_table.get("wall_clock_timeout_seconds"),
             field_name="pm_review_agent.wall_clock_timeout_seconds",
@@ -3025,10 +3164,16 @@ def _validate_optional_reflection_agent_config(
         table_name="reflection_agent",
         required_fields=_REFLECTION_AGENT_REQUIRED_FIELDS,
         optional_fields=_REFLECTION_AGENT_OPTIONAL_FIELDS,
+        normalize_implementation=normalize_reflection_implementation,
     )
     if normalized is None:
         return None
+    raw_table = cast(dict[str, object], raw_value)
     return ReflectionAgentConfig(
+        implementation=cast(
+            ReflectionAgentImplementation,
+            normalized.implementation,
+        ),
         vendor_root=normalized.vendor_root,
         log_dir=normalized.log_dir,
         llm_provider=normalized.llm_provider,
@@ -3036,6 +3181,12 @@ def _validate_optional_reflection_agent_config(
         llm_api_key=normalized.llm_api_key,
         llm_base_url=normalized.llm_base_url,
         llm_max_context_length=normalized.llm_max_context_length,
+        llm_max_output_tokens=normalized.llm_max_output_tokens,
+        wall_clock_timeout_seconds=_validate_optional_non_negative_int_with_default(
+            raw_table.get("wall_clock_timeout_seconds"),
+            field_name="reflection_agent.wall_clock_timeout_seconds",
+            default=0,
+        ),
     )
 
 
@@ -3046,6 +3197,7 @@ def _validate_optional_agent_runtime_config(
     table_name: str,
     required_fields: tuple[str, ...],
     optional_fields: tuple[str, ...] = (),
+    normalize_implementation: Callable[..., str],
     default_llm_max_context_length: int = _DEFAULT_AGENT_LLM_MAX_CONTEXT_LENGTH,
 ) -> _AgentRuntimeConfigValues | None:
     if raw_value is None:
@@ -3072,11 +3224,33 @@ def _validate_optional_agent_runtime_config(
             f"Unknown {table_name} config fields: {unknown}"
         )
 
+    implementation = normalize_implementation(
+        raw_value["implementation"],
+        field_name=f"{table_name}.implementation",
+        error_type=BootstrapConfigError,
+    )
+    llm_max_context_length = _validate_optional_positive_int_with_default(
+        raw_value.get("llm_max_context_length"),
+        field_name=f"{table_name}.llm_max_context_length",
+        default=default_llm_max_context_length,
+    )
+    llm_max_output_tokens = _validate_optional_positive_int_with_default(
+        raw_value.get("llm_max_output_tokens"),
+        field_name=f"{table_name}.llm_max_output_tokens",
+        default=_DEFAULT_AGENT_LLM_MAX_OUTPUT_TOKENS,
+    )
+    if llm_max_output_tokens >= llm_max_context_length:
+        raise BootstrapConfigError(
+            f"{table_name}.llm_max_output_tokens must be smaller than "
+            f"{table_name}.llm_max_context_length."
+        )
     return _AgentRuntimeConfigValues(
-        vendor_root=_validate_relative_or_absolute_path(
-            raw_value["vendor_root"],
+        implementation=implementation,
+        vendor_root=_validate_agent_vendor_root(
+            raw_value,
+            implementation=implementation,
             config_path=config_path,
-            field_name=f"{table_name}.vendor_root",
+            table_name=table_name,
         ),
         log_dir=_validate_relative_or_absolute_path(
             raw_value["log_dir"],
@@ -3099,16 +3273,34 @@ def _validate_optional_agent_runtime_config(
             raw_value["llm_base_url"],
             field_name=f"{table_name}.llm_base_url",
         ),
-        llm_reasoning_effort=normalize_mirothinker_reasoning_effort(
+        llm_reasoning_effort=normalize_agent_reasoning_effort(
             raw_value.get("llm_reasoning_effort"),
             field_name=f"{table_name}.llm_reasoning_effort",
             error_type=BootstrapConfigError,
         ),
-        llm_max_context_length=_validate_optional_positive_int_with_default(
-            raw_value.get("llm_max_context_length"),
-            field_name=f"{table_name}.llm_max_context_length",
-            default=default_llm_max_context_length,
-        ),
+        llm_max_context_length=llm_max_context_length,
+        llm_max_output_tokens=llm_max_output_tokens,
+    )
+
+
+def _validate_agent_vendor_root(
+    raw_value: dict[str, object],
+    *,
+    implementation: str,
+    config_path: Path,
+    table_name: str,
+) -> Path | None:
+    raw_vendor_root = raw_value.get("vendor_root")
+    if raw_vendor_root is None:
+        if implementation == MIROTHINKER_IMPLEMENTATION:
+            raise BootstrapConfigError(
+                f"Missing required {table_name} config fields: vendor_root"
+            )
+        return None
+    return _validate_relative_or_absolute_path(
+        raw_vendor_root,
+        config_path=config_path,
+        field_name=f"{table_name}.vendor_root",
     )
 
 
@@ -4534,16 +4726,11 @@ def _validate_validation_market_data_config(
         raw_value["provider"],
         field_name="validation.market_data.provider",
     )
-    api_key = ""
-    if provider != "futu_openapi":
-        if "api_key_env" not in raw_value:
-            raise BootstrapConfigError(
-                "Missing required validation.market_data config fields: api_key_env"
-            )
-        api_key = _validate_env_reference(
-            raw_value["api_key_env"],
-            field_name="validation.market_data.api_key_env",
-        )
+    api_key = _validate_market_data_api_key(
+        raw_value,
+        provider=provider,
+        field_name="validation.market_data",
+    )
 
     return ValidationMarketDataConfig(
         provider=provider,
@@ -4567,6 +4754,92 @@ def _validate_validation_market_data_config(
             if "local_archive_root" in raw_value
             else None
         ),
+        supplemental_providers=_validate_supplemental_market_data_providers(
+            raw_value.get("supplemental_providers", {}),
+            primary_provider=provider,
+            field_name="validation.market_data.supplemental_providers",
+        ),
+    )
+
+
+def _validate_supplemental_market_data_providers(
+    raw_value: object,
+    *,
+    primary_provider: ValidationMarketDataProvider,
+    field_name: str,
+) -> dict[ValidationMarketDataProvider, MarketDataProviderConfig]:
+    if not isinstance(raw_value, dict):
+        raise BootstrapConfigError(f"Config field '{field_name}' must be a TOML table.")
+    providers: dict[ValidationMarketDataProvider, MarketDataProviderConfig] = {}
+    for raw_provider, raw_config in raw_value.items():
+        provider = _validate_validation_market_data_provider(
+            raw_provider,
+            field_name=f"{field_name}.<provider>",
+        )
+        if provider == primary_provider:
+            raise BootstrapConfigError(
+                f"Config field '{field_name}' must not repeat primary provider {provider!r}."
+            )
+        if provider not in _SUPPORTED_SUPPLEMENTAL_MARKET_DATA_PROVIDERS:
+            supported = ", ".join(sorted(_SUPPORTED_SUPPLEMENTAL_MARKET_DATA_PROVIDERS))
+            raise BootstrapConfigError(
+                f"Config field '{field_name}.{provider}' is unsupported; "
+                f"supplemental providers must be one of: {supported}."
+            )
+        if not isinstance(raw_config, dict):
+            raise BootstrapConfigError(
+                f"Config field '{field_name}.{provider}' must be a TOML table."
+            )
+        missing = [
+            name
+            for name in _VALIDATION_SUPPLEMENTAL_PROVIDER_REQUIRED_FIELDS
+            if name not in raw_config
+        ]
+        if missing:
+            raise BootstrapConfigError(
+                f"Missing required {field_name}.{provider} config fields: {', '.join(missing)}"
+            )
+        extra = sorted(
+            set(raw_config) - set(_VALIDATION_SUPPLEMENTAL_PROVIDER_ALLOWED_FIELDS)
+        )
+        if extra:
+            raise BootstrapConfigError(
+                f"Unknown {field_name}.{provider} config fields: {', '.join(extra)}"
+            )
+        providers[provider] = MarketDataProviderConfig(
+            provider=provider,
+            base_url=_validate_market_data_base_url(
+                raw_config["base_url"],
+                provider=provider,
+                field_name=f"{field_name}.{provider}.base_url",
+            ),
+            api_key=_validate_market_data_api_key(
+                raw_config,
+                provider=provider,
+                field_name=f"{field_name}.{provider}",
+            ),
+            timeout_seconds=_validate_positive_number(
+                raw_config["timeout_seconds"],
+                field_name=f"{field_name}.{provider}.timeout_seconds",
+                unit_name="seconds",
+            ),
+        )
+    return providers
+
+
+def _validate_market_data_api_key(
+    raw_value: dict[str, object],
+    *,
+    provider: ValidationMarketDataProvider,
+    field_name: str,
+) -> str:
+    if provider not in {"alpaca_like", "bc_private_v1"}:
+        return ""
+    if "api_key_env" not in raw_value:
+        raise BootstrapConfigError(f"Missing required {field_name} config fields: api_key_env")
+    return _validate_env_reference(
+        raw_value["api_key_env"],
+        field_name=f"{field_name}.api_key_env",
     )
 
 
@@ -4578,10 +4851,17 @@ def _validate_validation_market_data_provider(
     if not isinstance(raw_value, str):
         raise BootstrapConfigError(f"Config field '{field_name}' must be a string.")
     normalized = raw_value.strip()
-    if normalized not in {"alpaca_like", "bc_private_v1", "futu_openapi"}:
+    if normalized not in {
+        "alpaca_like",
+        "bc_private_v1",
+        "binance_spot",
+        "futu_openapi",
+        "hyperliquid_perp",
+    }:
         raise BootstrapConfigError(
             "Config field "
-            f"'{field_name}' must be one of: alpaca_like, bc_private_v1, futu_openapi."
+            f"'{field_name}' must be one of: alpaca_like, bc_private_v1, "
+            "binance_spot, futu_openapi, hyperliquid_perp."
         )
     return cast(ValidationMarketDataProvider, normalized)
 

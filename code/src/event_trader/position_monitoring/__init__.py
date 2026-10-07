@@ -1,7 +1,6 @@
 """Read-only position monitoring surfaces."""
 
 from .contracts import (
-    AnalysisShadowSourceSummary,
     CurrentPortfolioStateSnapshot,
     ExecutionSummary,
     PMDecisionSummary,
@@ -31,7 +30,6 @@ from .workspace import (
 )
 
 __all__ = [
-    "AnalysisShadowSourceSummary",
     "CurrentPortfolioStateSnapshot",
     "ExecutionSummary",
     "PMDecisionSummary",

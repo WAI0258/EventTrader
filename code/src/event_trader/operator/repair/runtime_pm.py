@@ -12,6 +12,7 @@ from event_trader.contracts._validators import validate_event_id, validate_targe
 from event_trader.contracts.analysis_assessment import AnalysisAssessment
 from event_trader.contracts.price_level_role import MaterialLevelRole
 from event_trader.contracts.view_state_change import ViewStateChange
+from event_trader.execution.contracts import ExecutionRecord
 from event_trader.execution.engine import PaperExecutionEngine
 from event_trader.execution.store import ExecutionIntentStore, ExecutionRecordStore
 from event_trader.operator.repair.artifacts import (
@@ -592,6 +593,7 @@ def apply_pm_execution_recovery(
             layout=layout,
             decision=decision,
             execution_engine=execution_engine,
+            execution_observed_at=datetime.now(UTC),
         )
         execution_record_id = (
             None
@@ -677,7 +679,12 @@ def _retryable_execution_replacement_blocker(
     existing_execution_record_id: str,
 ) -> str | None:
     intent = execution_engine.build_intent(decision=decision)
-    candidate = execution_engine.execute(intent=intent)
+    candidate = execution_engine.execute(
+        intent=intent,
+        observed_at=datetime.now(UTC),
+    )
+    if not isinstance(candidate, ExecutionRecord):
+        return "retryable PM execution is still awaiting observable market data."
     if candidate.execution_record_id != existing_execution_record_id:
         return (
             "retryable rejected ExecutionRecord id does not match the rebuilt "

@@ -130,11 +130,23 @@ def build_citation_neighborhood(
     if normalized_event_id is None and normalized_source_ref is None:
         raise MarkdownContextError("event_id or source_ref is required.")
 
-    anchors = _citation_anchors(
-        normalized_event_id=normalized_event_id,
-        normalized_source_ref=normalized_source_ref,
-    )
-    anchor = _first_anchor_match(normalized_content, anchors)
+    if normalized_event_id is not None and normalized_source_ref is not None:
+        # A page/event topology is a citation *pair* topology.  Do not fall
+        # back to an event-only match here: the same event id may be cited
+        # with a different source reference elsewhere on the page.
+        anchor = _first_citation_pair_match(
+            normalized_content,
+            event_id=normalized_event_id,
+            source_ref=normalized_source_ref,
+        )
+    else:
+        anchor = _first_anchor_match(
+            normalized_content,
+            _citation_anchors(
+                normalized_event_id=normalized_event_id,
+                normalized_source_ref=normalized_source_ref,
+            ),
+        )
     if anchor is None:
         return None
 
@@ -233,6 +245,25 @@ def _first_anchor_match(content_md: str, anchors: tuple[str, ...]) -> tuple[str,
     if best_anchor is None or best_offset is None:
         return None
     return best_anchor, best_offset
+
+
+def _first_citation_pair_match(
+    content_md: str,
+    *,
+    event_id: str,
+    source_ref: str,
+) -> tuple[str, int] | None:
+    patterns = (
+        re.compile(
+            rf"`{re.escape(event_id)}`\s*\|\s*`{re.escape(source_ref)}`"
+        ),
+        re.compile(rf"{re.escape(event_id)}\s*\|\s*{re.escape(source_ref)}"),
+    )
+    matches = [match for pattern in patterns if (match := pattern.search(content_md))]
+    if not matches:
+        return None
+    match = min(matches, key=lambda candidate: candidate.start())
+    return match.group(0), match.start()
 
 
 def _require_text(value: object, *, field_name: str) -> str:

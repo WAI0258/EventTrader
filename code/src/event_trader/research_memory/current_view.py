@@ -110,6 +110,43 @@ def validate_market_setup_dashboard(content_md: str) -> None:
     _validate_market_setup_frame(content_md)
     _reject_actual_exposure_language(content_md)
 
+
+def validate_market_setup_dashboard_page(content_md: str) -> None:
+    """Validate the canonical Dashboard section inside one complete thesis page."""
+
+    if not isinstance(content_md, str) or not content_md.strip():
+        raise MarketSetupDashboardError(
+            "market_setup_dashboard_invalid_markdown: thesis.md content must not be blank."
+        )
+    if _level_two_heading_match(content_md, LEGACY_CURRENT_VIEW_SECTION) is not None:
+        raise MarketSetupDashboardError(
+            "market_setup_dashboard_legacy_section_forbidden: thesis.md must use "
+            "## Market Setup Dashboard, not ## Current View."
+        )
+    matches = tuple(
+        re.finditer(
+            rf"(?m)^##\s+{re.escape(MARKET_SETUP_DASHBOARD_SECTION)}\s*$",
+            content_md,
+        )
+    )
+    if not matches:
+        raise MarketSetupDashboardError(
+            "market_setup_dashboard_missing: thesis.md must include "
+            "## Market Setup Dashboard."
+        )
+    if len(matches) != 1:
+        raise MarketSetupDashboardError(
+            "market_setup_dashboard_invalid_markdown: thesis.md must contain exactly "
+            "one ## Market Setup Dashboard section."
+        )
+    section_match = matches[0]
+    section_body = content_md[section_match.end() :]
+    next_section = re.search(r"(?m)^##\s+", section_body)
+    if next_section is not None:
+        section_body = section_body[: next_section.start()]
+    validate_market_setup_dashboard(section_body)
+
+
 def _validate_market_setup_reference(content_md: str) -> None:
     body = _level_three_section_body(content_md, "Market Reference")
     if body is None or not body.strip():
@@ -242,12 +279,7 @@ def _rewrite_market_setup_dashboard(
             ),
         )
     if dashboard_match is not None:
-        return _replace_level_two_section(
-            content_md,
-            dashboard_match,
-            MARKET_SETUP_DASHBOARD_SECTION,
-            _MARKET_SETUP_DASHBOARD_BODY,
-        )
+        return content_md
     return _insert_market_setup_dashboard(content_md)
 
 
@@ -287,4 +319,5 @@ __all__ = [
     "MarketSetupDashboardError",
     "migrate_current_view_to_market_setup_dashboard",
     "validate_market_setup_dashboard",
+    "validate_market_setup_dashboard_page",
 ]

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -15,6 +14,15 @@ from event_trader.replay.checkpoint import (
     append_replay_checkpoint,
     read_latest_replay_checkpoints,
 )
+from event_trader.replay.slow_path_failure import (
+    ReplaySlowPathFailureGuard as _ReplaySlowPathFailureGuard,
+)
+from event_trader.replay.slow_path_failure import (
+    advance_replay_deferred_until as _advance_replay_deferred_until,
+)
+from event_trader.replay.slow_path_failure import (
+    resume_replay_runtime_backlog as _resume_replay_runtime_backlog,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Sequence
@@ -22,103 +30,6 @@ if TYPE_CHECKING:
     from event_trader.replay.runner import ReplayStepReceipt
     from event_trader.storage import WorkspaceLayout
     from event_trader.tools import replay_runtime
-
-
-class _ReplaySlowPathFailureGuard:
-    """Fail replay immediately when runtime workers persist new failure receipts."""
-
-    def __init__(self, *, layout: WorkspaceLayout) -> None:
-        self._failure_roots = (
-            layout.runtime_root / "checker_work_queue" / "checker" / "failed",
-            layout.runtime_root / "analysis_work_queue" / "analysis" / "failed",
-            layout.runtime_root / "pm_review_work_queue" / "pm_review" / "failed",
-            layout.runtime_root / "reflection_work_queue" / "reflection" / "failed",
-        )
-        self._known_failure_paths = {
-            path.resolve(strict=False)
-            for root in self._failure_roots
-            for path in root.glob("*.json")
-        }
-
-    def raise_if_new_failure(
-        self,
-        *,
-        replay_at: datetime,
-        context: str,
-    ) -> None:
-        failure = self._next_new_failure()
-        if failure is None:
-            return
-        raise RuntimeError(
-            "replay slow-path failed: "
-            f"replay_at={replay_at.isoformat()} "
-            f"context={context} "
-            f"queue={failure['queue_name']} "
-            f"work_item_id={failure['work_item_id']} "
-            f"reason={failure['reason']} "
-            f"error={failure['error']} "
-            f"path={failure['failure_path']}"
-        )
-
-    def _next_new_failure(self) -> dict[str, str] | None:
-        for root in self._failure_roots:
-            for path in sorted(root.glob("*.json")):
-                normalized_path = path.resolve(strict=False)
-                if normalized_path in self._known_failure_paths:
-                    continue
-                self._known_failure_paths.add(normalized_path)
-                payload = json.loads(path.read_text(encoding="utf-8"))
-                return {
-                    "queue_name": str(payload.get("queue_name") or path.parent.parent.name),
-                    "work_item_id": str(payload.get("work_item_id") or ""),
-                    "reason": str(payload.get("reason") or "worker_failed"),
-                    "error": str(payload.get("error") or ""),
-                    "failure_path": str(normalized_path),
-                }
-        return None
-
-
-def _advance_replay_deferred_until(
-    *,
-    replay_runtime,
-    replay_at: datetime,
-    include_boundary: bool,
-    failure_guard: _ReplaySlowPathFailureGuard,
-    context: str,
-) -> None:
-    def _raise_if_failed(advanced_at: datetime) -> None:
-        failure_guard.raise_if_new_failure(
-            replay_at=advanced_at,
-            context=(
-                context if advanced_at == replay_at else f"{context}:deferred_runtime"
-            ),
-        )
-
-    replay_runtime.advance_deferred_until(
-        replay_at=replay_at,
-        include_boundary=include_boundary,
-        after_advance=_raise_if_failed,
-    )
-
-
-def _resume_replay_runtime_backlog(
-    *,
-    replay_runtime,
-    replay_at: datetime,
-    failure_guard: _ReplaySlowPathFailureGuard,
-    context: str,
-) -> None:
-    if not callable(getattr(replay_runtime, "resume_runtime_backlog", None)):
-        return
-
-    def _raise_if_failed(advanced_at: datetime) -> None:
-        failure_guard.raise_if_new_failure(
-            replay_at=advanced_at,
-            context=context,
-        )
-
-    replay_runtime.resume_runtime_backlog(replay_at=replay_at)
-    _raise_if_failed(replay_at)
 
 
 def run_replay_command(args: argparse.Namespace) -> int:
@@ -167,7 +78,7 @@ def run_replay_command(args: argparse.Namespace) -> int:
     checker_policy, analysis_callback = runtime_tool._resolve_primary_research_overrides(
         cast(runtime_tool._ReplayPrimaryResearchMode, args.primary_research_mode)
     )
-    run_id = args.run_id or runtime_tool._default_market_data_run_id(
+    run_id = args.run_id or runtime_tool._default_replay_run_id(
         target_key=target_key,
         window_start=window_start,
         window_end=window_end,
@@ -179,6 +90,7 @@ def run_replay_command(args: argparse.Namespace) -> int:
         dataset_rows=tuple(dataset_rows),
         window_start=window_start,
         window_end=window_end,
+        reflection_end=reflection_end,
     )
     if prefetch_setup.receipt is not None:
         print(
@@ -186,7 +98,8 @@ def run_replay_command(args: argparse.Namespace) -> int:
             f"target_key={target_key} "
             f"run_id={run_id} "
             f"reused_existing={prefetch_setup.receipt.reused_existing} "
-            f"manifest={prefetch_setup.receipt.store.manifest_path.as_posix()}"
+            f"snapshot_id={prefetch_setup.receipt.snapshot_id} "
+            f"store={prefetch_setup.receipt.store.database_path.as_posix()}"
         )
     if args.primary_research_mode != "production":
         print(
@@ -210,6 +123,7 @@ def run_replay_command(args: argparse.Namespace) -> int:
             evaluate_review=runtime_tool._unexpected_shared_review,
             market_data_provider_override=prefetch_setup.market_data_provider_override,
             market_data_store_root=prefetch_setup.market_data_store_root,
+            market_data_snapshot_id=prefetch_setup.market_data_snapshot_id,
             replay_run_id=run_id,
             pm_review_preflight_target_keys=(target_key,),
             replay_market_mapping=replay_market_mapping,

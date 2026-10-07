@@ -34,7 +34,7 @@ from event_trader.checker.context_pack import (
     CheckerPackConfig,
 )
 from event_trader.checker.recorder import FileBackedCheckerDecisionRecorder
-from event_trader.checker.single_pass_policy import SinglePassCheckerPolicy
+from event_trader.checker.runtime import build_checker_policy
 from event_trader.checker.validator import (
     ConservativeCheckerValidator,
     RawCheckerDecision,
@@ -63,14 +63,10 @@ from event_trader.evidence_ledger import (
 )
 from event_trader.feeds.models import LiveNewsStreamInput, LiveWebSearchInput
 from event_trader.ingest.admission import AdmissionOutputs, AdmissionRequest
-from event_trader.integrations import (
-    MiroThinkerAnalysisRuntimeConfig,
-    build_mirothinker_analysis_runner,
-)
-from event_trader.integrations.mirothinker_pm_review import PMReviewTaskRunner
 from event_trader.market.context_builder import build_market_context_snapshot
 from event_trader.market.contracts import MarketContextSnapshot
 from event_trader.market.provider import MarketBarsProvider
+from event_trader.operator_context import CanonicalOperatorContextReader
 from event_trader.pm_review.runtime import (
     MaterializedPMReviewRequest,
     PMReviewRuntimePolicy,
@@ -85,6 +81,8 @@ from event_trader.projection.report_artifacts import (
     FileBackedCurrentStateReportWriter,
     MarkdownCurrentStateReportRenderer,
 )
+from event_trader.reasoning.analysis_runtime import build_analysis_runner
+from event_trader.reasoning.runtime import AgentRuntime
 from event_trader.runtime.admission import RawSourceUnavailable
 from event_trader.runtime.analysis_receipts import (
     _analysis_failure_business_at,
@@ -176,10 +174,11 @@ def install_primary_research_runtime(
     market_data_provider: MarketBarsProvider | None,
     config_path: Path,
     market_data_store_root: Path | None,
+    market_data_snapshot_id: str | None,
     memory_read_policy: str,
     replay_run_id: str,
     pm_review_runtime_policy: PMReviewRuntimePolicy,
-    pm_review_task_runner: PMReviewTaskRunner | None,
+    pm_review_task_runner: AgentRuntime | None,
     publish_runtime_analysis_requested: Callable[[CEAUUnitEmittedRecord], None],
     runtime_owned_analysis_pm_review: bool,
     checker_policy: Callable[[CheckerContextPack], RawCheckerDecision] | None,
@@ -189,6 +188,7 @@ def install_primary_research_runtime(
         raise CompositionError("primary research runtime now must be callable.")
     ledger = FileBackedEvidenceLedger(layout)
     checker_research_memory_reader = FileBackedResearchMemoryReader(layout)
+    operator_context_reader = CanonicalOperatorContextReader(layout)
     thesis_revision_store = ThesisRevisionStore(layout)
     market_context_max_prompt_chars = 6_000
     if config.market_context is not None and config.market_context.enabled:
@@ -241,14 +241,7 @@ def install_primary_research_runtime(
     )
     checker: Callable[[CheckerContextPack], RawCheckerDecision]
     if checker_policy is None:
-        checker = SinglePassCheckerPolicy(
-            log_dir=checker_config.log_dir,
-            llm_provider=checker_config.llm_provider,
-            llm_model_name=checker_config.llm_model_name,
-            llm_api_key=checker_config.llm_api_key,
-            llm_base_url=checker_config.llm_base_url,
-            llm_reasoning_effort=checker_config.llm_reasoning_effort,
-        )
+        checker = build_checker_policy(config=checker_config)
     else:
         checker = checker_policy
     checker_validator = ConservativeCheckerValidator(
@@ -298,36 +291,24 @@ def install_primary_research_runtime(
             if runtime_mode != "replay"
             else historical_target_seed_page_paths
         ),
+        read_operator_context=operator_context_reader.read,
     )
     analyze = analysis_callback
     if analyze is None:
-        analyze = build_mirothinker_analysis_runner(
-            config=MiroThinkerAnalysisRuntimeConfig(
-                vendor_root=analysis_config.vendor_root,
-                log_dir=analysis_config.log_dir,
-                llm_provider=analysis_config.llm_provider,
-                llm_model_name=analysis_config.llm_model_name,
-                llm_api_key=analysis_config.llm_api_key,
-                llm_base_url=analysis_config.llm_base_url,
-                llm_max_context_length=analysis_config.llm_max_context_length,
-                runtime_mode=runtime_mode,
-                config_path=config_path,
-                market_data_store_root=market_data_store_root,
-                llm_reasoning_effort=analysis_config.llm_reasoning_effort,
-                wall_clock_timeout_seconds=(
-                    analysis_config.wall_clock_timeout_seconds
-                ),
-                structured_output_mode=analysis_config.structured_output_mode,
-                structured_output_probe=analysis_config.structured_output_probe,
-                memory_read_policy=memory_read_policy,
-                runtime_scope=("replay" if runtime_mode == "replay" else "live"),
-                run_id=(replay_run_id if runtime_mode == "replay" else ""),
-                execution_direction_mode=resolve_validation_execution_direction_mode(
-                    config,
-                    target_key=stream_target_key,
-                ),
-            ),
+        analyze = build_analysis_runner(
+            analysis_agent=analysis_config,
             layout=layout,
+            runtime_mode=runtime_mode,
+            config_path=config_path,
+            market_data_store_root=market_data_store_root,
+            market_data_snapshot_id=market_data_snapshot_id,
+            memory_read_policy=memory_read_policy,
+            runtime_scope=("replay" if runtime_mode == "replay" else "live"),
+            run_id=(replay_run_id if runtime_mode == "replay" else ""),
+            execution_direction_mode=resolve_validation_execution_direction_mode(
+                config,
+                target_key=stream_target_key,
+            ),
         )
     analysis_handler = build_analysis_request_handler(
         context_loader=analysis_context_loader,

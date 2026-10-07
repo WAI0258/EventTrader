@@ -30,7 +30,6 @@ from event_trader.research_memory.analysis_price_basis_rebase import (
     rescale_analysis_assessment,
 )
 from event_trader.research_memory.analysis_price_semantics_assembler import (
-    AnalysisPriceSemanticsAssemblyError,
     enrich_assessment_with_analysis_price_semantics,
 )
 from event_trader.storage import WorkspaceLayout
@@ -52,19 +51,10 @@ def align_analysis_assessment_to_active_price_basis(
     market_context: MarketContextSnapshot | None,
 ) -> AnalysisAssessment | None:
     original_assessment = assessment
-    try:
-        assessment = enrich_assessment_with_analysis_price_semantics(
-            assessment,
-            market_context=market_context,
-        )
-    except AnalysisPriceSemanticsAssemblyError as exc:
-        assessment = _fallback_alignment_assessment(
-            assessment=assessment,
-            layout=layout,
-            market_context=market_context,
-        )
-        if assessment is None:
-            raise ActivePriceBasisAlignmentError(str(exc)) from exc
+    assessment = enrich_assessment_with_analysis_price_semantics(
+        assessment,
+        market_context=market_context,
+    )
     if assessment is not None and assessment.analysis_price_semantics is None:
         fallback_assessment = _fallback_alignment_assessment(
             assessment=assessment,
@@ -559,10 +549,6 @@ def _carry_forward_active_setup(
         analysis_price_semantics=replace(
             assessment.analysis_price_semantics,
             active_price_level_ids=carried_level_ids,
-        ),
-        pm_candidate_review_required=(
-            assessment.pm_candidate_review_required
-            or any(level.role_if_flat == "entry" for level in carried_levels)
         ),
     )
     return carried

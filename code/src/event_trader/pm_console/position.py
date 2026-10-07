@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import UTC, datetime
 
 from event_trader.pm_console.schemas import (
-    PMConsoleAnalysisShadowSourceDTO,
     PMConsoleAuditDTO,
     PMConsoleCurrentPortfolioStateDTO,
     PMConsoleDecisionDTO,
@@ -19,7 +18,10 @@ from event_trader.pm_console.schemas import (
     PMConsoleTargetsResponseDTO,
     _isoformat,
 )
-from event_trader.pm_console.thesis import map_pm_console_target_views
+from event_trader.pm_console.thesis import (
+    default_pm_console_target_view,
+    map_pm_console_target_views,
+)
 from event_trader.position_monitoring import (
     PositionMonitoringSnapshot,
 )
@@ -37,7 +39,7 @@ def build_targets_response(layout: WorkspaceLayout) -> PMConsoleTargetsResponseD
             PMConsoleTargetDTO(
                 target_key=target_key,
                 implemented_views=implemented_views,
-                default_view="workbench",
+                default_view=default_pm_console_target_view(implemented_views),
             )
             for target_key, implemented_views in target_views.items()
         ),
@@ -83,11 +85,11 @@ def build_position_response(snapshot: PositionMonitoringSnapshot) -> PMConsolePo
                 price=point.price,
                 pm_pipeline_value=point.pm_pipeline_value,
                 buy_hold_value=point.buy_hold_value,
-                analysis_direct_shadow_value=point.analysis_direct_shadow_value,
+                analysis_direct_value=point.analysis_direct_value,
                 pm_target_weight=point.pm_target_weight,
-                analysis_shadow_target_weight=point.analysis_shadow_target_weight,
+                analysis_direct_target_weight=point.analysis_direct_target_weight,
                 pm_state=point.pm_state,
-                analysis_shadow_state=point.analysis_shadow_state,
+                analysis_direct_state=point.analysis_direct_state,
             )
             for point in snapshot.points
         ),
@@ -107,6 +109,9 @@ def build_position_response(snapshot: PositionMonitoringSnapshot) -> PMConsolePo
                 position=marker.position,
                 text=marker.text,
                 source_id=marker.source_id,
+                pm_decision_id=marker.pm_decision_id,
+                execution_record_id=marker.execution_record_id,
+                analysis_assessment_id=marker.analysis_assessment_id,
             )
             for marker in snapshot.markers
         ),
@@ -133,16 +138,6 @@ def build_position_response(snapshot: PositionMonitoringSnapshot) -> PMConsolePo
                 requested_target_weight=snapshot.latest_execution.requested_target_weight,
                 executed_at=_isoformat(snapshot.latest_execution.executed_at),
                 target_weight=snapshot.latest_execution.target_weight,
-            )
-        ),
-        latest_analysis_shadow_source=(
-            None
-            if snapshot.latest_analysis_shadow_source is None
-            else PMConsoleAnalysisShadowSourceDTO(
-                assessment_id=snapshot.latest_analysis_shadow_source.assessment_id,
-                business_at=snapshot.latest_analysis_shadow_source.business_at.isoformat(),
-                as_if_flat_state=snapshot.latest_analysis_shadow_source.as_if_flat_state,
-                target_weight=snapshot.latest_analysis_shadow_source.target_weight,
             )
         ),
         notes=snapshot.notes,

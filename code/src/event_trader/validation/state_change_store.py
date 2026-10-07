@@ -127,8 +127,14 @@ def append_state_change_once(
 def read_state_changes(
     layout: WorkspaceLayout,
     target_key: str,
+    *,
+    source_kind: ViewStateChangeSourceKind | None = None,
 ) -> tuple[ViewStateChange, ...]:
-    """Read one target's canonical state-change stream across monthly shards."""
+    """Read one target's canonical state-change stream across monthly shards.
+
+    When ``source_kind`` is specified, non-matching historical records are left
+    outside the requested projection and are not deserialized as ViewStateChange.
+    """
     if not isinstance(layout, WorkspaceLayout):
         raise StateChangeStoreError("layout must be a WorkspaceLayout instance.")
     validated_target_key = validate_target_key(
@@ -169,6 +175,21 @@ def read_state_changes(
                     "state-change shard contains a blank line at "
                     f"{shard_path}:{line_number}."
                 )
+            if source_kind is not None:
+                try:
+                    payload = json.loads(line)
+                except json.JSONDecodeError as exc:
+                    raise StateChangeStoreError(
+                        "state-change shard contains invalid JSON at "
+                        f"{shard_path}:{line_number}: {exc}"
+                    ) from exc
+                if not isinstance(payload, dict):
+                    raise StateChangeStoreError(
+                        "state-change shard lines must decode to JSON objects at "
+                        f"{shard_path}:{line_number}."
+                    )
+                if payload.get("source_kind") != source_kind:
+                    continue
             state_change = _deserialize_view_state_change(
                 line,
                 shard_path=shard_path,
@@ -193,6 +214,19 @@ def read_state_changes(
     return tuple(state_changes)
 
 
+def read_pm_execution_sidecar_state_changes(
+    layout: WorkspaceLayout,
+    target_key: str,
+) -> tuple[ViewStateChange, ...]:
+    """Read the PM-execution projection of a target's state-change stream."""
+
+    return read_state_changes(
+        layout,
+        target_key,
+        source_kind="pm_execution_sidecar",
+    )
+
+
 def _serialize_view_state_change(state_change: ViewStateChange) -> dict[str, object]:
     return {
         "state_change_id": state_change.state_change_id,
@@ -208,6 +242,8 @@ def _serialize_view_state_change(state_change: ViewStateChange) -> dict[str, obj
         "source_kind": state_change.source_kind,
         "pm_decision_id": state_change.pm_decision_id,
         "execution_record_id": state_change.execution_record_id,
+        "predecessor_instrument_basis": state_change.predecessor_instrument_basis,
+        "instrument_basis": state_change.instrument_basis,
     }
 
 
@@ -258,6 +294,8 @@ def _deserialize_view_state_change(
             source_kind=payload["source_kind"],
             pm_decision_id=payload.get("pm_decision_id"),
             execution_record_id=payload.get("execution_record_id"),
+            predecessor_instrument_basis=payload.get("predecessor_instrument_basis"),
+            instrument_basis=payload.get("instrument_basis"),
         )
     except KeyError as exc:
         raise StateChangeStoreError(

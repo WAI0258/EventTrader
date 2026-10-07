@@ -112,16 +112,20 @@ class PriceLevelRole:
             "source_refs",
             _validate_string_tuple(self.source_refs, "source_refs", allow_empty=True),
         )
-        object.__setattr__(self, "role_if_flat", _validate_role(self.role_if_flat))
+        object.__setattr__(
+            self,
+            "role_if_flat",
+            _validate_role(self.role_if_flat, "role_if_flat"),
+        )
         object.__setattr__(
             self,
             "role_if_already_long",
-            _validate_role(self.role_if_already_long),
+            _validate_role(self.role_if_already_long, "role_if_already_long"),
         )
         object.__setattr__(
             self,
             "role_if_already_short",
-            _validate_role(self.role_if_already_short),
+            _validate_role(self.role_if_already_short, "role_if_already_short"),
         )
         if not isinstance(self.path_context_required, bool):
             raise PriceLevelRoleContractError("path_context_required must be a boolean.")
@@ -209,6 +213,19 @@ def parse_price_level_role(payload: Mapping[str, object]) -> PriceLevelRole:
     )
 
 
+def is_semantically_active_price_level(level: PriceLevelRole) -> bool:
+    return (
+        not (
+            level.role_if_flat == "not_relevant"
+            and level.role_if_already_long == "not_relevant"
+            and level.role_if_already_short == "not_relevant"
+        )
+        or bool(level.refresh_triggers)
+        or bool(level.invalidation_triggers)
+        or level.path_context_required
+    )
+
+
 def _validate_non_blank(value: object, field_name: str) -> str:
     if not isinstance(value, str) or not value.strip():
         raise PriceLevelRoleContractError(f"{field_name} must be a non-blank string.")
@@ -268,9 +285,12 @@ def _validate_string_tuple(
     return normalized
 
 
-def _validate_role(value: object) -> MaterialLevelRole:
+def _validate_role(value: object, field_name: str) -> MaterialLevelRole:
     if value not in _MATERIAL_LEVEL_ROLES:
-        raise PriceLevelRoleContractError("material level role is not supported.")
+        allowed_values = ", ".join(sorted(_MATERIAL_LEVEL_ROLES))
+        raise PriceLevelRoleContractError(
+            f"{field_name} must be one of: {allowed_values}; actual={value!r}."
+        )
     return cast(MaterialLevelRole, value)
 
 
@@ -332,5 +352,6 @@ __all__ = [
     "PriceLevelRole",
     "PriceLevelRoleContractError",
     "PriceLevelSourceType",
+    "is_semantically_active_price_level",
     "parse_price_level_role",
 ]

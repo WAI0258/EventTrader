@@ -184,6 +184,16 @@ class FileBackedReflectionCompletionOutbox:
             _read_outbox_entry(path) for path in sorted(self._published_root.glob("*.json"))
         )
 
+    def find_pending(self, idempotency_key: str) -> ReflectionCompletionOutboxEntry | None:
+        normalized_key = _require_text(idempotency_key, "idempotency_key")
+        path = self._pending_path(normalized_key)
+        return _read_outbox_entry(path) if path.exists() else None
+
+    def find_published(self, idempotency_key: str) -> ReflectionCompletionOutboxEntry | None:
+        normalized_key = _require_text(idempotency_key, "idempotency_key")
+        path = self._published_path(normalized_key)
+        return _read_outbox_entry(path) if path.exists() else None
+
     def mark_published(
         self,
         entry: ReflectionCompletionOutboxEntry,

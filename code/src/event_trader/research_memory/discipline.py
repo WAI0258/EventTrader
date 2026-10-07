@@ -15,7 +15,7 @@ _HEADING_RE = re.compile(r"^(#{1,6})\s+(.*?)\s*$")
 _LIST_MARKER_RE = re.compile(r"^(?:[-*+]\s+|\d+\.\s+)")
 _INDEX_LIST_ENTRY_MAX_WORDS = 24
 _FIXED_TARGET_ENTRY_PAGES = frozenset(
-    {"thesis.md", "timeline.md", "risks.md", "watchlist.md", "operator.md"}
+    {"thesis.md", "timeline.md", "risks.md", "watchlist.md"}
 )
 _INDEX_SECTIONS = (
     "Current Reading Path",

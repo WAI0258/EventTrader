@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from math import prod
+from math import isfinite, prod
 from typing import Literal
 
 from event_trader.contracts.view_state_change import (
@@ -103,6 +103,14 @@ class OpenEpisodeTerminalMark:
 
 
 @dataclass(frozen=True, slots=True)
+class MarkReturn:
+    """Canonical underlying and weighted strategy return for one price mark."""
+
+    underlying_return: float
+    strategy_return: float
+
+
+@dataclass(frozen=True, slots=True)
 class _ExecutionPrice:
     timestamp: datetime
     price: float
@@ -118,6 +126,43 @@ def _realized_price(
         raw_price=execution_price.price,
         timestamp=execution_price.timestamp,
         sidecar=adjustment_sidecar,
+    )
+
+
+def calculate_mark_return(
+    *,
+    entry_price: float,
+    mark_price: float,
+    target_weight: float,
+) -> MarkReturn:
+    """Apply the project-owned validation return convention to one mark."""
+
+    values = {
+        "entry_price": entry_price,
+        "mark_price": mark_price,
+        "target_weight": target_weight,
+    }
+    normalized: dict[str, float] = {}
+    for field_name, value in values.items():
+        if isinstance(value, bool):
+            raise ValidationReturnsError(f"{field_name} must be a finite number.")
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValidationReturnsError(
+                f"{field_name} must be a finite number."
+            ) from exc
+        if not isfinite(numeric):
+            raise ValidationReturnsError(f"{field_name} must be a finite number.")
+        normalized[field_name] = numeric
+    if normalized["entry_price"] <= 0.0:
+        raise ValidationReturnsError("entry_price must be greater than zero.")
+    if normalized["mark_price"] <= 0.0:
+        raise ValidationReturnsError("mark_price must be greater than zero.")
+    underlying_return = normalized["mark_price"] / normalized["entry_price"] - 1.0
+    return MarkReturn(
+        underlying_return=underlying_return,
+        strategy_return=normalized["target_weight"] * underlying_return,
     )
 
 
@@ -189,8 +234,11 @@ def calculate_returns(
             if exit_execution
             else exit_bar.open_price
         )
-        underlying_return = exit_price / entry_price - 1.0
-        strategy_return = segment.target_weight * underlying_return
+        mark_return = calculate_mark_return(
+            entry_price=entry_price,
+            mark_price=exit_price,
+            target_weight=segment.target_weight,
+        )
         calculated = SegmentReturn(
             segment_id=segment.segment_id,
             episode_id=segment.episode_id,
@@ -200,8 +248,8 @@ def calculate_returns(
             entry_price=entry_price,
             exit_price=exit_price,
             target_weight=segment.target_weight,
-            underlying_return=underlying_return,
-            strategy_return=strategy_return,
+            underlying_return=mark_return.underlying_return,
+            strategy_return=mark_return.strategy_return,
         )
         segment_returns.append(calculated)
         segment_returns_by_episode.setdefault(segment.episode_id, []).append(calculated)
@@ -375,8 +423,11 @@ def calculate_open_episode_terminal_mark(
         if entry_execution
         else entry.open_price
     )
-    underlying_return = mark_bar.close_price / entry_price - 1.0
-    strategy_return = open_segment.target_weight * underlying_return
+    mark_return = calculate_mark_return(
+        entry_price=entry_price,
+        mark_price=mark_bar.close_price,
+        target_weight=open_segment.target_weight,
+    )
     return OpenEpisodeTerminalMark(
         episode_id=open_episode.episode_id,
         target_key=open_episode.target_key,
@@ -386,8 +437,8 @@ def calculate_open_episode_terminal_mark(
         mark_bar_start_at=mark_bar.start_at,
         entry_price=entry_price,
         mark_price=mark_bar.close_price,
-        underlying_return=underlying_return,
-        strategy_return=strategy_return,
+        underlying_return=mark_return.underlying_return,
+        strategy_return=mark_return.strategy_return,
         target_weight=open_segment.target_weight,
     )
 
@@ -437,8 +488,11 @@ def _calculate_horizon_baseline(
         )
 
     exit_bar = bars[covering_bar_index]
-    underlying_return = exit_bar.close_price / entry_price - 1.0
-    strategy_return = opening_weight * underlying_return
+    mark_return = calculate_mark_return(
+        entry_price=entry_price,
+        mark_price=exit_bar.close_price,
+        target_weight=opening_weight,
+    )
     return HorizonBaseline(
         episode_id=episode.episode_id,
         target_key=episode.target_key,
@@ -447,8 +501,8 @@ def _calculate_horizon_baseline(
         status="final",
         entry_bar_start_at=entry.start_at,
         exit_bar_start_at=exit_bar.start_at,
-        underlying_return=underlying_return,
-        strategy_return=strategy_return,
+        underlying_return=mark_return.underlying_return,
+        strategy_return=mark_return.strategy_return,
         bar_count=covering_bar_index - entry_index + 1,
     )
 

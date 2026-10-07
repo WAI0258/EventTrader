@@ -1,8 +1,24 @@
 # Event-Trader: An Event-Driven LLM Research Runtime for Asynchronous Financial Evidence
 
-[Paper](paper/event_trader.pdf) · [Installation](#installation) · [Usage](#usage) · [Experiments](#experiments) · [Citation](#citation)
+[Paper](paper/event_trader.pdf) · [Results](#results) · [Installation](#installation) · [Usage](#usage) · [Experiments](#experiments) · [Citation](#citation)
 
-Event-Trader is an LLM research and trading system for asynchronous financial evidence. It follows a discretionary trading workflow: admit new evidence, decide when further research is needed, revise research memory, and review trading positions. The paper studies this workflow in a gold-trading application.
+Event-Trader follows incoming financial evidence to update research and trading decisions. It models a discretionary trading workflow: admit new evidence, decide when further research is needed, revise research memory, and review positions. The paper evaluates this event-driven LLM system in a gold-trading application.
+
+## Results
+
+![SOXX paper-trading PM and Direct curves](assets/paper-trading/soxx-selected.png)
+
+![IAU paper-trading PM and Direct curves](assets/paper-trading/iau-selected.png)
+
+| Paper-trading case (2026, UTC) | PM | Direct |
+| --- | ---: | ---: |
+| SOXX, June 4–September 5 | **+13.58%** | −1.49% |
+| IAU, July 20–August 24 | +4.23% | **+8.47%** |
+| BTC, September 11–15 (full available overlap) | −0.81% | +1.14% |
+
+PM follows recorded paper executions with their persisted execution-adjusted costs. Direct is a hypothetical mapping of analysis assessments to positions. SOXX's cutoff and IAU's 35-day interval were selected after observing performance; [full intervals, CSVs and original PM Console instructions](data/paper-trading/README.md) accompany these cases. BTC currently has less than 30 days of overlapping price coverage. These examples are separate from the paper's historical replay experiments.
+
+See the [paper](paper/event_trader.pdf) for the full comparisons and experimental setup, and [REPRODUCTION.md](REPRODUCTION.md) for saved results and reproduction details.
 
 ## Framework
 
@@ -53,6 +69,21 @@ Additional tool credentials depend on the tools you enable; variable names are l
 
 ## Usage
 
+### Inspect the paper-trading examples
+
+The original PM Console includes a saved-result mode for inspecting the supplied numerical workspaces without raw market data or API credentials:
+
+```sh
+cd code
+uv run event-trader-pm-console --mount-catalog ../data/paper-trading/mounts.toml --saved-results
+```
+
+In another terminal, run `npm ci` and `npm run dev` from `code/frontend/pm-console/`, then open http://127.0.0.1:4173. Select a target to inspect its PM/Direct curves and recorded position decisions. See the [example guide](data/paper-trading/README.md) for the retained data and omitted narrative content.
+
+Users can also connect their own Futu or compatible market-data provider and add a Buy & Hold baseline over the same historical interval. See [the baseline instructions](data/paper-trading/README.md#compare-with-buy--hold-using-your-own-market-data); fetched data stays local, and saved PM/Direct results remain unchanged.
+
+### Replay
+
 From `code/`, inspect the replay options:
 
 ```sh
@@ -74,6 +105,8 @@ uv run python -m event_trader.tools.replay_runtime run \
 This is a command template, not a bundled complete experiment. Use a separate output workspace for new runs. Details on input formats, baseline setup and evaluation are in [REPRODUCTION.md](REPRODUCTION.md).
 
 ## Experiments
+
+In a one-week ablation (February 24–March 2, 2026), Continuous Event-to-Analysis Unit (CEAU) formation reduced total successful analysis runtime by **64.2%** and successful token use by **62.9%** relative to direct per-record invocation. Returns were 1.53% and 1.44%, respectively; direct per-record invocation had the lower maximum drawdown (0.27% versus 0.48%).
 
 The repository includes saved baseline comparisons, timebatch experiments, CEAU ablation records and case-study summaries. Check these results without model calls or API keys, from the repository root:
 

@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import threading
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import UTC, datetime
 from hashlib import sha256
 from pathlib import Path
@@ -37,6 +37,7 @@ class PMReviewWorkItem:
     causation_id: str | None
     idempotency_key: str
     enqueued_at: datetime
+    available_at: datetime | None = None
     source_analysis_unit_id: str | None = None
     source_record_id: str | None = None
     source_outcome_record_ref: str | None = None
@@ -74,6 +75,13 @@ class PMReviewWorkItem:
             "enqueued_at",
             _validate_timestamp(self.enqueued_at, field_name="enqueued_at"),
         )
+        object.__setattr__(
+            self,
+            "available_at",
+            self.enqueued_at
+            if self.available_at is None
+            else _validate_timestamp(self.available_at, field_name="available_at"),
+        )
         for field_name in (
             "source_analysis_unit_id",
             "source_record_id",
@@ -86,6 +94,9 @@ class PMReviewWorkItem:
             )
 
     def to_json_payload(self) -> dict[str, object]:
+        available_at = self.available_at
+        if available_at is None:
+            raise PMReviewQueueError("available_at must be set after validation.")
         return {
             "work_item_id": self.work_item_id,
             "target_key": self.target_key,
@@ -96,6 +107,7 @@ class PMReviewWorkItem:
             "causation_id": self.causation_id,
             "idempotency_key": self.idempotency_key,
             "enqueued_at": self.enqueued_at.isoformat(),
+            "available_at": available_at.isoformat(),
             "source_analysis_unit_id": self.source_analysis_unit_id,
             "source_record_id": self.source_record_id,
             "source_outcome_record_ref": self.source_outcome_record_ref,
@@ -120,6 +132,11 @@ class PMReviewWorkItem:
             causation_id=_optional_text(payload_map.get("causation_id"), "causation_id"),
             idempotency_key=_require_text(payload_map.get("idempotency_key"), "idempotency_key"),
             enqueued_at=_require_datetime(payload_map.get("enqueued_at"), "enqueued_at"),
+            available_at=(
+                None
+                if payload_map.get("available_at") is None
+                else _require_datetime(payload_map.get("available_at"), "available_at")
+            ),
             source_analysis_unit_id=_optional_text(
                 payload_map.get("source_analysis_unit_id", payload_map.get("analysis_unit_id")),
                 "source_analysis_unit_id",
@@ -340,6 +357,8 @@ class FileBackedPMReviewWorkQueue:
                 if self._completed_path(item.idempotency_key).exists():
                     self._remove_if_exists(pending_path)
                     continue
+                if item.available_at is not None and item.available_at > self._now():
+                    continue
                 claim_path = self._in_flight_path(item.idempotency_key)
                 if claim_path.exists():
                     continue
@@ -356,6 +375,35 @@ class FileBackedPMReviewWorkQueue:
                     claim_path=claim_path,
                 )
             return None
+
+    def defer(
+        self,
+        claim: PMReviewQueueClaim,
+        *,
+        available_at: datetime,
+    ) -> PMReviewWorkItem:
+        """Return an unfinished item to pending work after a non-terminal wait."""
+
+        with self._lock:
+            if not isinstance(claim, PMReviewQueueClaim):
+                raise PMReviewQueueError("claim must be a PMReviewQueueClaim.")
+            if claim.queue_name != self._queue_name:
+                raise PMReviewQueueError("claim queue_name does not match this queue.")
+            normalized_available_at = _validate_timestamp(
+                available_at,
+                field_name="available_at",
+            )
+            if normalized_available_at <= claim.claimed_at:
+                raise PMReviewQueueError("available_at must be after claim time.")
+            deferred_item = replace(claim.item, available_at=normalized_available_at)
+            pending_path = self._pending_path(claim.idempotency_key)
+            if not pending_path.exists():
+                pending_path.write_text(
+                    json.dumps(deferred_item.to_json_payload(), sort_keys=True),
+                    encoding="utf-8",
+                )
+            self._remove_if_exists(claim.claim_path)
+            return deferred_item
 
     def complete(
         self,
@@ -624,7 +672,10 @@ def _read_work_item(path: Path) -> PMReviewWorkItem:
 
 
 def _read_completion(path: Path) -> PMReviewQueueCompletion:
-    payload = _require_dict(json.loads(path.read_text(encoding="utf-8-sig")), "PMReviewQueueCompletion")
+    payload = _require_dict(
+        json.loads(path.read_text(encoding="utf-8-sig")),
+        "PMReviewQueueCompletion",
+    )
     return PMReviewQueueCompletion(
         queue_name=_require_text(payload.get("queue_name"), "queue_name"),
         work_item_id=_require_text(payload.get("work_item_id"), "work_item_id"),
@@ -636,7 +687,10 @@ def _read_completion(path: Path) -> PMReviewQueueCompletion:
 
 
 def _read_failure(path: Path) -> PMReviewQueueFailure:
-    payload = _require_dict(json.loads(path.read_text(encoding="utf-8-sig")), "PMReviewQueueFailure")
+    payload = _require_dict(
+        json.loads(path.read_text(encoding="utf-8-sig")),
+        "PMReviewQueueFailure",
+    )
     return PMReviewQueueFailure(
         queue_name=_require_text(payload.get("queue_name"), "queue_name"),
         work_item_id=_require_text(payload.get("work_item_id"), "work_item_id"),

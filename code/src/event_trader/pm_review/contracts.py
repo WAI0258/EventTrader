@@ -7,11 +7,26 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime
 from hashlib import sha256
-from math import isfinite
+from math import isclose, isfinite
 from typing import Literal, cast
 
+from event_trader.contracts._validators import (
+    normalize_content,
+    validate_event_id,
+    validate_target_key,
+    validate_timestamp,
+)
 from event_trader.contracts.analysis_assessment import AnalysisAssessment
 from event_trader.contracts.evidence import EvidenceLedgerRecord
+from event_trader.contracts.execution_direction_policy import (
+    allowed_view_states_for_execution_direction_mode,
+    analysis_assessment_direction_policy_violations,
+    validate_execution_direction_mode,
+)
+from event_trader.contracts.pm_review_reason import (
+    PMReviewReason,
+    validate_pm_review_reasons,
+)
 from event_trader.contracts.price_level_role import (
     PriceLevelRole,
     PriceLevelRoleContractError,
@@ -21,25 +36,9 @@ from event_trader.contracts.temporal_visibility import (
     DecisionVisibilityBoundary,
     DecisionVisibilityBoundaryError,
 )
-from event_trader.contracts._validators import (
-    normalize_content,
-    validate_event_id,
-    validate_target_key,
-    validate_timestamp,
-)
-from event_trader.contracts.pm_review_reason import (
-    PMReviewReason,
-    validate_pm_review_reasons,
-)
-from event_trader.contracts.execution_direction_policy import (
-    allowed_view_states_for_execution_direction_mode,
-    analysis_assessment_direction_policy_violations,
-    validate_execution_direction_mode,
-)
 from event_trader.contracts.view_state_change import (
     MarketDataBar,
     ViewState,
-    ViewStateChangeContractError,
     canonical_view_state_target_weight,
 )
 from event_trader.episode_memory.contracts import (
@@ -67,6 +66,10 @@ CandidateReviewAnchorSource = Literal[
 ]
 Confidence = Literal["low", "medium", "high"]
 PMReviewExecutionDirectionMode = Literal["long_only", "long_short"]
+PMPortfolioRiskEntrySource = Literal[
+    "same_basis_execution",
+    "active_basis_market_bar",
+]
 PMReviewFailureStage = Literal[
     "pm_review_run",
     "pm_review_run_and_execute",
@@ -84,6 +87,14 @@ PMReviewEpisodeMemoryReadReceiptStatus = Literal[
     "skipped",
     "failed",
 ]
+
+_EXPLICIT_HOLD_REVIEW_REASONS: frozenset[PMReviewReason] = frozenset(
+    {
+        "current_exposure_pressure",
+        "risk_reward_compression",
+        "invalidation_touched",
+    }
+)
 
 _PM_REVIEW_SOURCES = frozenset(
     {
@@ -467,20 +478,42 @@ class PMAnalysisSnapshot:
 class PMPortfolioRiskSnapshot:
     """Deterministic portfolio-path risk context surfaced to PMReview."""
 
-    position_opened_at: datetime
+    episode_id: str
+    segment_id: str
+    instrument_basis: str
+    segment_opened_at: datetime
+    entry_reference_at: datetime
     entry_reference_price: float
+    entry_source: PMPortfolioRiskEntrySource
+    target_weight: float
     current_mark_price: float
     mark_as_of: datetime
-    unrealized_directional_return_pct: float
-    drawdown_from_best_mark_pct: float | None = None
+    underlying_return: float
+    strategy_return: float
+    drawdown_from_best_strategy_return: float
 
     def __post_init__(self) -> None:
+        for field_name in ("episode_id", "segment_id", "instrument_basis"):
+            object.__setattr__(
+                self,
+                field_name,
+                _validate_non_blank(getattr(self, field_name), field_name),
+            )
         object.__setattr__(
             self,
-            "position_opened_at",
+            "segment_opened_at",
             validate_timestamp(
-                self.position_opened_at,
-                field_name="position_opened_at",
+                self.segment_opened_at,
+                field_name="segment_opened_at",
+                error_type=PMReviewContractError,
+            ),
+        )
+        object.__setattr__(
+            self,
+            "entry_reference_at",
+            validate_timestamp(
+                self.entry_reference_at,
+                field_name="entry_reference_at",
                 error_type=PMReviewContractError,
             ),
         )
@@ -493,10 +526,19 @@ class PMPortfolioRiskSnapshot:
                 error_type=PMReviewContractError,
             ),
         )
-        if self.mark_as_of < self.position_opened_at:
+        if self.entry_reference_at < self.segment_opened_at:
             raise PMReviewContractError(
-                "mark_as_of must be at or after position_opened_at."
+                "entry_reference_at must be at or after segment_opened_at."
             )
+        if self.mark_as_of < self.entry_reference_at:
+            raise PMReviewContractError(
+                "mark_as_of must be at or after entry_reference_at."
+            )
+        if self.entry_source not in {
+            "same_basis_execution",
+            "active_basis_market_bar",
+        }:
+            raise PMReviewContractError("entry_source is unsupported.")
         entry_reference_price = _validate_finite_float(
             self.entry_reference_price,
             "entry_reference_price",
@@ -515,43 +557,74 @@ class PMPortfolioRiskSnapshot:
             )
         object.__setattr__(self, "entry_reference_price", entry_reference_price)
         object.__setattr__(self, "current_mark_price", current_mark_price)
-        object.__setattr__(
-            self,
-            "unrealized_directional_return_pct",
-            _validate_finite_float(
-                self.unrealized_directional_return_pct,
-                "unrealized_directional_return_pct",
-            ),
+        target_weight = _validate_finite_float(self.target_weight, "target_weight")
+        if target_weight == 0.0:
+            raise PMReviewContractError("target_weight must be non-zero.")
+        object.__setattr__(self, "target_weight", target_weight)
+        underlying_return = _validate_finite_float(
+            self.underlying_return,
+            "underlying_return",
         )
-        drawdown_from_best_mark_pct = (
-            None
-            if self.drawdown_from_best_mark_pct is None
-            else _validate_finite_float(
-                self.drawdown_from_best_mark_pct,
-                "drawdown_from_best_mark_pct",
-            )
+        strategy_return = _validate_finite_float(
+            self.strategy_return,
+            "strategy_return",
         )
-        if (
-            drawdown_from_best_mark_pct is not None
-            and drawdown_from_best_mark_pct < 0.0
+        expected_underlying_return = current_mark_price / entry_reference_price - 1.0
+        if not isclose(
+            underlying_return,
+            expected_underlying_return,
+            rel_tol=1e-12,
+            abs_tol=1e-12,
         ):
             raise PMReviewContractError(
-                "drawdown_from_best_mark_pct must be non-negative when provided."
+                "underlying_return must match entry_reference_price and current_mark_price."
+            )
+        if not isclose(
+            strategy_return,
+            target_weight * underlying_return,
+            rel_tol=1e-12,
+            abs_tol=1e-12,
+        ):
+            raise PMReviewContractError(
+                "strategy_return must equal target_weight * underlying_return."
             )
         object.__setattr__(
             self,
-            "drawdown_from_best_mark_pct",
-            drawdown_from_best_mark_pct,
+            "underlying_return",
+            underlying_return,
+        )
+        object.__setattr__(self, "strategy_return", strategy_return)
+        drawdown = _validate_finite_float(
+            self.drawdown_from_best_strategy_return,
+            "drawdown_from_best_strategy_return",
+        )
+        if drawdown < 0.0:
+            raise PMReviewContractError(
+                "drawdown_from_best_strategy_return must be non-negative."
+            )
+        object.__setattr__(
+            self,
+            "drawdown_from_best_strategy_return",
+            drawdown,
         )
 
     def to_json_payload(self) -> dict[str, object]:
         return {
-            "position_opened_at": self.position_opened_at.isoformat(),
+            "episode_id": self.episode_id,
+            "segment_id": self.segment_id,
+            "instrument_basis": self.instrument_basis,
+            "segment_opened_at": self.segment_opened_at.isoformat(),
+            "entry_reference_at": self.entry_reference_at.isoformat(),
             "entry_reference_price": self.entry_reference_price,
+            "entry_source": self.entry_source,
+            "target_weight": self.target_weight,
             "current_mark_price": self.current_mark_price,
             "mark_as_of": self.mark_as_of.isoformat(),
-            "unrealized_directional_return_pct": self.unrealized_directional_return_pct,
-            "drawdown_from_best_mark_pct": self.drawdown_from_best_mark_pct,
+            "underlying_return": self.underlying_return,
+            "strategy_return": self.strategy_return,
+            "drawdown_from_best_strategy_return": (
+                self.drawdown_from_best_strategy_return
+            ),
         }
 
 
@@ -728,8 +801,15 @@ class PMReviewInput:
                     "portfolio_risk_snapshot.mark_as_of exceeds "
                     "decision_visibility.max_visible_market_time."
                 )
-        elif self.actual_current_state == "flat":
-            pass
+            if self.portfolio_risk_snapshot.target_weight != actual_target_weight_before:
+                raise PMReviewContractError(
+                    "portfolio_risk_snapshot.target_weight must match "
+                    "actual_target_weight_before."
+                )
+        elif self.current_exposure_required and self.actual_current_state != "flat":
+            raise PMReviewContractError(
+                "portfolio_risk_snapshot is required for a non-flat current-exposure review."
+            )
         object.__setattr__(
             self,
             "visible_evidence",
@@ -888,6 +968,23 @@ class PMReviewInput:
                 None if self.candidate_anchor is None else self.candidate_anchor.to_json_payload()
             ),
         }
+
+
+def pm_review_hold_reason_required(
+    *,
+    pm_review_input: PMReviewInput,
+    requested_state: ViewState,
+) -> bool:
+    """Return whether an unchanged risk-reviewed exposure requires a hold code."""
+
+    if not pm_review_input.current_exposure_required:
+        return False
+    if requested_state != pm_review_input.actual_current_state:
+        return False
+    return any(
+        reason in _EXPLICIT_HOLD_REVIEW_REASONS
+        for reason in pm_review_input.review_reasons
+    )
 
 
 @dataclass(frozen=True, slots=True)
@@ -2318,6 +2415,7 @@ def _evidence_record_to_json_payload(record: EvidenceLedgerRecord) -> dict[str, 
 
 def _market_bar_to_json_payload(record: MarketDataBar) -> dict[str, object]:
     return {
+        "bar_id": _market_bar_id(record),
         "start_at": record.start_at.isoformat(),
         "end_at": record.end_at.isoformat(),
         "open_price": record.open_price,
@@ -2396,6 +2494,7 @@ def _parse_visible_market_bars(
         _require_exact_fields(
             item,
             required={
+                "bar_id",
                 "start_at",
                 "end_at",
                 "open_price",
@@ -2407,18 +2506,21 @@ def _parse_visible_market_bars(
             },
             surface=f"{field_name}[{index}]",
         )
-        items.append(
-            MarketDataBar(
-                start_at=_parse_timestamp(item.get("start_at"), "start_at"),
-                end_at=_parse_timestamp(item.get("end_at"), "end_at"),
-                open_price=_require_float(item, "open_price"),
-                high_price=_require_float(item, "high_price"),
-                low_price=_require_float(item, "low_price"),
-                close_price=_require_float(item, "close_price"),
-                volume=_require_float(item, "volume"),
-                vwap=_optional_float(item.get("vwap")),
-            )
+        bar = MarketDataBar(
+            start_at=_parse_timestamp(item.get("start_at"), "start_at"),
+            end_at=_parse_timestamp(item.get("end_at"), "end_at"),
+            open_price=_require_float(item, "open_price"),
+            high_price=_require_float(item, "high_price"),
+            low_price=_require_float(item, "low_price"),
+            close_price=_require_float(item, "close_price"),
+            volume=_require_float(item, "volume"),
+            vwap=_optional_float(item.get("vwap")),
         )
+        if _require_text(item, "bar_id") != _market_bar_id(bar):
+            raise PMReviewContractError(
+                f"{field_name}[{index}].bar_id must match its market-bar timestamps."
+            )
+        items.append(bar)
     return tuple(items)
 
 
@@ -2712,29 +2814,44 @@ def parse_pm_portfolio_risk_snapshot(
     _require_exact_fields(
         payload,
         required={
-            "position_opened_at",
+            "episode_id",
+            "segment_id",
+            "instrument_basis",
+            "segment_opened_at",
+            "entry_reference_at",
             "entry_reference_price",
+            "entry_source",
+            "target_weight",
             "current_mark_price",
             "mark_as_of",
-            "unrealized_directional_return_pct",
-            "drawdown_from_best_mark_pct",
+            "underlying_return",
+            "strategy_return",
+            "drawdown_from_best_strategy_return",
         },
         surface="pm_portfolio_risk_snapshot",
     )
     return PMPortfolioRiskSnapshot(
-        position_opened_at=_parse_timestamp(
-            payload.get("position_opened_at"),
-            "position_opened_at",
+        episode_id=_require_text(payload, "episode_id"),
+        segment_id=_require_text(payload, "segment_id"),
+        instrument_basis=_require_text(payload, "instrument_basis"),
+        segment_opened_at=_parse_timestamp(
+            payload.get("segment_opened_at"), "segment_opened_at"
+        ),
+        entry_reference_at=_parse_timestamp(
+            payload.get("entry_reference_at"), "entry_reference_at"
         ),
         entry_reference_price=_require_float(payload, "entry_reference_price"),
+        entry_source=cast(
+            PMPortfolioRiskEntrySource,
+            _require_text(payload, "entry_source"),
+        ),
+        target_weight=_require_float(payload, "target_weight"),
         current_mark_price=_require_float(payload, "current_mark_price"),
         mark_as_of=_parse_timestamp(payload.get("mark_as_of"), "mark_as_of"),
-        unrealized_directional_return_pct=_require_float(
-            payload,
-            "unrealized_directional_return_pct",
-        ),
-        drawdown_from_best_mark_pct=_optional_float(
-            payload.get("drawdown_from_best_mark_pct")
+        underlying_return=_require_float(payload, "underlying_return"),
+        strategy_return=_require_float(payload, "strategy_return"),
+        drawdown_from_best_strategy_return=_require_float(
+            payload, "drawdown_from_best_strategy_return"
         ),
     )
 
@@ -2751,6 +2868,7 @@ __all__ = [
     "Confidence",
     "PMAnalysisSnapshot",
     "PMDecisionDraft",
+    "PMPortfolioRiskEntrySource",
     "PMPortfolioRiskSnapshot",
     "PMReviewExecutionDirectionMode",
     "PMPositionReviewTriggers",
@@ -2781,5 +2899,6 @@ __all__ = [
     "parse_pm_review_request",
     "parse_pm_review_episode_memory_read_receipt",
     "parse_pm_review_tool_read_receipt",
+    "pm_review_hold_reason_required",
     "requested_state_allowed_for_execution_direction_mode",
 ]

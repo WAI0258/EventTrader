@@ -94,6 +94,20 @@ def resolve_transition(
     from_state: SystemViewState = (
         "uninitialized" if previous_state_change is None else previous_state_change.state
     )
+    if next_state_change.source_kind == "basis_handover":
+        if previous_state_change is None:
+            raise ValidationStateMachineError(
+                "basis_handover requires an existing directional state-change."
+            )
+        if next_state_change.state != previous_state_change.state:
+            raise ValidationStateMachineError(
+                "basis_handover must preserve the existing view state."
+            )
+        return TransitionResult(
+            from_state=from_state,
+            to_state=next_state_change.state,
+            actions=("rollover_view",),
+        )
     return TransitionResult(
         from_state=from_state,
         to_state=next_state_change.state,

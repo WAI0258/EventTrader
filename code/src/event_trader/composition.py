@@ -7,6 +7,7 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import cast
 
 from nautilus_trader.common.component import TestClock
 
@@ -23,18 +24,10 @@ from event_trader.context_assembly import (
 from event_trader.contracts.ports import OutcomeContextPort, TradeContextPort
 from event_trader.contracts.view_state_change import MarketMapping
 from event_trader.evidence_ledger import FileBackedEvidenceLedger
-from event_trader.integrations import (
-    MiroThinkerReflectionRuntimeConfig,
-    build_mirothinker_open_position_reflection_runner,
-    build_mirothinker_reflection_runner,
-    build_mirothinker_target_close_reflection_runner,
-    build_mirothinker_target_reflection_runner,
-)
 from event_trader.integrations.capabilities import (
     CapabilityStatus,
     discover_capability_status,
 )
-from event_trader.integrations.mirothinker_pm_review import PMReviewTaskRunner
 from event_trader.kernel import EventTraderKernel
 from event_trader.market.provider import (
     MarketBarsProvider,
@@ -42,7 +35,10 @@ from event_trader.market.provider import (
 )
 from event_trader.migrations.cutover_baseline import DEFAULT_CUTOVER_MIGRATION_ID
 from event_trader.pm_review import runtime as pm_review_runtime
+from event_trader.pm_review.implementation import build_pm_review_task_runner
+from event_trader.reasoning.runtime import AgentRuntime
 from event_trader.reflection import runtime as reflection_runtime
+from event_trader.reflection.implementation import resolve_reflection_evaluators
 from event_trader.reflection.outcome_context import (
     FileBackedReflectionOutcomeContextPort,
 )
@@ -196,11 +192,12 @@ def compose_kernel(
     replay_market_mapping: MarketMapping | None = None,
     market_data_provider_override: MarketBarsProvider | None = None,
     market_data_store_root: Path | None = None,
+    market_data_snapshot_id: str | None = None,
     replay_run_id: str | None = None,
     auto_dispatch_pm_review_after_analysis: bool = False,
     execute_approved_pm_review_after_analysis: bool = False,
     pm_review_runtime_policy: pm_review_runtime.PMReviewRuntimePolicy | None = None,
-    pm_review_task_runner: PMReviewTaskRunner | None = None,
+    pm_review_task_runner: AgentRuntime | None = None,
     pm_review_preflight_target_keys: tuple[str, ...] = (),
     checker_policy: Callable[[CheckerContextPack], RawCheckerDecision] | None = None,
     analysis_callback: AnalysisCallback | None = None,
@@ -241,6 +238,19 @@ def compose_kernel(
         )
         if pm_review_runtime_requires_layout and active_layout is None:
             raise CompositionError("PMReview runtime requires a workspace layout.")
+        active_pm_review_task_runner = pm_review_task_runner
+        if (
+            active_pm_review_runtime_policy.auto_dispatch_after_analysis
+            and active_pm_review_task_runner is None
+        ):
+            active_pm_review_task_runner = build_pm_review_task_runner(config=config)
+        if (
+            active_pm_review_runtime_policy.auto_dispatch_after_analysis
+            and not callable(getattr(active_pm_review_task_runner, "run_once", None))
+        ):
+            raise CompositionError(
+                "automatic PMReview dispatch requires AgentRuntime.run_once."
+            )
         if pm_review_runtime_requires_layout and active_layout is not None:
             active_pm_review_preflight_targets = (
                 pm_review_preflight_target_keys
@@ -252,22 +262,7 @@ def compose_kernel(
                 config=config,
                 layout=active_layout,
                 target_keys=active_pm_review_preflight_targets,
-                task_runner=pm_review_task_runner,
-            )
-        active_pm_review_task_runner = pm_review_task_runner
-        if (
-            active_pm_review_runtime_policy.auto_dispatch_after_analysis
-            and active_pm_review_task_runner is None
-        ):
-            active_pm_review_task_runner = pm_review_runtime.build_pm_review_task_runner(
-                config=config
-            )
-        if (
-            active_pm_review_runtime_policy.auto_dispatch_after_analysis
-            and not callable(active_pm_review_task_runner)
-        ):
-            raise CompositionError(
-                "automatic PMReview dispatch requires a PMReview task runner."
+                task_runner=active_pm_review_task_runner,
             )
 
         def _noop_time_advance_finalizer() -> None:
@@ -386,6 +381,7 @@ def compose_kernel(
                     market_data_provider=active_market_data_provider,
                     config_path=Path(config_path),
                     market_data_store_root=market_data_store_root,
+                    market_data_snapshot_id=market_data_snapshot_id,
                     config=config,
                     memory_read_policy=analysis_memory_read_policy,
                     replay_run_id=active_replay_run_id,
@@ -416,45 +412,22 @@ def compose_kernel(
                         evaluate_target_open_position_review
                     )
                     if config.reflection_agent is not None:
-                        reflection_runtime_config = MiroThinkerReflectionRuntimeConfig(
-                            vendor_root=config.reflection_agent.vendor_root,
-                            log_dir=config.reflection_agent.log_dir,
-                            llm_provider=config.reflection_agent.llm_provider,
-                            llm_model_name=config.reflection_agent.llm_model_name,
-                            llm_api_key=config.reflection_agent.llm_api_key,
-                            llm_base_url=config.reflection_agent.llm_base_url,
-                            llm_max_context_length=(
-                                config.reflection_agent.llm_max_context_length
-                            ),
+                        reflection_evaluators = resolve_reflection_evaluators(
+                            config=config.reflection_agent,
+                            layout=workspace.layout,
+                            shared=shared_reflection_evaluator,
+                            target=target_reflection_evaluator,
+                            target_close=target_close_reflection_evaluator,
+                            open_position=target_open_position_reflection_evaluator,
                         )
-                        if shared_reflection_evaluator is None:
-                            shared_reflection_evaluator = (
-                                build_mirothinker_reflection_runner(
-                                    config=reflection_runtime_config,
-                                    layout=workspace.layout,
-                                )
-                            )
-                        if target_reflection_evaluator is None:
-                            target_reflection_evaluator = (
-                                build_mirothinker_target_reflection_runner(
-                                    config=reflection_runtime_config,
-                                    layout=workspace.layout,
-                                )
-                            )
-                        if target_close_reflection_evaluator is None:
-                            target_close_reflection_evaluator = (
-                                build_mirothinker_target_close_reflection_runner(
-                                    config=reflection_runtime_config,
-                                    layout=workspace.layout,
-                                )
-                            )
-                        if target_open_position_reflection_evaluator is None:
-                            target_open_position_reflection_evaluator = (
-                                build_mirothinker_open_position_reflection_runner(
-                                    config=reflection_runtime_config,
-                                    layout=workspace.layout,
-                                )
-                            )
+                        shared_reflection_evaluator = reflection_evaluators.shared
+                        target_reflection_evaluator = reflection_evaluators.target
+                        target_close_reflection_evaluator = (
+                            reflection_evaluators.target_close
+                        )
+                        target_open_position_reflection_evaluator = (
+                            reflection_evaluators.open_position
+                        )
                     missing_reflection_dependencies = (
                         reflection_runtime.missing_reflection_dependencies(
                             outcome_context=outcome_context,
@@ -545,7 +518,10 @@ def compose_kernel(
                         resolver=pm_review_resolver,
                         execute=pm_review_runtime.build_runtime_pm_review_executor(
                             layout=active_layout,
-                            task_runner=active_pm_review_task_runner,
+                            task_runner=cast(
+                                AgentRuntime,
+                                active_pm_review_task_runner,
+                            ),
                             config=config,
                             market_data_provider=active_market_data_provider,
                             execute_pm_decisions=(

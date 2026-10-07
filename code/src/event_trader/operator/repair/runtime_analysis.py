@@ -26,6 +26,11 @@ from event_trader.integrations.analysis_commit_audit import (
     AnalysisCommitAuditState,
     read_target_analysis_commit_audit_states,
 )
+from event_trader.runtime.analysis_outbox import FileBackedAnalysisCompletionOutbox
+from event_trader.runtime.analysis_queue import (
+    AnalysisWorkItem,
+    FileBackedAnalysisWorkQueue,
+)
 from event_trader.storage import WorkspaceLayout
 
 _ANALYSIS_OUTCOME_DIR_NAME = "analysis_outcomes"
@@ -199,6 +204,55 @@ class AnalysisRecoveryReport:
         }
 
 
+AnalysisRecoveryApplyStatus = Literal["dry_run", "applied", "skipped", "blocked"]
+
+
+@dataclass(frozen=True, slots=True)
+class AnalysisRecoveryApplyDecision:
+    """One dry-run or applied rollback-precommit recovery operation."""
+
+    target_key: str
+    event_id: str | None
+    task_id: str | None
+    status: AnalysisRecoveryApplyStatus
+    work_item_id: str | None
+    idempotency_key: str | None
+    queue_status: str | None
+    blocker_reason: str | None
+
+    def to_json_payload(self) -> dict[str, object]:
+        return {
+            "target_key": self.target_key,
+            "event_id": self.event_id,
+            "task_id": self.task_id,
+            "status": self.status,
+            "work_item_id": self.work_item_id,
+            "idempotency_key": self.idempotency_key,
+            "queue_status": self.queue_status,
+            "blocker_reason": self.blocker_reason,
+        }
+
+
+@dataclass(frozen=True, slots=True)
+class AnalysisRecoveryApplyReport:
+    """Operator-facing analysis recovery apply report."""
+
+    mode: Literal["dry_run", "apply"]
+    inspected_count: int
+    applied_count: int
+    blocked_count: int
+    decisions: tuple[AnalysisRecoveryApplyDecision, ...]
+
+    def to_json_payload(self) -> dict[str, object]:
+        return {
+            "mode": self.mode,
+            "inspected_count": self.inspected_count,
+            "applied_count": self.applied_count,
+            "blocked_count": self.blocked_count,
+            "decisions": [decision.to_json_payload() for decision in self.decisions],
+        }
+
+
 @dataclass(frozen=True, slots=True)
 class LiveAnalysisConsistencyReport:
     """Consistency audit for live analysis commit artifacts."""
@@ -313,17 +367,21 @@ def plan_analysis_recovery(
             decisions.append(decision)
 
     for receipt in checker_receipts:
-        decision = _recovery_decision_from_checker_receipt(
+        checker_decision = _recovery_decision_from_checker_receipt(
             layout=layout,
             receipt=receipt,
         )
-        if decision is None:
+        if checker_decision is None:
             continue
-        decision_key = (decision.target_key, decision.event_id, decision.task_id)
+        decision_key = (
+            checker_decision.target_key,
+            checker_decision.event_id,
+            checker_decision.task_id,
+        )
         if decision_key in seen_keys:
             continue
         seen_keys.add(decision_key)
-        decisions.append(decision)
+        decisions.append(checker_decision)
 
     sorted_decisions = tuple(
         sorted(
@@ -390,7 +448,7 @@ def scan_live_analysis_repair_candidates(
                 business_at=decision.business_at,
                 source_ref=decision.source_ref or receipt.source_ref,
                 title=decision.title or "",
-                attention_hint=receipt.attention_hint,
+                attention_hint=receipt.attention_hint or "",
                 requires_watchlist_maintenance=receipt.requires_watchlist_maintenance,
                 decision_episode_id=receipt.decision_episode_id,
                 checker_decision_path=receipt.path,
@@ -412,6 +470,177 @@ def scan_live_analysis_repair_candidates(
                 item.event_id,
             ),
         )
+    )
+
+
+def apply_analysis_recovery(
+    *,
+    layout: WorkspaceLayout,
+    target_key: str | None = None,
+    event_id: str | None = None,
+    apply: bool = False,
+) -> AnalysisRecoveryApplyReport:
+    """Dry-run or requeue only safe precommit analysis recoveries.
+
+    Recovery never edits or removes commit journals, CEAU records, evidence,
+    ResearchMemory, outcomes, or prior failed queue entries.  It creates a new
+    idempotent queue item and lets the normal runtime worker publish completion.
+    """
+    if not isinstance(layout, WorkspaceLayout):
+        raise RuntimeRepairInspectionError("layout must be a WorkspaceLayout instance.")
+    normalized_target_key = _validate_optional_target_key(target_key)
+    normalized_event_id = _validate_optional_event_id(event_id)
+    plan = plan_analysis_recovery(
+        layout=layout,
+        target_key=normalized_target_key,
+        event_id=normalized_event_id,
+    )
+    checker_receipts = {
+        (receipt.target_key, receipt.event_id): receipt
+        for receipt in _iter_checker_escalation_receipts(
+            layout=layout,
+            target_key=normalized_target_key,
+            event_id=normalized_event_id,
+        )
+    }
+    queue = FileBackedAnalysisWorkQueue(
+        root=layout.runtime_root / "analysis_work_queue"
+    )
+    outbox = FileBackedAnalysisCompletionOutbox(
+        root=layout.runtime_root / "analysis_outbox"
+    )
+    failed_items = queue.load_failed_items()
+    decisions: list[AnalysisRecoveryApplyDecision] = []
+    for planned in plan.decisions:
+        eligible = (
+            planned.planned_action == "rollback_precommit"
+            and planned.rerun_allowed
+            and not planned.durable_artifacts_committed
+            and planned.event_id is not None
+            and planned.task_id is not None
+        )
+        if not eligible:
+            decisions.append(
+                AnalysisRecoveryApplyDecision(
+                    target_key=planned.target_key,
+                    event_id=planned.event_id,
+                    task_id=planned.task_id,
+                    status="blocked" if planned.planned_action == "block" else "skipped",
+                    work_item_id=None,
+                    idempotency_key=None,
+                    queue_status=None,
+                    blocker_reason=planned.blocker_reason,
+                )
+            )
+            continue
+        planned_event_id = planned.event_id
+        planned_task_id = planned.task_id
+        assert planned_event_id is not None
+        assert planned_task_id is not None
+        receipt = checker_receipts.get((planned.target_key, planned_event_id))
+        if receipt is None:
+            decisions.append(
+                _apply_blocked_decision(
+                    planned,
+                    reason="checker escalation receipt is missing; no recovery input is proven.",
+                )
+            )
+            continue
+        refs = _analysis_work_refs(
+            layout=layout,
+            target_key=planned.target_key,
+            event_id=planned_event_id,
+        )
+        if refs is None:
+            decisions.append(
+                _apply_blocked_decision(
+                    planned,
+                    reason="CEAU unit_emitted truth is missing or ambiguous; recovery is blocked.",
+                )
+            )
+            continue
+        analysis_unit_id, record_id = refs
+        if not any(
+            item.target_key == planned.target_key
+            and item.analysis_unit_id == analysis_unit_id
+            and item.record_id == record_id
+            for item in failed_items
+        ):
+            decisions.append(
+                _apply_blocked_decision(
+                    planned,
+                    reason=(
+                        "matching failed analysis queue item is missing; recovery "
+                        "cannot enqueue a new attempt from audit truth alone."
+                    ),
+                )
+            )
+            continue
+        if _analysis_outbox_has_outcome(
+            outbox,
+            target_key=planned.target_key,
+            analysis_unit_id=analysis_unit_id,
+            record_id=record_id,
+        ):
+            decisions.append(
+                _apply_blocked_decision(
+                    planned,
+                    reason="analysis completion outbox already contains durable outcome truth.",
+                    work_item_id=f"analysis-recovery:{planned.task_id}",
+                    idempotency_key=f"analysis-recovery:{planned.task_id}:v1",
+                )
+            )
+            continue
+        work_item_id = f"analysis-recovery:{planned_task_id}"
+        idempotency_key = f"analysis-recovery:{planned_task_id}:v1"
+        if not apply:
+            decisions.append(
+                AnalysisRecoveryApplyDecision(
+                    target_key=planned.target_key,
+                    event_id=planned.event_id,
+                    task_id=planned.task_id,
+                    status="dry_run",
+                    work_item_id=work_item_id,
+                    idempotency_key=idempotency_key,
+                    queue_status=None,
+                    blocker_reason=None,
+                )
+            )
+            continue
+        item = AnalysisWorkItem(
+            work_item_id=work_item_id,
+            target_key=planned.target_key,
+            analysis_unit_id=analysis_unit_id,
+            record_id=record_id,
+            event_time=receipt.business_at,
+            correlation_id=receipt.decision_episode_id or planned_task_id,
+            causation_id=receipt.event_id,
+            idempotency_key=idempotency_key,
+            enqueued_at=datetime.now(UTC),
+        )
+        enqueue_receipt = queue.enqueue(item)
+        decisions.append(
+            AnalysisRecoveryApplyDecision(
+                target_key=planned.target_key,
+                event_id=planned.event_id,
+                task_id=planned.task_id,
+                status=(
+                    "applied"
+                    if enqueue_receipt.status == "enqueued"
+                    else "skipped"
+                ),
+                work_item_id=work_item_id,
+                idempotency_key=idempotency_key,
+                queue_status=enqueue_receipt.status,
+                blocker_reason=None,
+            )
+        )
+    return AnalysisRecoveryApplyReport(
+        mode="apply" if apply else "dry_run",
+        inspected_count=len(decisions),
+        applied_count=sum(item.status == "applied" for item in decisions),
+        blocked_count=sum(item.status == "blocked" for item in decisions),
+        decisions=tuple(decisions),
     )
 
 
@@ -446,6 +675,66 @@ def _recovery_decision_from_checker_receipt(
             event_id=receipt.event_id,
         ),
     )
+
+
+def _apply_blocked_decision(
+    planned: AnalysisRecoveryDecision,
+    *,
+    reason: str,
+    work_item_id: str | None = None,
+    idempotency_key: str | None = None,
+) -> AnalysisRecoveryApplyDecision:
+    return AnalysisRecoveryApplyDecision(
+        target_key=planned.target_key,
+        event_id=planned.event_id,
+        task_id=planned.task_id,
+        status="blocked",
+        work_item_id=work_item_id,
+        idempotency_key=idempotency_key,
+        queue_status=None,
+        blocker_reason=reason,
+    )
+
+
+def _analysis_work_refs(
+    *,
+    layout: WorkspaceLayout,
+    target_key: str,
+    event_id: str,
+) -> tuple[str, str] | None:
+    matches: set[tuple[str, str]] = set()
+    for payload in _load_ceau_records(layout=layout, target_key=target_key):
+        if payload.get("record_type") != "unit_emitted":
+            continue
+        event_ids = payload.get("event_ids")
+        if not isinstance(event_ids, list) or event_id not in event_ids:
+            continue
+        analysis_unit_id = _optional_text(payload, "analysis_unit_id")
+        record_id = _optional_text(payload, "record_id")
+        if analysis_unit_id and record_id:
+            matches.add((analysis_unit_id, record_id))
+    if len(matches) != 1:
+        return None
+    return next(iter(matches))
+
+
+def _analysis_outbox_has_outcome(
+    outbox: FileBackedAnalysisCompletionOutbox,
+    *,
+    target_key: str,
+    analysis_unit_id: str,
+    record_id: str,
+) -> bool:
+    for entry in (*outbox.load_pending(), *outbox.load_published()):
+        message = entry.message
+        if (
+            entry.entry_kind == "outcome"
+            and getattr(message, "target_key", None) == target_key
+            and getattr(message, "analysis_unit_id", None) == analysis_unit_id
+            and getattr(message, "record_id", None) == record_id
+        ):
+            return True
+    return False
 
 
 def _recovery_decision_from_audit_state(
@@ -1280,11 +1569,14 @@ def _relative_path(path: Path, *, workspace_root: Path) -> str:
 
 
 __all__ = [
+    "AnalysisRecoveryApplyDecision",
+    "AnalysisRecoveryApplyReport",
     "AnalysisRecoveryDecision",
     "AnalysisRecoveryReport",
     "LiveAnalysisRepairCandidate",
     "RuntimeRepairInspectionError",
     "audit_live_analysis_consistency",
+    "apply_analysis_recovery",
     "plan_analysis_recovery",
     "scan_live_analysis_repair_candidates",
 ]

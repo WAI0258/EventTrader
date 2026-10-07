@@ -16,6 +16,11 @@ from typing import Literal, NoReturn, cast
 
 from nautilus_trader.common.component import TestClock
 
+from event_trader.agent_implementation import (
+    MIROTHINKER_IMPLEMENTATION,
+    SearchAgentImplementation,
+    normalize_search_implementation,
+)
 from event_trader.analysis import FileBackedResearchMemoryReader
 from event_trader.audit import (
     write_release_readiness_report,
@@ -57,6 +62,10 @@ from event_trader.feeds.models import (
     ReplaySourceShape,
 )
 from event_trader.feeds.payload_mappers import replay_adapter_for
+from event_trader.feeds.search_implementation import (
+    SearchImplementationConfig,
+    build_search_collection_runner,
+)
 from event_trader.feeds.web_search_backfill import (
     HistoricalWebSearchBackfillReceipt,
     backfill_historical_web_search,
@@ -64,17 +73,6 @@ from event_trader.feeds.web_search_backfill import (
 from event_trader.ingest.admission import (
     derive_admission_event_id,
     validate_admission_request,
-)
-from event_trader.integrations import (
-    MiroThinkerReflectionRuntimeConfig,
-    build_mirothinker_open_position_reflection_runner,
-    build_mirothinker_search_collection_runner,
-)
-from event_trader.integrations.mirothinker_llm_config import (
-    normalize_mirothinker_reasoning_effort,
-)
-from event_trader.integrations.mirothinker_search import (
-    MiroThinkerSearchRuntimeConfig,
 )
 from event_trader.market.adjustments import (
     MarketAdjustmentSidecar,
@@ -95,6 +93,7 @@ from event_trader.operator.repair import (
     plan_replay_failed_event_repair,
 )
 from event_trader.pm_review.runtime import validate_pm_review_runtime_preflight
+from event_trader.reasoning.effort import normalize_agent_reasoning_effort
 from event_trader.reflection.context import ReflectionLedgerContext
 from event_trader.reflection.contracts import (
     OutcomeContextPacket,
@@ -104,6 +103,9 @@ from event_trader.reflection.contracts import (
 from event_trader.reflection.feedback_context import (
     ReflectionFeedbackContextError,
     build_reflection_feedback_context_facts,
+)
+from event_trader.reflection.implementation import (
+    build_open_position_reflection_evaluator,
 )
 from event_trader.reflection.learning_lifecycle import apply_reflection_learning
 from event_trader.reflection.market_context_usage import (
@@ -170,12 +172,13 @@ class ReplayRuntimeToolError(RuntimeError):
 
 @dataclass(frozen=True, slots=True)
 class _ReplayBackfillWebSearchConfig:
+    implementation: SearchAgentImplementation
     search_intent: str
     prompt_profile_id: str
     control_language: str
     retrieval_languages: tuple[str, ...]
     slice_hours: int
-    vendor_root: Path
+    vendor_root: Path | None
     log_dir: Path
     llm_provider: str
     llm_model_name: str
@@ -239,6 +242,7 @@ class _ReplayMarketPrefetchSetup:
     market_data_provider_override: MarketBarsProvider | None
     receipt: ReplayMarketPrefetchReceipt | None
     market_data_store_root: Path | None = None
+    market_data_snapshot_id: str | None = None
 
 
 type _ReplayPrimaryResearchMode = Literal[
@@ -1241,7 +1245,8 @@ def _run_backfill_web_search_command(args: argparse.Namespace) -> int:
     window_start = _parse_window_boundary(window_start_raw, end_of_day=False)
     window_end = _parse_window_boundary(window_end_raw, end_of_day=True)
 
-    runner_config = MiroThinkerSearchRuntimeConfig(
+    runner_config = SearchImplementationConfig(
+        implementation=backfill_config.implementation,
         vendor_root=backfill_config.vendor_root,
         workspace_root=layout.root,
         log_dir=backfill_config.log_dir,
@@ -1254,6 +1259,7 @@ def _run_backfill_web_search_command(args: argparse.Namespace) -> int:
         llm_base_url=backfill_config.llm_base_url,
         llm_max_context_length=65_536,
         llm_reasoning_effort=backfill_config.llm_reasoning_effort,
+        wall_clock_timeout_seconds=0,
         serper_api_key=_require_env_value(
             backfill_config.serper_api_key_env,
             field_name="replay_backfill.web_search.serper_api_key_env",
@@ -1298,7 +1304,7 @@ def _run_backfill_web_search_command(args: argparse.Namespace) -> int:
         anthropic_web_search_version=backfill_config.anthropic_web_search_version,
         acquisition_tool_names=backfill_config.acquisition_tool_names,
     )
-    run_search_agent = build_mirothinker_search_collection_runner(config=runner_config)
+    run_search_agent = build_search_collection_runner(config=runner_config)
     receipt = backfill_historical_web_search(
         layout=layout,
         target_key=target_key,
@@ -1471,12 +1477,12 @@ def _load_web_search_backfill_config(
             "Replay config field 'replay_backfill.web_search' must be a TOML table."
         )
     required_fields = {
+        "implementation",
         "search_intent",
         "prompt_profile_id",
         "control_language",
         "retrieval_languages",
         "slice_hours",
-        "vendor_root",
         "log_dir",
         "llm_provider",
         "llm_model_name",
@@ -1484,6 +1490,7 @@ def _load_web_search_backfill_config(
         "llm_base_url",
     }
     optional_fields = {
+        "vendor_root",
         "acquisition_tool_names",
         "llm_reasoning_effort",
         "serper_api_key_env",
@@ -1529,7 +1536,18 @@ def _load_web_search_backfill_config(
         raw_config=raw_config,
         acquisition_tool_names=acquisition_tool_names,
     )
+    implementation = normalize_search_implementation(
+        raw_config["implementation"],
+        field_name="replay_backfill.web_search.implementation",
+        error_type=ReplayRuntimeToolError,
+    )
+    raw_vendor_root = raw_config.get("vendor_root")
+    if raw_vendor_root is None and implementation == MIROTHINKER_IMPLEMENTATION:
+        raise ReplayRuntimeToolError(
+            "Missing required replay_backfill.web_search config fields: vendor_root"
+        )
     return _ReplayBackfillWebSearchConfig(
+        implementation=implementation,
         search_intent=_require_non_blank_string(
             raw_config["search_intent"],
             field_name="replay_backfill.web_search.search_intent",
@@ -1550,10 +1568,14 @@ def _load_web_search_backfill_config(
             raw_config["slice_hours"],
             field_name="replay_backfill.web_search.slice_hours",
         ),
-        vendor_root=_resolve_config_path(
-            raw_config["vendor_root"],
-            config_path=resolved_path,
-            field_name="replay_backfill.web_search.vendor_root",
+        vendor_root=(
+            None
+            if raw_vendor_root is None
+            else _resolve_config_path(
+                raw_vendor_root,
+                config_path=resolved_path,
+                field_name="replay_backfill.web_search.vendor_root",
+            )
         ),
         log_dir=_resolve_config_path(
             raw_config["log_dir"],
@@ -1576,7 +1598,7 @@ def _load_web_search_backfill_config(
             raw_config["llm_base_url"],
             field_name="replay_backfill.web_search.llm_base_url",
         ),
-        llm_reasoning_effort=normalize_mirothinker_reasoning_effort(
+        llm_reasoning_effort=normalize_agent_reasoning_effort(
             raw_config.get("llm_reasoning_effort"),
             field_name="replay_backfill.web_search.llm_reasoning_effort",
             error_type=ReplayRuntimeToolError,
@@ -1983,8 +2005,14 @@ def _prepare_replay_market_prefetch(
     dataset_rows: Sequence[_ReplayDatasetRow],
     window_start: datetime,
     window_end: datetime,
+    reflection_end: datetime | None = None,
     provider: MarketBarsProvider | None = None,
 ) -> _ReplayMarketPrefetchSetup:
+    market_horizon_end = window_end if reflection_end is None else reflection_end
+    if market_horizon_end < window_end:
+        raise ReplayRuntimeToolError(
+            "reflection_end must be greater than or equal to window_end."
+        )
     prefetch_config = load_kernel_config(config_path)
     prefetch_events = tuple(
         ReplayMarketPrefetchEvent(
@@ -2000,7 +2028,7 @@ def _prepare_replay_market_prefetch(
         run_id=run_id,
         events=prefetch_events,
         window_start=window_start,
-        window_end=window_end,
+        window_end=market_horizon_end,
         provider=provider,
         progress=lambda message: print(message, flush=True),
     )
@@ -2013,6 +2041,9 @@ def _prepare_replay_market_prefetch(
         receipt=prefetch_receipt,
         market_data_store_root=(
             prefetch_receipt.store.root if prefetch_receipt is not None else None
+        ),
+        market_data_snapshot_id=(
+            prefetch_receipt.snapshot_id if prefetch_receipt is not None else None
         ),
     )
 
@@ -2610,7 +2641,7 @@ def _replay_run_key(
     )
 
 
-def _default_market_data_run_id(
+def _default_replay_run_id(
     *,
     target_key: str,
     window_start: datetime,
@@ -2976,15 +3007,6 @@ def _build_open_position_terminal_outputs(
         raise ReplayRuntimeToolError(
             "Replay open-position reflection requires [reflection_agent] config."
         )
-    reflection_runtime_config = MiroThinkerReflectionRuntimeConfig(
-        vendor_root=config.reflection_agent.vendor_root,
-        log_dir=config.reflection_agent.log_dir,
-        llm_provider=config.reflection_agent.llm_provider,
-        llm_model_name=config.reflection_agent.llm_model_name,
-        llm_api_key=config.reflection_agent.llm_api_key,
-        llm_base_url=config.reflection_agent.llm_base_url,
-        llm_max_context_length=config.reflection_agent.llm_max_context_length,
-    )
     review_horizon_hours = (
         (terminal_mark.replay_end_at - open_episode.opened_at).total_seconds() / 3600.0
     )
@@ -3000,10 +3022,16 @@ def _build_open_position_terminal_outputs(
         execution_records=execution_records,
         review_horizon_hours=review_horizon_hours,
     )
-    terminal_evaluation = build_mirothinker_open_position_reflection_runner(
-        config=reflection_runtime_config,
-        layout=layout,
-    )(terminal_context)
+    try:
+        evaluate_open_position = build_open_position_reflection_evaluator(
+            config=config.reflection_agent,
+            layout=layout,
+        )
+    except CompositionError as exc:
+        raise ReplayRuntimeToolError(
+            f"failed to build replay reflection implementation: {exc}"
+        ) from exc
+    terminal_evaluation = evaluate_open_position(terminal_context)
     terminal_review_receipt = write_open_position_horizon_review(
         context=terminal_context,
         evaluation=terminal_evaluation,

@@ -58,6 +58,7 @@ _COUNT_KEYS = (
 _STUCK_KEYS = (
     "request_without_pm_decision",
     "execution_without_sidecar",
+    "sidecar_without_execution",
     "candidate_request_missing_anchor",
     "candidate_request_expired_anchor",
     "request_without_pm_decision_with_failure",
@@ -231,6 +232,20 @@ def build_pm_review_readiness_report(
         )
         for target_key in normalized_targets
     )
+    orphan_sidecar_targets = {
+        report.target_key: report.stuck_counts["sidecar_without_execution"]
+        for report in target_reports
+        if report.stuck_counts["sidecar_without_execution"]
+    }
+    if orphan_sidecar_targets:
+        workspace_ready = False
+        workspace_ready_error = (
+            "PM execution sidecars reference missing execution records: "
+            + ", ".join(
+                f"{target_key}={count}"
+                for target_key, count in sorted(orphan_sidecar_targets.items())
+            )
+        )
     return PMReviewReadinessReport(
         workspace_ready=workspace_ready,
         workspace_ready_error=workspace_ready_error,
@@ -351,6 +366,18 @@ def _build_target_report(
         if state_change.source_kind == "pm_execution_sidecar"
         and state_change.execution_record_id is not None
     }
+    execution_record_ids = {execution.execution_record_id for execution in executions}
+    effective_execution_ids_by_time = {
+        execution.executed_at: execution.execution_record_id
+        for execution in sorted(
+            (execution for execution in executions if execution.executed_at is not None),
+            key=lambda execution: (
+                execution.executed_at,
+                execution.business_at,
+                execution.execution_record_id,
+            ),
+        )
+    }
     latest_dispatch_by_request = _latest_dispatch_considerations_by_request(dispatch_considerations)
     terminally_skipped_request_ids = {
         request_id
@@ -379,8 +406,18 @@ def _build_target_report(
             elif anchor.expires_at <= request.business_at:
                 stuck_counts["candidate_request_expired_anchor"] += 1
     for execution in executions:
-        if execution.status == "executed" and execution.execution_record_id not in sidecar_execution_ids:
+        if (
+            execution.status == "executed"
+            and execution.executed_at is not None
+            and effective_execution_ids_by_time[execution.executed_at]
+            == execution.execution_record_id
+            and execution.execution_record_id not in sidecar_execution_ids
+        ):
             stuck_counts["execution_without_sidecar"] += 1
+    stuck_counts["sidecar_without_execution"] = sum(
+        execution_record_id not in execution_record_ids
+        for execution_record_id in sidecar_execution_ids
+    )
 
     counts = {
         "analysis_assessment_count": len(assessments),

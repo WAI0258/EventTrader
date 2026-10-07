@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from datetime import timedelta
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 from typing import Protocol
 
 from event_trader.contracts.view_state_change import (
@@ -25,6 +26,23 @@ from event_trader.portfolio import PMDecision
 
 class ExecutionError(ValueError):
     """Raised when deterministic paper execution cannot be evaluated."""
+
+
+@dataclass(frozen=True, slots=True)
+class ExecutionDeferred:
+    """A non-terminal execution attempt awaiting observable market data."""
+
+    intent_id: str
+    retry_at: datetime
+    reason: str
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.intent_id, str) or not self.intent_id.strip():
+            raise ExecutionError("intent_id must be a non-blank string.")
+        if not isinstance(self.retry_at, datetime) or self.retry_at.tzinfo is None:
+            raise ExecutionError("retry_at must be a timezone-aware datetime.")
+        if not isinstance(self.reason, str) or not self.reason.strip():
+            raise ExecutionError("reason must be a non-blank string.")
 
 
 class MarketBarsProviderLike(Protocol):
@@ -116,11 +134,22 @@ class PaperExecutionEngine:
         self,
         *,
         intent: ExecutionIntent,
-    ) -> ExecutionRecord:
+        observed_at: datetime,
+    ) -> ExecutionRecord | ExecutionDeferred:
+        if not isinstance(observed_at, datetime) or observed_at.tzinfo is None:
+            raise ExecutionError("observed_at must be a timezone-aware datetime.")
         cost_model = self._cost_model_for_target(intent.target_key)
         mapping = self._resolve_market_mapping(intent.target_key)
         execution_available_at = intent.decision_available_at
-        requested_end = execution_available_at + self._max_next_bar_wait
+        expiry_at = execution_available_at + self._max_next_bar_wait
+        if observed_at <= execution_available_at:
+            return _deferred_execution(
+                intent=intent,
+                observed_at=observed_at,
+                expiry_at=expiry_at,
+                reason="no market bar is observable after the PM decision yet.",
+            )
+        requested_end = min(observed_at, expiry_at)
         try:
             series = self._market_data_provider.read_series(
                 mapping,
@@ -128,6 +157,16 @@ class PaperExecutionEngine:
                 end_at=requested_end,
             )
         except Exception as exc:
+            if observed_at < expiry_at:
+                return _deferred_execution(
+                    intent=intent,
+                    observed_at=observed_at,
+                    expiry_at=expiry_at,
+                    reason=(
+                        "market data is not observable for paper execution yet: "
+                        f"{exc}"
+                    ),
+                )
             provenance = _provenance(
                 provider=self._provider_name,
                 mapping=mapping,
@@ -143,6 +182,13 @@ class PaperExecutionEngine:
                 reason=f"market data unavailable for paper execution: {exc}",
             )
         if not isinstance(series, MarketDataSeries):
+            if observed_at < expiry_at:
+                return _deferred_execution(
+                    intent=intent,
+                    observed_at=observed_at,
+                    expiry_at=expiry_at,
+                    reason="market data provider has not produced an observable series yet.",
+                )
             provenance = _provenance(
                 provider=self._provider_name,
                 mapping=mapping,
@@ -157,7 +203,12 @@ class PaperExecutionEngine:
                 provenance=provenance,
                 reason="market data provider did not return MarketDataSeries.",
             )
-        selected = _select_next_bar(series.bars, execution_available_at)
+        selected = _select_next_observable_bar(
+            series.bars,
+            available_at=execution_available_at,
+            observed_at=observed_at,
+            price_basis=cost_model.price_basis,
+        )
         provenance = _provenance(
             provider=self._provider_name,
             mapping=mapping,
@@ -167,6 +218,13 @@ class PaperExecutionEngine:
             selected_bar=selected,
         )
         if selected is None:
+            if observed_at < expiry_at:
+                return _deferred_execution(
+                    intent=intent,
+                    observed_at=observed_at,
+                    expiry_at=expiry_at,
+                    reason="no tradable market bar is observable after the PM decision yet.",
+                )
             return _rejected_record(
                 intent=intent,
                 cost_model=cost_model,
@@ -253,14 +311,34 @@ def derive_execution_record_id(*, intent: ExecutionIntent) -> str:
     return f"execution-record:{digest[:32]}"
 
 
-def _select_next_bar(
+def _select_next_observable_bar(
     bars: tuple[MarketDataBar, ...],
-    business_at,
+    *,
+    available_at: datetime,
+    observed_at: datetime,
+    price_basis: str,
 ) -> MarketDataBar | None:
     for bar in sorted(bars, key=lambda item: item.start_at):
-        if bar.start_at >= business_at:
+        price_observable_at = (
+            bar.start_at if price_basis == "open" else bar.end_at
+        )
+        if bar.start_at >= available_at and price_observable_at <= observed_at:
             return bar
     return None
+
+
+def _deferred_execution(
+    *,
+    intent: ExecutionIntent,
+    observed_at: datetime,
+    expiry_at: datetime,
+    reason: str,
+) -> ExecutionDeferred:
+    return ExecutionDeferred(
+        intent_id=intent.intent_id,
+        retry_at=min(observed_at + timedelta(minutes=1), expiry_at),
+        reason=reason,
+    )
 
 
 def _provenance(
@@ -385,6 +463,7 @@ def resolve_adjusted_execution_price(
 
 __all__ = [
     "ExecutionError",
+    "ExecutionDeferred",
     "MarketBarsProviderLike",
     "MarketMappingResolver",
     "PaperExecutionEngine",

@@ -92,8 +92,11 @@ _VALID_PROMOTION_INTENTS = frozenset(
 )
 _VALID_PROMOTION_VALIDATION_STATUSES = frozenset({"accepted", "rejected"})
 _VALID_PROMOTION_WRITE_STATUSES = frozenset({"written", "failed"})
+EPISODE_MEMORY_LEARNING_CARD_CONSUMER_ROLES: tuple[
+    EpisodeMemoryPromotionLearningConsumerRole, ...
+] = ("analysis", "pm_review", "reflection_learning")
 _VALID_LEARNING_CARD_CONSUMER_ROLES = frozenset(
-    {"analysis", "pm_review", "reflection_learning"}
+    EPISODE_MEMORY_LEARNING_CARD_CONSUMER_ROLES
 )
 _COMMAND_PATTERNS = (
     re.compile(
@@ -1086,7 +1089,7 @@ class LearningCardPromotionIntent(_EpisodeMemoryPromotionIntentBase):
         object.__setattr__(
             self,
             "consumer_role",
-            _validate_learning_card_consumer_role(
+            validate_learning_card_consumer_role(
                 self.consumer_role,
                 "consumer_role",
             ),
@@ -2019,9 +2022,9 @@ def _validate_promotion_scope_key(value: object, *, target_key: str) -> str:
     )
 
 
-def _validate_learning_card_consumer_role(
+def validate_learning_card_consumer_role(
     value: object,
-    field_name: str,
+    field_name: str = "consumer_role",
 ) -> EpisodeMemoryPromotionLearningConsumerRole:
     if value not in _VALID_LEARNING_CARD_CONSUMER_ROLES:
         raise EpisodeMemoryContractError(
@@ -2218,6 +2221,7 @@ __all__ = [
     "EpisodeMemoryDeltaCandidate",
     "EpisodeMemoryDeltaSourceRefs",
     "EpisodeMemoryPromotionDecisionIntent",
+    "EPISODE_MEMORY_LEARNING_CARD_CONSUMER_ROLES",
     "NoPromoteIntent",
     "LearningCardPromotionIntent",
     "RiskPolicyCandidatePromotionIntent",
@@ -2247,5 +2251,6 @@ __all__ = [
     "parse_episode_memory_validation_receipt",
     "parse_episode_memory_write_receipt",
     "validate_promotion_intent_batch",
+    "validate_learning_card_consumer_role",
     "build_promotion_decision_view",
 ]

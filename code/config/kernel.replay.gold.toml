@@ -47,6 +47,7 @@ analysis_concurrency = 1
 pm_review_concurrency = 1
 
 [analysis_agent]
+implementation = "mirothinker"
 vendor_root = "vendor/mirothinker"
 log_dir = ".local/gold-gcusd-20260101_20260630-run/logs/mirothinker/analysis"
 llm_provider = "anthropic"
@@ -56,6 +57,7 @@ llm_base_url = "https://api.minimaxi.com/anthropic"
 wall_clock_timeout_seconds = 1200
 
 [checker_agent]
+implementation = "single_pass"
 log_dir = ".local/gold-gcusd-20260101_20260630-run/logs/checker"
 llm_provider = "openai"
 llm_model_name = "MiniMax-M2.1"
@@ -68,6 +70,7 @@ max_pack_chars = 16000
 force_escalate_on_insufficient_coverage = true
 
 [pm_review_agent]
+implementation = "mirothinker"
 vendor_root = "vendor/mirothinker"
 log_dir = ".local/gold-gcusd-20260101_20260630-run/logs/mirothinker/pm_review"
 llm_provider = "anthropic"
@@ -77,6 +80,7 @@ llm_base_url = "https://api.minimaxi.com/anthropic"
 wall_clock_timeout_seconds = 1200
 
 [reflection_agent]
+implementation = "mirothinker"
 vendor_root = "vendor/mirothinker"
 log_dir = ".local/gold-gcusd-20260101_20260630-run/logs/mirothinker/reflection"
 llm_provider = "anthropic"

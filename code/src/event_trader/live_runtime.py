@@ -15,9 +15,9 @@ from event_trader.config import (
     LiveWebSearchConfig,
 )
 from event_trader.contracts._validators import validate_timestamp
-from event_trader.integrations import (
-    MiroThinkerSearchRuntimeConfig,
-    build_mirothinker_search_runner,
+from event_trader.feeds.search_implementation import (
+    SearchImplementationConfig,
+    build_search_runner,
 )
 from event_trader.live_source_checkpoint import (
     advance_live_source_checkpoint,
@@ -50,7 +50,7 @@ type Sleep = Callable[[float], None]
 
 _HOST_JOIN_POLL_SECONDS = 0.1
 _MAX_SOURCE_SLEEP_SECONDS = 60.0
-_LIVE_WEB_SEARCH_WALL_CLOCK_TIMEOUT_SECONDS = 900
+_LIVE_WEB_SEARCH_WALL_CLOCK_TIMEOUT_SECONDS = 1200
 
 
 class LiveRuntimeError(RuntimeError):
@@ -91,8 +91,12 @@ def build_live_web_search_drivers(
     web_search_config = live_config.web_search
     current_time = _resolve_live_startup_anchor(startup_at)
     cadence_profile = _build_web_search_cadence_profile(web_search_config)
-    run_search_agent = build_mirothinker_search_runner(
-        config=_build_mirothinker_search_config(web_search_config, composed),
+    run_search_agent = build_search_runner(
+        config=SearchImplementationConfig.from_live_config(
+            web_search_config,
+            workspace_root=composed.workspace.root,
+            wall_clock_timeout_seconds=_LIVE_WEB_SEARCH_WALL_CLOCK_TIMEOUT_SECONDS,
+        ),
     )
     drivers: list[WebSearchBatchDriver] = []
     for target_config in web_search_config.targets:
@@ -419,42 +423,6 @@ def run_live_runtime_loop(
     return LiveRuntimeReceipt(
         source_batch_count=source_batch_count,
         heartbeat_count=heartbeat_count,
-    )
-
-
-def _build_mirothinker_search_config(
-    web_search_config: LiveWebSearchConfig,
-    composed: ComposedKernel,
-) -> MiroThinkerSearchRuntimeConfig:
-    return MiroThinkerSearchRuntimeConfig(
-        vendor_root=web_search_config.vendor_root,
-        workspace_root=composed.workspace.root,
-        log_dir=web_search_config.log_dir,
-        llm_provider=web_search_config.llm_provider,
-        llm_model_name=web_search_config.llm_model_name,
-        llm_api_key=web_search_config.llm_api_key,
-        llm_base_url=web_search_config.llm_base_url,
-        llm_max_context_length=web_search_config.llm_max_context_length,
-        llm_reasoning_effort=web_search_config.llm_reasoning_effort,
-        wall_clock_timeout_seconds=_LIVE_WEB_SEARCH_WALL_CLOCK_TIMEOUT_SECONDS,
-        serper_api_key=web_search_config.serper_api_key,
-        serper_base_url=web_search_config.serper_base_url,
-        jina_api_key=web_search_config.jina_api_key,
-        jina_base_url=web_search_config.jina_base_url,
-        summary_llm_api_key=web_search_config.summary_llm_api_key,
-        summary_llm_base_url=web_search_config.summary_llm_base_url,
-        summary_llm_model_name=web_search_config.summary_llm_model_name,
-        native_web_search_api_key=web_search_config.native_web_search_api_key,
-        native_web_search_base_url=web_search_config.native_web_search_base_url,
-        native_web_search_model=web_search_config.native_web_search_model,
-        native_web_search_tool_type=web_search_config.native_web_search_tool_type,
-        anthropic_web_search_api_key=web_search_config.anthropic_web_search_api_key,
-        anthropic_web_search_base_url=web_search_config.anthropic_web_search_base_url,
-        anthropic_web_search_model=web_search_config.anthropic_web_search_model,
-        anthropic_web_search_tool_type=web_search_config.anthropic_web_search_tool_type,
-        anthropic_web_search_max_uses=web_search_config.anthropic_web_search_max_uses,
-        anthropic_web_search_version=web_search_config.anthropic_web_search_version,
-        acquisition_tool_names=web_search_config.acquisition_tool_names,
     )
 
 

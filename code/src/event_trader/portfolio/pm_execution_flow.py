@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from datetime import datetime
 from hashlib import sha256
 
 from event_trader.contracts.view_state_change import (
@@ -13,7 +14,7 @@ from event_trader.contracts.view_state_change import (
     ViewStateChange,
 )
 from event_trader.execution.contracts import ExecutionIntent, ExecutionRecord
-from event_trader.execution.engine import PaperExecutionEngine
+from event_trader.execution.engine import ExecutionDeferred, PaperExecutionEngine
 from event_trader.execution.store import (
     ExecutionIntentStore,
     ExecutionRecordStore,
@@ -25,13 +26,13 @@ from event_trader.portfolio.store import (
     PortfolioStoreError,
 )
 from event_trader.storage import WorkspaceLayout
-from event_trader.validation.state_change_store import (
-    StateChangeStoreError,
-    append_state_change_once,
-)
 from event_trader.validation.episode_artifacts import (
     EpisodeArtifactStoreError,
     refresh_episode_artifacts,
+)
+from event_trader.validation.state_change_store import (
+    StateChangeStoreError,
+    append_state_change_once,
 )
 
 
@@ -44,6 +45,7 @@ class PMExecutionFlowResult:
     pm_decision: PMDecision | None
     execution_intent: ExecutionIntent | None
     execution_record: ExecutionRecord | None
+    execution_deferred: ExecutionDeferred | None
     portfolio_state: PortfolioState | None
     view_state_change: ViewStateChange | None
 
@@ -53,6 +55,7 @@ def execute_pm_decision(
     layout: WorkspaceLayout,
     decision: PMDecision,
     execution_engine: PaperExecutionEngine,
+    execution_observed_at: datetime,
 ) -> PMExecutionFlowResult:
     """Execute one persisted PMDecision on the active decision-first hot path."""
 
@@ -64,18 +67,34 @@ def execute_pm_decision(
     intent = execution_engine.build_intent(
         decision=decision,
     )
-    record = execution_engine.execute(intent=intent)
+    attempt = execution_engine.execute(
+        intent=intent,
+        observed_at=execution_observed_at,
+    )
     try:
         ExecutionIntentStore(layout).append(intent)
-        ExecutionRecordStore(layout).append(record)
+        if isinstance(attempt, ExecutionRecord):
+            ExecutionRecordStore(layout).append(attempt)
     except ExecutionStoreError as exc:
         raise PMExecutionFlowError(str(exc)) from exc
 
+    if isinstance(attempt, ExecutionDeferred):
+        return PMExecutionFlowResult(
+            pm_decision=decision,
+            execution_intent=intent,
+            execution_record=None,
+            execution_deferred=attempt,
+            portfolio_state=None,
+            view_state_change=None,
+        )
+
+    record = attempt
     if record.status != "executed":
         return PMExecutionFlowResult(
             pm_decision=decision,
             execution_intent=intent,
             execution_record=record,
+            execution_deferred=None,
             portfolio_state=None,
             view_state_change=None,
         )
@@ -105,6 +124,7 @@ def execute_pm_decision(
         pm_decision=decision,
         execution_intent=intent,
         execution_record=record,
+        execution_deferred=None,
         portfolio_state=state,
         view_state_change=state_change,
     )

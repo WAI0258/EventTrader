@@ -87,6 +87,11 @@ class CEAUUnitFormationCore:
         self._config = stream_routing_config
         self._pending_by_unit_id: dict[str, PendingCEAUUnit] = {}
         self._pending_by_scope_key: dict[tuple[str, str, str, str], str] = {}
+        # An emitted unit is immutable business history.  Replaying its source
+        # events must still produce the existing routing decision, but must not
+        # recreate the pending unit and try to emit a second payload.
+        self._emitted_unit_ids: set[str] = set()
+        self._emitted_unit_id_by_event_id: dict[str, str] = {}
         self._restore_pending_units_from_store()
 
     @property
@@ -125,6 +130,9 @@ class CEAUUnitFormationCore:
             default_market_anchor=f"{self._config.target_key}:{self._config.bar_granularity}",
         )
         budget_emitted_records: tuple[CEAUUnitEmittedRecord, ...] = ()
+        already_emitted_unit_id = self._emitted_unit_id_by_event_id.get(
+            route_input.event_id
+        )
         existing_unit_id = self._pending_by_scope_key.get(scope_key)
         existing_unit = (
             None
@@ -132,7 +140,8 @@ class CEAUUnitFormationCore:
             else self._pending_by_unit_id.get(existing_unit_id)
         )
         if (
-            existing_unit is not None
+            already_emitted_unit_id is None
+            and existing_unit is not None
             and existing_unit.unit_char_count + route_input.content_char_count
             > unit_policy.max_unit_chars
         ):
@@ -147,9 +156,9 @@ class CEAUUnitFormationCore:
             )
             existing_unit = None
 
-        analysis_unit_id_override = (
-            existing_unit.analysis_unit_id if existing_unit else None
-        )
+        analysis_unit_id_override = already_emitted_unit_id
+        if analysis_unit_id_override is None and existing_unit is not None:
+            analysis_unit_id_override = existing_unit.analysis_unit_id
         if analysis_unit_id_override is None:
             analysis_unit_id_override = _derive_accumulate_analysis_unit_id(
                 target_key=route_input.target_key,
@@ -168,6 +177,8 @@ class CEAUUnitFormationCore:
             support_resolver=support_resolver,
             analysis_unit_id_override=analysis_unit_id_override,
         )
+        if decision.unit_emitted_record is not None:
+            self._remember_emitted_unit(decision.unit_emitted_record)
         if decision.final_route == "accumulate":
             self._track_pending_unit(
                 decision=decision,
@@ -284,6 +295,7 @@ class CEAUUnitFormationCore:
             self._store.append_record(emitted_record)
         except FileBackedCEAUStoreError as exc:
             raise CEAUCoordinatorError(str(exc)) from exc
+        self._remember_emitted_unit(emitted_record)
         self._pending_by_unit_id.pop(unit.analysis_unit_id, None)
         if self._pending_by_scope_key.get(unit.scope_key) == unit.analysis_unit_id:
             self._pending_by_scope_key.pop(unit.scope_key, None)
@@ -323,6 +335,8 @@ class CEAUUnitFormationCore:
         analysis_unit_id = decision.analysis_unit_id
         if analysis_unit_id is None:
             raise CEAUCoordinatorError("accumulate route must include analysis_unit_id.")
+        if analysis_unit_id in self._emitted_unit_ids:
+            return
         existing_unit_id = self._pending_by_scope_key.get(scope_key)
         existing = (
             None
@@ -478,18 +492,17 @@ class CEAUUnitFormationCore:
         except FileBackedCEAUStoreError as exc:
             raise CEAUCoordinatorError(str(exc)) from exc
 
-        emitted_unit_ids: set[str] = set()
         for persisted in persisted_records:
             record = persisted.record
             if isinstance(record, (CEAUUnitOpenedRecord, CEAUUnitAppendedRecord)):
-                if record.analysis_unit_id in emitted_unit_ids:
+                if record.analysis_unit_id in self._emitted_unit_ids:
                     continue
                 unit = pending_unit_from_lifecycle_record(record)
                 self._pending_by_unit_id[unit.analysis_unit_id] = unit
                 self._pending_by_scope_key[unit.scope_key] = unit.analysis_unit_id
                 continue
             if isinstance(record, CEAUUnitEmittedRecord):
-                emitted_unit_ids.add(record.analysis_unit_id)
+                self._remember_emitted_unit(record)
                 existing = self._pending_by_unit_id.pop(record.analysis_unit_id, None)
                 if (
                     existing is not None
@@ -497,6 +510,20 @@ class CEAUUnitFormationCore:
                     == record.analysis_unit_id
                 ):
                     self._pending_by_scope_key.pop(existing.scope_key, None)
+
+    def _remember_emitted_unit(self, record: CEAUUnitEmittedRecord) -> None:
+        self._emitted_unit_ids.add(record.analysis_unit_id)
+        for event_id in record.event_ids:
+            existing = self._emitted_unit_id_by_event_id.setdefault(
+                event_id,
+                record.analysis_unit_id,
+            )
+            if existing != record.analysis_unit_id:
+                raise CEAUCoordinatorError(
+                    "persisted emitted CEAU units assign one event to different units: "
+                    f"event_id={event_id} first_unit={existing} "
+                    f"second_unit={record.analysis_unit_id}"
+                )
 
     def _unit_policy_for_lane(self, routing_lane: str) -> StreamRoutingPolicy:
         return self._config.lane_policies.get(
